@@ -1,3 +1,4 @@
+import { BlobIdentifier } from "../common/storage";
 import { DataSource } from "../ingestion/data-sources/dataSource";
 
 /**
@@ -10,8 +11,8 @@ export interface RawDocument {
   mimeType: string;
   // The hash of the document content.
   hash?: string;
-  // Path to the document file, if it has been saved to disk.
-  filePath?: string;
+  // Storage path to the raw document file, if it has been saved.
+  blobId?: BlobIdentifier;
 
   // Any JSON-serializable metadata associated with the document.
   metadata: { [key: string]: string };
@@ -43,6 +44,8 @@ export interface DocumentFragment {
   fragmentId: string;
   // The hash of the fragment content.
   hash?: string;
+  // Storage path to the fragment content
+  blobId?: BlobIdentifier;
 
   fragmentType:
     | "text"
@@ -69,7 +72,7 @@ export interface DocumentFragment {
   attributes?: { [key: string]: string };
 
   /**
-   * Gets the content of the fragment.
+   * Gets the content of the fragment. @see blobId
    */
   getContent(): Promise<string>;
 

@@ -8,7 +8,8 @@
     "resolveJsonModule": true,
     "rootDir": ".",
     "strict": true,
-    "target": "es6"
+    "target": "es6",
+    "esModuleInterop": true
   },
   "exclude": ["dist", "docs", "node_modules"]
 }
