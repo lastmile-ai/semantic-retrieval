@@ -1,10 +1,11 @@
+import { Attributable } from "../common/base";
 import { BlobIdentifier } from "../common/storage";
 import { DataSource } from "../ingestion/data-sources/dataSource";
 
 /**
  * The original document, as it was ingested from the data source.
  */
-export interface RawDocument {
+export interface RawDocument extends Attributable {
   uri: string;
   dataSource: DataSource;
   name: string;
@@ -13,11 +14,6 @@ export interface RawDocument {
   hash?: string;
   // Storage path to the raw document file, if it has been saved.
   blobId?: BlobIdentifier;
-
-  // Any JSON-serializable metadata associated with the document.
-  metadata: { [key: string]: string };
-  // A general property bag associated with this object.
-  attributes: { [key: string]: string };
 
   // Some identifiers for the document.
   documentId: string;
@@ -40,7 +36,7 @@ export interface RawDocument {
 /**
  *
  */
-export interface DocumentFragment {
+export interface DocumentFragment extends Attributable {
   fragmentId: string;
   // The hash of the fragment content.
   hash?: string;
@@ -66,11 +62,6 @@ export interface DocumentFragment {
   // Sub-fragments within this fragment.
   children?: DocumentFragment[];
 
-  // Any JSON-serializable metadata associated with the document fragment.
-  metadata?: { [key: string]: string };
-  // A general property bag associated with this object.
-  attributes?: { [key: string]: string };
-
   /**
    * Gets the content of the fragment. @see blobId
    */
@@ -85,13 +76,8 @@ export interface DocumentFragment {
 /**
  * A @see RawDocument after it has been parsed into a graph of @see DocumentFragments.
  */
-export interface Document {
+export interface Document extends Attributable {
   rawDocument: RawDocument;
-
-  // Any JSON-serializable metadata associated with the document.
-  metadata: { [key: string]: string };
-  // A general property bag associated with this object.
-  attributes: { [key: string]: string };
 
   // Some identifiers for the document (these could be different from the raw document identifiers)
   documentId: string;
