@@ -57,7 +57,74 @@ export interface BlobIdentifier {
 export interface Blob {
   data: Uint8Array;
   mimeType?: string;
-  id: BlobIdentifier;
+  id?: BlobIdentifier;
+}
+
+export class InMemoryStorage implements BlobStorage {
+  private blobs: Map<string, Blob> = new Map();
+
+  async write(blob: Blob, name?: string | undefined): Promise<BlobIdentifier> {
+    const blobUri = name || uuid();
+    this.blobs.set(blobUri, blob);
+
+    return {
+      blobUri,
+      storage: this,
+    };
+  }
+
+  async writeStream(
+    stream: Readable,
+    name?: string | undefined
+  ): Promise<BlobIdentifier> {
+    const blobUri = name || uuid();
+    const blobId: BlobIdentifier = {
+      blobUri,
+      storage: this,
+    };
+    const chunks: Buffer[] = [];
+
+    return new Promise((resolve, reject) => {
+      stream.on("data", (chunk) => {
+        chunks.push(chunk);
+      });
+
+      stream.on("error", reject);
+
+      stream.on("end", () => {
+        const blob: Blob = {
+          data: Buffer.concat(chunks),
+          id: blobId,
+        };
+
+        this.blobs.set(blobUri, blob);
+        resolve(blobId);
+      });
+    });
+  }
+
+  async read(blobUri: string): Promise<Blob> {
+    const blob = this.blobs.get(blobUri);
+    if (!blob) {
+      throw new Error(`Blob ${blobUri} not found`);
+    }
+
+    return blob;
+  }
+
+  async readStream(blobUri: string): Promise<Readable> {
+    const blob = await this.read(blobUri);
+    const stream = new Readable();
+    stream.push(blob.data);
+    // end of stream
+    stream.push(null);
+
+    return stream;
+  }
+
+  async delete(blobUri: string): Promise<void> {
+    this.blobs.delete(blobUri);
+  }
 }
 
 /**
