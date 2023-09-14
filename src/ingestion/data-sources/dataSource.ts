@@ -51,11 +51,18 @@ export class FileSystem implements DataSource {
   connectionInfo?: ConnectionInfo | undefined;
   metadata?: { [key: string]: string } | undefined;
   attributes?: { [key: string]: string } | undefined;
+  
+  filePath: string;
+
+  constructor(filePath: string) {
+    this.filePath = filePath;
+  }
+
   testConnection(): Promise<number> {
     throw new Error("Method not implemented.");
   }
   loadDocuments(
-    filters: { [key: string]: any },
+    filters?: { [key: string]: any },
     limit?: number | undefined
   ): Promise<RawDocument[]> {
     throw new Error("Method not implemented.");
