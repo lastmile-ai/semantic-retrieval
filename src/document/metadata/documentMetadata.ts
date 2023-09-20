@@ -1,6 +1,6 @@
-import { DataSource } from "../ingestion/data-sources/dataSource";
-import { Document, RawDocument } from "./document";
-import { ResourceAccessPolicy } from "./resourceAccessPolicy";
+import { DataSource } from "../../ingestion/data-sources/dataSource";
+import { Document, RawDocument } from "../document";
+import { ResourceAccessPolicy } from "../../access-control/resourceAccessPolicy";
 
 export interface DocumentMetadata {
   documentId: string;
@@ -23,8 +23,4 @@ export interface DocumentMetadata {
   metadata: { [key: string]: string };
   // A general property bag associated with this object.
   attributes: { [key: string]: string };
-}
-
-export interface DocumentMetadataDB {
-  // TODO: saqadri - implement an InMemory and a Postgres implementation of this interface.
 }
