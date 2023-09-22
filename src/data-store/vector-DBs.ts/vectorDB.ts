@@ -1,0 +1,71 @@
+import { AccessPassport } from "../../access-control/accessPassport";
+import type { Document } from "../../document/document"
+import { DocumentMetadataDB } from "../../document/metadata/documentMetadataDB";
+import { VectorDBRetriever, VectorDBRetrieverParams } from "../../retrieval/vectorDBRetriever";
+
+export type EmbeddingVector = number[] & {
+  /**
+   * Number of dimensions in the vector, and min/max values for each dimension.
+   * This can be used to normalize the vector or checking for out-of-bounds values.
+   */
+  extras?: {
+    dimensions: number;
+    min: number;
+    max: number;
+  };
+};
+
+export interface VectorDBQuery {
+  // TODO: saqadri - revisit
+  mode?:
+    | "default"
+    | "sparse"
+    | "hybrid"
+    | "dense"
+    | "svm"
+    | "logistic"
+    | "linear";
+
+  // Metadata filtering, such as https://docs.pinecone.io/docs/metadata-filtering
+  metadataFilter?: { [key: string]: any };
+  // Document filters
+  documentFilter?: { [key: string]: any };
+
+  topK?: number;
+}
+
+export interface VectorDBEmbeddingQuery extends VectorDBQuery {
+  // The embedding to query
+  embeddingVector: EmbeddingVector;
+}
+
+export interface VectorDBTextQuery extends VectorDBQuery {
+  // The text to query
+  text: string,
+}
+
+type VectorDBAsRetrieverParams<V extends VectorDB> = Omit<VectorDBRetrieverParams<V>, "vectorDB">;
+
+export abstract class VectorDB {
+  metadataDB?: DocumentMetadataDB;
+
+  constructor(metadataDB?: DocumentMetadataDB) {
+    this.metadataDB = metadataDB;
+  }
+
+  static async fromDocuments(_documents: Document[], _metadataDB?: DocumentMetadataDB): Promise<VectorDB> {
+    throw new Error("VectorDB implementation missing override");
+  }
+
+  abstract addDocuments(documents: Document[]): Promise<void>;
+
+  abstract query(query: VectorDBQuery): Promise<Document[]>;
+
+  asRetriever(params?: VectorDBAsRetrieverParams<this>): VectorDBRetriever<this> {
+    return new VectorDBRetriever({
+      vectorDB: this,
+      metadataDB: this.metadataDB,
+      ...params,
+    })
+  }
+}
