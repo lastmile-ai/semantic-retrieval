@@ -1,7 +1,5 @@
-import { AccessPassport } from "../../access-control/accessPassport";
 import type { Document } from "../../document/document"
 import { DocumentMetadataDB } from "../../document/metadata/documentMetadataDB";
-import { VectorDBRetriever, VectorDBRetrieverParams } from "../../retrieval/vectorDBRetriever";
 
 export type EmbeddingVector = number[] & {
   /**
@@ -44,8 +42,6 @@ export interface VectorDBTextQuery extends VectorDBQuery {
   text: string,
 }
 
-type VectorDBAsRetrieverParams<V extends VectorDB> = Omit<VectorDBRetrieverParams<V>, "vectorDB">;
-
 export abstract class VectorDB {
   metadataDB?: DocumentMetadataDB;
 
@@ -60,12 +56,4 @@ export abstract class VectorDB {
   abstract addDocuments(documents: Document[]): Promise<void>;
 
   abstract query(query: VectorDBQuery): Promise<Document[]>;
-
-  asRetriever(params?: VectorDBAsRetrieverParams<this>): VectorDBRetriever<this> {
-    return new VectorDBRetriever({
-      vectorDB: this,
-      metadataDB: this.metadataDB,
-      ...params,
-    })
-  }
 }

@@ -10,14 +10,14 @@ export type VectorDBRetrieverParams<V extends VectorDB> = {
 }
 
 /**
- * Abstract class for retrieving Documents from and underlying VectorDB
+ * Abstract class for retrieving data R from an underlying VectorDB
  */
-export class VectorDBRetriever<V extends VectorDB> extends BaseRetriever {
+export abstract class BaseVectorDBRetriever<V extends VectorDB, R> extends BaseRetriever<R> {
     vectorDB: V;
 
-    constructor(params: VectorDBRetrieverParams<V>) {
-        super(params.metadataDB);
-        this.vectorDB = params.vectorDB;
+    constructor(vectorDB: V) {
+        super(vectorDB.metadataDB);
+        this.vectorDB = vectorDB;
     }
 
     protected async _getDocumentsUnsafe(params: BaseRetrieverQueryParams): Promise<Document[]> {

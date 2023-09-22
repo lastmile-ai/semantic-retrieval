@@ -5,6 +5,7 @@ import { PineconeVectorDB } from "../src/data-store/vector-DBs.ts/pineconeVector
 import { InMemoryDocumentMetadataDB } from "../src/document/metadata/InMemoryDocumentMetadataDB";
 import { FileSystem } from "../src/ingestion/data-sources/dataSource";
 import { SimpleDocumentParser } from "../src/ingestion/document-parsers/simpleDocumentParser";
+import { VectorDBDocumentRetriever } from "../src/retrieval/vectorDBDocumentRetriever";
 
 const metadataDB = new InMemoryDocumentMetadataDB();
 
@@ -25,8 +26,8 @@ async function createIndex() {
 async function main() {
   const vectorDB = await createIndex();
   const accessPassport = new AccessPassport();
-  const retriever = vectorDB.asRetriever();
-  const res = await retriever.getDocuments({
+  const retriever = new VectorDBDocumentRetriever(vectorDB);
+  const res = await retriever.retrieveData({
     accessPassport,
     query: "How do I use parameters in a workbook?",
   });
