@@ -5,7 +5,13 @@ import { DocumentParser } from "./documentParser";
  */
 export class ParserRegistry {
   // TODO: saqadri = instantiate this map with default parsers for various MIME types.
-  parsers: Map<string, DocumentParser> = new Map();
+  parsers: Map<string, DocumentParser> = new Map(
+    [
+      ['text/plain', new TextDocumentParser()],
+      // ['text/html', new HtmlDocumentParser()],
+      // ['application/pdf', new PDFDocumentParser()],
+    ]
+  );
 
   constructor() {}
 
