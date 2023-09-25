@@ -13,7 +13,7 @@ export abstract class BaseDocumentRetriever extends BaseRetriever<Document[]> {
    * @returns A promise that resolves to post-processed data.
    */
   protected async _processDocuments(
-    documents: Document[]
+    documents: Document[],
   ): Promise<Document[]> {
     return documents;
   }

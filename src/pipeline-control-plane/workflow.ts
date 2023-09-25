@@ -1,4 +1,5 @@
 import { Attributable } from "../common/base";
+import { JSONObject } from "../common/jsonTypes";
 import { BlobIdentifier } from "../common/storage";
 import { Pipeline } from "./pipeline";
 
@@ -29,7 +30,7 @@ export interface WorkflowState {
   state: "pending" | "running" | "completed" | "failed";
   timestamp: Date;
   message?: string;
-  data: { [key: string]: any };
+  data: JSONObject;
 
   previous?: WorkflowState;
   next?: WorkflowState;

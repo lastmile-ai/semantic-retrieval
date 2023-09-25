@@ -17,7 +17,7 @@ export interface DocumentParser extends Attributable {
   parseNext(
     rawDocument: RawDocument,
     previousFragment?: DocumentFragment,
-    take?: number
+    take?: number,
   ): Promise<DocumentFragment>;
 
   /**
