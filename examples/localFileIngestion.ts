@@ -4,7 +4,8 @@ import { AlwaysAllowDocumentAccessPolicyFactory } from "../src/access-control/al
 import { PineconeVectorDB } from "../src/data-store/vector-DBs/pineconeVectorDB";
 import { InMemoryDocumentMetadataDB } from "../src/document/metadata/InMemoryDocumentMetadataDB";
 import { FileSystem } from "../src/ingestion/data-sources/dataSource";
-import { SimpleDocumentParser } from "../src/ingestion/document-parsers/simpleDocumentParser";
+import * as SimpleDocumentParser from "../src/ingestion/document-parsers/simpleDocumentParser";
+import { OpenAICompletionGenerator } from "../src/generator/llm/openAICompletionGenerator";
 import { VectorDBDocumentRetriever } from "../src/retrieval/vectorDBDocumentRetriever";
 
 const metadataDB = new InMemoryDocumentMetadataDB();
@@ -27,9 +28,11 @@ async function main() {
   const vectorDB = await createIndex();
   const accessPassport = new AccessPassport();
   const retriever = new VectorDBDocumentRetriever(vectorDB);
-  const res = await retriever.retrieveData({
+  const generator = new OpenAICompletionGenerator();
+  const res = await generator.run({
     accessPassport,
-    query: "How do I use parameters in a workbook?",
+    prompt: "How do I use parameters in a workbook?",
+    retriever,
   });
   console.log(res);
 }
