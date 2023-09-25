@@ -1,4 +1,5 @@
-import type { Document } from "../../document/document"
+import { JSONObject } from "../../common/jsonTypes";
+import type { Document } from "../../document/document";
 import { DocumentMetadataDB } from "../../document/metadata/documentMetadataDB";
 
 export type EmbeddingVector = number[] & {
@@ -25,9 +26,9 @@ export interface VectorDBQuery {
     | "linear";
 
   // Metadata filtering, such as https://docs.pinecone.io/docs/metadata-filtering
-  metadataFilter?: { [key: string]: any };
+  metadataFilter?: JSONObject;
   // Document filters
-  documentFilter?: { [key: string]: any };
+  documentFilter?: JSONObject;
 
   topK?: number;
 }
@@ -39,7 +40,7 @@ export interface VectorDBEmbeddingQuery extends VectorDBQuery {
 
 export interface VectorDBTextQuery extends VectorDBQuery {
   // The text to query
-  text: string,
+  text: string;
 }
 
 export abstract class VectorDB {
@@ -49,7 +50,10 @@ export abstract class VectorDB {
     this.metadataDB = metadataDB;
   }
 
-  static async fromDocuments(_documents: Document[], _metadataDB?: DocumentMetadataDB): Promise<VectorDB> {
+  static async fromDocuments(
+    _documents: Document[],
+    _metadataDB?: DocumentMetadataDB,
+  ): Promise<VectorDB> {
     throw new Error("VectorDB implementation missing override");
   }
 

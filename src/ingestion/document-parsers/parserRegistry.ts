@@ -1,17 +1,16 @@
 import { DocumentParser } from "./documentParser";
+import { TextDocumentParser } from "./textDocumentParser";
 
 /**
  * A registry of document parsers, keyed by MIME type.
  */
 export class ParserRegistry {
   // TODO: saqadri = instantiate this map with default parsers for various MIME types.
-  parsers: Map<string, DocumentParser> = new Map(
-    [
-      ['text/plain', new TextDocumentParser()],
-      // ['text/html', new HtmlDocumentParser()],
-      // ['application/pdf', new PDFDocumentParser()],
-    ]
-  );
+  parsers: Map<string, DocumentParser> = new Map([
+    ["text/plain", new TextDocumentParser()],
+    // ['text/html', new HtmlDocumentParser()],
+    // ['application/pdf', new PDFDocumentParser()],
+  ]);
 
   constructor() {}
 

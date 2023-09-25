@@ -29,7 +29,7 @@ export abstract class BaseRetriever<R> {
    * @returns A promise that resolves to array of retrieved Documents.
    */
   protected abstract _getDocumentsUnsafe(
-    _params: BaseRetrieverQueryParams
+    _params: BaseRetrieverQueryParams,
   ): Promise<Document[]>;
 
   /**
@@ -41,7 +41,7 @@ export abstract class BaseRetriever<R> {
    */
   protected async _filterAccessibleDocuments(
     accessPassport: AccessPassport,
-    documents: Document[]
+    documents: Document[],
   ): Promise<Document[]> {
     if (this.metadataDB == null) {
       return documents;
@@ -50,7 +50,7 @@ export abstract class BaseRetriever<R> {
     const accessibleDocuments = await Promise.all(
       documents.map(async (unsafeDocument) => {
         const metadata = await this.metadataDB!.getMetadata(
-          unsafeDocument.documentId
+          unsafeDocument.documentId,
         );
 
         if (metadata.accessPolicies) {
@@ -61,9 +61,9 @@ export abstract class BaseRetriever<R> {
                   unsafeDocument,
                   policy.resource
                     ? accessPassport.getIdentity(policy.resource)
-                    : undefined
-                )
-            )
+                    : undefined,
+                ),
+            ),
           );
 
           if (policyChecks.some((check) => check === false)) {
@@ -71,7 +71,7 @@ export abstract class BaseRetriever<R> {
           }
         }
         return unsafeDocument;
-      })
+      }),
     );
 
     return accessibleDocuments.filter((doc): doc is Document => doc != null);
@@ -82,9 +82,7 @@ export abstract class BaseRetriever<R> {
    * @param documents The array of retrieved Documents to post-process.
    * @returns A promise that resolves to post-processed data.
    */
-  protected abstract _processDocuments(
-    _documents: Document[]
-  ): Promise<R>;
+  protected abstract _processDocuments(_documents: Document[]): Promise<R>;
 
   /**
    * Get the data relevant to the given query and which the current identity can access.
@@ -98,7 +96,7 @@ export abstract class BaseRetriever<R> {
 
     const accessibleDocuments = await this._filterAccessibleDocuments(
       params.accessPassport,
-      unsafeDocuments
+      unsafeDocuments,
     );
 
     return await this._processDocuments(accessibleDocuments);
