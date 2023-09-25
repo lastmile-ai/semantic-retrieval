@@ -1,3 +1,4 @@
+import { JSONObject } from "../../common/jsonTypes";
 import { RawDocument } from "../../document/document";
 
 export interface Authentication {
@@ -9,10 +10,9 @@ export interface Authentication {
 /**
  * Defines how to connect to a data source.
  */
-export type ConnectionInfo = {
+export type ConnectionInfo = JSONObject & {
   endpoint?: string;
   auth?: Authentication;
-  [key: string]: any;
 };
 
 /**
@@ -41,7 +41,7 @@ export interface DataSource {
    * @param limit The maximum number of documents to load.
    */
   loadDocuments(
-    filters: { [key: string]: any },
+    filters: JSONObject,
     limit?: number
   ): Promise<RawDocument[]>;
 }
@@ -62,8 +62,8 @@ export class FileSystem implements DataSource {
     throw new Error("Method not implemented.");
   }
   loadDocuments(
-    filters?: { [key: string]: any },
-    limit?: number | undefined
+    _filters?: JSONObject,
+    _limit?: number | undefined
   ): Promise<RawDocument[]> {
     throw new Error("Method not implemented.");
   }
@@ -78,8 +78,8 @@ export class GoogleDrive implements DataSource {
     throw new Error("Method not implemented.");
   }
   loadDocuments(
-    filters: { [key: string]: any },
-    limit?: number | undefined
+    _filters: JSONObject,
+    _limit?: number | undefined
   ): Promise<RawDocument[]> {
     throw new Error("Method not implemented.");
   }
@@ -94,8 +94,8 @@ export class OneDrive implements DataSource {
     throw new Error("Method not implemented.");
   }
   loadDocuments(
-    filters: { [key: string]: any },
-    limit?: number | undefined
+    _filters: JSONObject,
+    _limit?: number | undefined
   ): Promise<RawDocument[]> {
     throw new Error("Method not implemented.");
   }

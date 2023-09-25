@@ -1,4 +1,5 @@
 import { DocumentParser } from "./documentParser";
+import { TextDocumentParser } from "./textDocumentParser";
 
 /**
  * A registry of document parsers, keyed by MIME type.
