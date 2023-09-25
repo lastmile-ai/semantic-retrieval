@@ -1,3 +1,4 @@
+import { JSONObject } from "../common/jsonTypes";
 import { Document } from "../document/document";
 import { AccessIdentity } from "./accessIdentity";
 
@@ -7,7 +8,7 @@ import { AccessIdentity } from "./accessIdentity";
 export interface ResourceAccessPolicy {
   resource?: string;
   policy: string;
-  policyJSON: { [key: string]: any };
+  policyJSON: JSONObject;
 
   /**
    * Tests whether the requestor has read permission for the specified document.
@@ -17,7 +18,7 @@ export interface ResourceAccessPolicy {
    */
   testDocumentReadPermission: (
     document: Document,
-    requestor?: AccessIdentity
+    requestor?: AccessIdentity,
   ) => Promise<boolean>;
 
   /**
@@ -28,7 +29,7 @@ export interface ResourceAccessPolicy {
    * @see https://cloud.google.com/resource-manager/reference/rest/v3/organizations/testIamPermissions and https://developers.google.com/drive/api/reference/rest/v3/permissions
    */
   testPolicyPermission: (
-    requestor: AccessIdentity
+    requestor: AccessIdentity,
   ) => Promise<string[] | boolean>;
 }
 
@@ -42,7 +43,7 @@ export class ResourceAccessPolicyCache {
 
   get(
     policy: string,
-    requestor: AccessIdentity
+    requestor: AccessIdentity,
   ): string[] | boolean | undefined {
     return this.cache.get(JSON.stringify(requestor) + policy);
   }
@@ -50,7 +51,7 @@ export class ResourceAccessPolicyCache {
   set(
     policy: string,
     requestor: AccessIdentity,
-    permissions: string[] | boolean
+    permissions: string[] | boolean,
   ) {
     this.cache.set(JSON.stringify(requestor) + policy, permissions);
   }

@@ -12,13 +12,13 @@ const metadataDB = new InMemoryDocumentMetadataDB();
 async function createIndex() {
   const fileSystem = new FileSystem("./example_docs");
   const rawDocuments = await fileSystem.loadDocuments();
-  
+
   const parsedDocuments = await SimpleDocumentParser.parseDocuments(
     rawDocuments,
     {
       metadataDB,
       accessControlPolicyFactory: new AlwaysAllowDocumentAccessPolicyFactory(),
-    }
+    },
   );
   return await PineconeVectorDB.fromDocuments(parsedDocuments, metadataDB);
 }

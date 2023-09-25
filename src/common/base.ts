@@ -1,12 +1,14 @@
+import { JSONObject } from "./jsonTypes";
+
 /**
  * Implement this interface to get property bags for metadata and free-form attributes.
  */
 export interface Attributable {
   // Any JSON-serializable metadata (like configuration settings) associated with the object.
-  metadata: { [key: string]: string };
+  metadata: JSONObject;
 
   // A general property bag associated with this object.
-  attributes: { [key: string]: string };
+  attributes: JSONObject;
 }
 
 /**
