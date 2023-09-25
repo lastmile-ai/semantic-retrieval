@@ -1,3 +1,4 @@
+import { JSONObject } from "../common/jsonTypes";
 import { Document } from "../document/document";
 import { AccessIdentity } from "./accessIdentity";
 
@@ -7,7 +8,7 @@ import { AccessIdentity } from "./accessIdentity";
 export interface ResourceAccessPolicy {
   resource?: string;
   policy: string;
-  policyJSON: { [key: string]: any };
+  policyJSON: JSONObject;
 
   /**
    * Tests whether the requestor has read permission for the specified document.

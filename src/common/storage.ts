@@ -204,19 +204,19 @@ export class TemporaryFileSystemStorage extends FileSystemStorage {
  */
 export class S3Storage implements BlobStorage {
   constructor() {}
-  write(blob: Blob, name?: string): Promise<BlobIdentifier> {
+  write(_blob: Blob, _name?: string): Promise<BlobIdentifier> {
     throw new Error("Method not implemented.");
   }
-  writeStream(stream: Readable, name?: string): Promise<BlobIdentifier> {
+  writeStream(_stream: Readable, _name?: string): Promise<BlobIdentifier> {
     throw new Error("Method not implemented.");
   }
-  read(blobUri: string): Promise<Blob> {
+  read(_blobUri: string): Promise<Blob> {
     throw new Error("Method not implemented.");
   }
-  readStream(blobUri: string): Promise<Readable> {
+  readStream(_blobUri: string): Promise<Readable> {
     throw new Error("Method not implemented.");
   }
-  delete(blobUri: string): Promise<void> {
+  delete(_blobUri: string): Promise<void> {
     throw new Error("Method not implemented.");
   }
 }

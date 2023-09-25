@@ -16,11 +16,11 @@ export class PineconeVectorDB extends VectorDB {
         return instance;
     }
 
-    async addDocuments(documents: Document[]): Promise<void> {
+    async addDocuments(_documents: Document[]): Promise<void> {
 
     }
 
-    async query(query: VectorDBQuery): Promise<Document[]> {
+    async query(_query: VectorDBQuery): Promise<Document[]> {
         throw new Error("Method not implemented.");
 
         // Perform query with as much filtering at the vector DB level as possible

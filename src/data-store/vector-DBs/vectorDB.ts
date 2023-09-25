@@ -1,3 +1,4 @@
+import { JSONObject } from "../../common/jsonTypes";
 import type { Document } from "../../document/document"
 import { DocumentMetadataDB } from "../../document/metadata/documentMetadataDB";
 
@@ -25,9 +26,9 @@ export interface VectorDBQuery {
     | "linear";
 
   // Metadata filtering, such as https://docs.pinecone.io/docs/metadata-filtering
-  metadataFilter?: { [key: string]: any };
+  metadataFilter?: JSONObject;
   // Document filters
-  documentFilter?: { [key: string]: any };
+  documentFilter?: JSONObject;
 
   topK?: number;
 }
