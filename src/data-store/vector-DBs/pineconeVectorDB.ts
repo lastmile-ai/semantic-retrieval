@@ -1,4 +1,3 @@
-import { AccessPassport } from "../../access-control/accessPassport";
 import type { Document } from "../../document/document"
 import { DocumentMetadataDB } from "../../document/metadata/documentMetadataDB";
 

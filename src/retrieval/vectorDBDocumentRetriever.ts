@@ -1,4 +1,4 @@
-import { VectorDB } from "../data-store/vector-DBs.ts/vectorDB";
+import { VectorDB } from "../data-store/vector-DBs/vectorDB";
 import { Document } from "../document/document";
 import { BaseVectorDBRetriever, VectorDBRetrieverParams } from "./vectorDBRetriever";
 
