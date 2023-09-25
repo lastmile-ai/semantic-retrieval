@@ -1,7 +1,7 @@
 // TODO: These imports should be from actual lastmile retrieval package
 import { AccessPassport } from "../src/access-control/accessPassport";
 import { AlwaysAllowDocumentAccessPolicyFactory } from "../src/access-control/alwaysAllowDocumentAccessPolicyFactory";
-import { PineconeVectorDB } from "../src/data-store/vector-DBs.ts/pineconeVectorDB";
+import { PineconeVectorDB } from "../src/data-store/vector-DBs/pineconeVectorDB";
 import { InMemoryDocumentMetadataDB } from "../src/document/metadata/InMemoryDocumentMetadataDB";
 import { FileSystem } from "../src/ingestion/data-sources/dataSource";
 import { SimpleDocumentParser } from "../src/ingestion/document-parsers/simpleDocumentParser";

@@ -1,4 +1,4 @@
-import { VectorDB, VectorDBTextQuery } from "../data-store/vector-DBs.ts/vectorDB";
+import { VectorDB, VectorDBTextQuery } from "../data-store/vector-DBs/vectorDB";
 import { Document } from "../document/document";
 import { DocumentMetadataDB } from "../document/metadata/documentMetadataDB";
 import { BaseRetriever, BaseRetrieverQueryParams } from "./retriever";
