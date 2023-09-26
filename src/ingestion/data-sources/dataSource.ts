@@ -43,29 +43,6 @@ export interface DataSource {
   loadDocuments(filters: JSONObject, limit?: number): Promise<RawDocument[]>;
 }
 
-export class FileSystem implements DataSource {
-  name: string = "FileSystem";
-  connectionInfo?: ConnectionInfo | undefined;
-  metadata?: { [key: string]: string } | undefined;
-  attributes?: { [key: string]: string } | undefined;
-
-  filePath: string;
-
-  constructor(filePath: string) {
-    this.filePath = filePath;
-  }
-
-  testConnection(): Promise<number> {
-    throw new Error("Method not implemented.");
-  }
-  loadDocuments(
-    _filters?: JSONObject,
-    _limit?: number | undefined,
-  ): Promise<RawDocument[]> {
-    throw new Error("Method not implemented.");
-  }
-}
-
 export class GoogleDrive implements DataSource {
   name: string = "GDrive";
   connectionInfo?: ConnectionInfo | undefined;
