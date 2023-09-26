@@ -1,6 +1,6 @@
-import { JSONObject } from "../common/jsonTypes";
-import { Document } from "../document/document";
-import { AccessIdentity } from "./accessIdentity";
+import { JSONObject } from "../common/jsonTypes.js";
+import { Document } from "../document/document.js";
+import { AccessIdentity } from "./accessIdentity.js";
 
 /**
  * Access policy for a resource

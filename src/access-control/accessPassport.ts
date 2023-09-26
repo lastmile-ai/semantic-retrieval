@@ -1,4 +1,4 @@
-import { AccessIdentity } from "./accessIdentity";
+import { AccessIdentity } from "./accessIdentity.js";
 
 /**
  * Class for maintaining resource-to-access-identity mapping for a given identity (e.g. user).

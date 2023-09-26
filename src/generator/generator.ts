@@ -1,6 +1,6 @@
-import { AccessPassport } from "../access-control/accessPassport";
-import { JSONValue } from "../common/jsonTypes";
-import { BaseRetriever } from "../retrieval/retriever";
+import { AccessPassport } from "../access-control/accessPassport.js";
+import { JSONValue } from "../common/jsonTypes.js";
+import { BaseRetriever } from "../retrieval/retriever.js";
 
 export type GeneratorParams<D> = {
   prompt: JSONValue;

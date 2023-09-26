@@ -1,5 +1,5 @@
-import { Attributable } from "../../common/base";
-import { Document, RawDocument } from "../../document/document";
+import { Attributable } from "../../common/base.js";
+import { Document, RawDocument } from "../../document/document.js";
 
 export interface DocumentParser extends Attributable {
   // The type of file that this parser can parse.

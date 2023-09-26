@@ -1,7 +1,7 @@
-import { VectorDB, VectorDBTextQuery } from "../data-store/vector-DBs/vectorDB";
-import { Document } from "../document/document";
-import { DocumentMetadataDB } from "../document/metadata/documentMetadataDB";
-import { BaseRetriever, BaseRetrieverQueryParams } from "./retriever";
+import { VectorDB, VectorDBTextQuery } from "../data-store/vector-DBs/vectorDB.js";
+import { Document } from "../document/document.js";
+import { DocumentMetadataDB } from "../document/metadata/documentMetadataDB.js";
+import { BaseRetriever, BaseRetrieverQueryParams } from "./retriever.js";
 
 export type VectorDBRetrieverParams<V extends VectorDB> = {
   vectorDB: V;

@@ -1,7 +1,7 @@
-import { DocumentAccessPolicyFactory } from "../../access-control/documentAccessPolicyFactory";
-import { Document, RawDocument } from "../../document/document";
-import { DocumentMetadataDB } from "../../document/metadata/documentMetadataDB";
-import { ParserRegistry } from "./parserRegistry";
+import { DocumentAccessPolicyFactory } from "../../access-control/documentAccessPolicyFactory.js";
+import { Document, RawDocument } from "../../document/document.js";
+import { DocumentMetadataDB } from "../../document/metadata/documentMetadataDB.js";
+import { ParserRegistry } from "./parserRegistry.js";
 
 type ParserConfig = {
   metadataDB?: DocumentMetadataDB;

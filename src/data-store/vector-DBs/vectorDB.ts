@@ -1,6 +1,6 @@
-import { JSONObject } from "../../common/jsonTypes";
-import type { Document } from "../../document/document";
-import { DocumentMetadataDB } from "../../document/metadata/documentMetadataDB";
+import { JSONObject } from "../../common/jsonTypes.js";
+import type { Document } from "../../document/document.js";
+import { DocumentMetadataDB } from "../../document/metadata/documentMetadataDB.js";
 
 export type EmbeddingVector = number[] & {
   /**

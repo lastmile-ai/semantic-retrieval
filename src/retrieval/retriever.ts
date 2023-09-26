@@ -1,6 +1,6 @@
-import { AccessPassport } from "../access-control/accessPassport";
-import { Document } from "../document/document";
-import { DocumentMetadataDB } from "../document/metadata/documentMetadataDB";
+import { AccessPassport } from "../access-control/accessPassport.js";
+import { Document } from "../document/document.js";
+import { DocumentMetadataDB } from "../document/metadata/documentMetadataDB.js";
 
 export type BaseRetrieverQueryParams = {
   accessPassport: AccessPassport;

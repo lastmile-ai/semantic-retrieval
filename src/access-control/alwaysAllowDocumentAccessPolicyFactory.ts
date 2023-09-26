@@ -1,7 +1,7 @@
-import { RawDocument } from "../document/document";
-import { DocumentAccessPolicyFactory } from "./documentAccessPolicyFactory";
-import { AlwaysAllowAccessPolicy } from "./policies/alwaysAllowAccessPolicy";
-import { ResourceAccessPolicy } from "./resourceAccessPolicy";
+import { RawDocument } from "../document/document.js";
+import { DocumentAccessPolicyFactory } from "./documentAccessPolicyFactory.js";
+import { AlwaysAllowAccessPolicy } from "./policies/alwaysAllowAccessPolicy.js";
+import { ResourceAccessPolicy } from "./resourceAccessPolicy.js";
 
 export class AlwaysAllowDocumentAccessPolicyFactory
   implements DocumentAccessPolicyFactory

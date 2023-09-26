@@ -1,5 +1,5 @@
-import { DocumentMetadata } from "./documentMetadata";
-import { DocumentMetadataDB } from "./documentMetadataDB";
+import { DocumentMetadata } from "./documentMetadata.js";
+import { DocumentMetadataDB } from "./documentMetadataDB.js";
 
 export class InMemoryDocumentMetadataDB implements DocumentMetadataDB {
   _metadata: { [key: string]: DocumentMetadata } = {};

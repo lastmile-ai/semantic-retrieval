@@ -1,5 +1,5 @@
-import { RawDocument, Document } from "../../document/document";
-import { DocumentParser } from "./documentParser";
+import { RawDocument, Document } from "../../document/document.js";
+import { DocumentParser } from "./documentParser.js";
 
 /**
  * A basic DocumentParser implementation for text/plain documents.

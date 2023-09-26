@@ -1,5 +1,5 @@
-import { DocumentParser } from "./documentParser";
-import { TextDocumentParser } from "./textDocumentParser";
+import { DocumentParser } from "./documentParser.js";
+import { TextDocumentParser } from "./textDocumentParser.js";
 
 /**
  * A registry of document parsers, keyed by MIME type.

@@ -1,5 +1,5 @@
-import { GeneratorParams } from "./generator";
-import { Document } from "../document/document";
+import { GeneratorParams } from "./generator.js";
+import { Document } from "../document/document.js";
 
 /**
  * Simple abstract class for generating text from a prompt and retrieved Documents.

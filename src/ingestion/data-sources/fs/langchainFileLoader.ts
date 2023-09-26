@@ -1,6 +1,6 @@
-import { BaseDocumentLoader } from "langchain/dist/document_loaders/base";
-import { BaseFileLoader } from "./fileLoader";
-import { RawDocumentChunks } from "../../../document/document";
+import type { BaseDocumentLoader } from "langchain/document_loaders/base";
+import { BaseFileLoader } from "./fileLoader.js";
+import { RawDocumentChunks } from "../../../document/document.js";
 
 /**
  * Abstract class for loading RawDocuments from a file using

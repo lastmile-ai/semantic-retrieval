@@ -2,6 +2,7 @@
   "name": "@lastmileai/semantic-retrieval",
   "version": "0.0.1",
   "description": "Node.js library for LastMile AI API",
+  "type": "module",
   "repository": {
     "type": "git",
     "url": "https://github.com/lastmile-ai/semantic-retrieval.git"
@@ -29,6 +30,7 @@
   },
   "devDependencies": {
     "@types/jest": "^29.5.0",
+    "@types/pdf-parse": "^1.1.2",
     "@typescript-eslint/eslint-plugin": "^6.7.2",
     "@typescript-eslint/parser": "^6.7.2",
     "dotenv": "^16.0.3",
@@ -47,6 +49,7 @@
     "langchain": "^0.0.153",
     "mime-types": "^2.1.35",
     "openai": "^3.2.1",
+    "pdf-parse": "^1.1.1",
     "sanitize-filename": "^1.6.3",
     "uuid": "^9.0.0"
   }

@@ -1,7 +1,7 @@
-import type { Document } from "../../document/document";
-import { DocumentMetadataDB } from "../../document/metadata/documentMetadataDB";
+import type { Document } from "../../document/document.js";
+import { DocumentMetadataDB } from "../../document/metadata/documentMetadataDB.js";
 
-import { VectorDB, VectorDBQuery } from "./vectorDB";
+import { VectorDB, VectorDBQuery } from "./vectorDB.js";
 
 // TODO: Can we just thinly wrap langchain here and handle the access control layer?
 export class PineconeVectorDB extends VectorDB {

@@ -1,7 +1,7 @@
-import { Attributable } from "../common/base";
-import { JSONObject } from "../common/jsonTypes";
-import { BlobIdentifier } from "../common/storage";
-import { DataSource } from "../ingestion/data-sources/dataSource";
+import { Attributable } from "../common/base.js";
+import { JSONObject } from "../common/jsonTypes.js";
+import { BlobIdentifier } from "../common/storage.js";
+import { DataSource } from "../ingestion/data-sources/dataSource.js";
 
 export type RawDocumentChunks = { content: string; metadata: JSONObject }[];
 

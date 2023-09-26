@@ -1,4 +1,4 @@
-import { JSONObject } from "./jsonTypes";
+import { JSONObject } from "./jsonTypes.js";
 
 /**
  * Implement this interface to get property bags for metadata and free-form attributes.
