@@ -1,7 +1,7 @@
-import { Attributable } from "../common/base";
-import { JSONObject } from "../common/jsonTypes";
-import { BlobIdentifier } from "../common/storage";
-import { Pipeline } from "./pipeline";
+import { Attributable } from "../common/base.js";
+import { JSONObject } from "../common/jsonTypes.js";
+import { BlobIdentifier } from "../common/storage.js";
+import { Pipeline } from "./pipeline.js";
 
 /**
  * An instance of a pipeline execution run.

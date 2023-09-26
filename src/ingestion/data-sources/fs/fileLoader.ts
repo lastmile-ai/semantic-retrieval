@@ -1,4 +1,4 @@
-import { RawDocumentChunks } from "../../../document/document";
+import { RawDocumentChunks } from "../../../document/document.js";
 
 /**
  * Abstract class for loading chunked content from a file.

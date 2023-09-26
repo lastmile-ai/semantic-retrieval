@@ -1,6 +1,6 @@
-import { Attributable, Identifiable } from "../common/base";
-import { DataSource } from "../ingestion/data-sources/dataSource";
-import { Workflow } from "./workflow";
+import { Attributable, Identifiable } from "../common/base.js";
+import { DataSource } from "../ingestion/data-sources/dataSource.js";
+import { Workflow } from "./workflow.js";
 
 // TODO: saqadri -- this needs more definition
 export interface Pipeline extends Attributable {

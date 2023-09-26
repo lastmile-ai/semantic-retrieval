@@ -1,7 +1,7 @@
-import { JSONObject } from "../../common/jsonTypes";
-import { GeneratorParams } from "../generator";
-import { Document } from "../../document/document";
-import { TextGenerator } from "../textGenerator";
+import { JSONObject } from "../../common/jsonTypes.js";
+import { GeneratorParams } from "../generator.js";
+import { Document } from "../../document/document.js";
+import { TextGenerator } from "../textGenerator.js";
 
 export type OpenAICompletionGeneratorParams = GeneratorParams<Document[]> & {
   completionParams?: JSONObject; // TODO: Add openai API completion params type

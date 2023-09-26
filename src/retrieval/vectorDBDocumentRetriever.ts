@@ -1,6 +1,6 @@
-import { VectorDB } from "../data-store/vector-DBs/vectorDB";
-import { Document } from "../document/document";
-import { BaseVectorDBRetriever } from "./vectorDBRetriever";
+import { VectorDB } from "../data-store/vector-DBs/vectorDB.js";
+import { Document } from "../document/document.js";
+import { BaseVectorDBRetriever } from "./vectorDBRetriever.js";
 
 /**
  * Base class for retrieving Documents from an underlying VectorDB

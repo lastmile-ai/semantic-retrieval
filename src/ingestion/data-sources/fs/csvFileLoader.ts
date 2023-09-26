@@ -1,5 +1,5 @@
 import { CSVLoader } from "langchain/document_loaders/fs/csv";
-import { LangChainFileLoader } from "./langchainFileLoader";
+import { LangChainFileLoader } from "./langchainFileLoader.js";
 
 type LangChainCSVLoaderOptions = {
   column?: string;

@@ -1,6 +1,6 @@
-import { Document } from "../document/document";
-import { DocumentMetadataDB } from "../document/metadata/documentMetadataDB";
-import { BaseRetriever } from "./retriever";
+import { Document } from "../document/document.js";
+import { DocumentMetadataDB } from "../document/metadata/documentMetadataDB.js";
+import { BaseRetriever } from "./retriever.js";
 
 export abstract class BaseDocumentRetriever extends BaseRetriever<Document[]> {
   constructor(metadataDB?: DocumentMetadataDB) {

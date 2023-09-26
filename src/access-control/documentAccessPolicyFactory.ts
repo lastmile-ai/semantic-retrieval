@@ -1,5 +1,5 @@
-import { RawDocument } from "../document/document";
-import { ResourceAccessPolicy } from "./resourceAccessPolicy";
+import { RawDocument } from "../document/document.js";
+import { ResourceAccessPolicy } from "./resourceAccessPolicy.js";
 
 /**
  * Interface for specifying the access policies for a document during ingestion.

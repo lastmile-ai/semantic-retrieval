@@ -1,15 +1,15 @@
-import { JSONObject } from "../../../common/jsonTypes";
-import { RawDocument } from "../../../document/document";
-import { DataSource } from "../dataSource";
-import { LangChainFileLoader } from "./langchainFileLoader";
-import { TxtFileLoader } from "./txtFileLoader";
+import { JSONObject } from "../../../common/jsonTypes.js";
+import { RawDocument } from "../../../document/document.js";
+import { DataSource } from "../dataSource.js";
+import { LangChainFileLoader } from "./langchainFileLoader.js";
+import { TxtFileLoader } from "./txtFileLoader.js";
 import fs from "fs/promises";
 import { extname, resolve } from "node:path";
 import * as mime from "mime-types";
 import { v4 as uuid } from "uuid";
-import { DocxFileLoader } from "./docxFileLoader";
-import { PDFFileLoader } from "./pdfFileLoader";
-import { CSVFileLoader } from "./csvFileLoader";
+import { DocxFileLoader } from "./docxFileLoader.js";
+import { PDFFileLoader } from "./pdfFileLoader.js";
+import { CSVFileLoader } from "./csvFileLoader.js";
 
 type FileLoaderMap = {
   [extension: string]: (path: string) => LangChainFileLoader;

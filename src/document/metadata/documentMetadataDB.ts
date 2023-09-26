@@ -1,4 +1,4 @@
-import { DocumentMetadata } from "./documentMetadata";
+import { DocumentMetadata } from "./documentMetadata.js";
 
 export interface DocumentMetadataDB {
   // TODO: saqadri - implement a Postgres implementation of this interface.

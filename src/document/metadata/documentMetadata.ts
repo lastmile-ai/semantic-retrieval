@@ -1,6 +1,6 @@
-import { DataSource } from "../../ingestion/data-sources/dataSource";
-import { Document, RawDocument } from "../document";
-import { ResourceAccessPolicy } from "../../access-control/resourceAccessPolicy";
+import { DataSource } from "../../ingestion/data-sources/dataSource.js";
+import { Document, RawDocument } from "../document.js";
+import { ResourceAccessPolicy } from "../../access-control/resourceAccessPolicy.js";
 
 export interface DocumentMetadata {
   documentId: string;

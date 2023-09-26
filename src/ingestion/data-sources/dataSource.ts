@@ -1,5 +1,5 @@
-import { JSONObject } from "../../common/jsonTypes";
-import { RawDocument } from "../../document/document";
+import { JSONObject } from "../../common/jsonTypes.js";
+import { RawDocument } from "../../document/document.js";
 
 export interface Authentication {
   authToken?: string;
