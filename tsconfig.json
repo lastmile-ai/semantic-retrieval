@@ -16,5 +16,6 @@
     // to avoid that.
     "skipLibCheck": true
   },
-  "exclude": ["dist", "docs", "examples", "node_modules"]
+  "include": ["src"],
+  "exclude": ["dist", "docs", "examples", "node_modules", "__tests__"]
 }
