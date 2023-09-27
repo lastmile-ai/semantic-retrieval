@@ -1,12 +1,12 @@
 // TODO: These imports should be from actual lastmile retrieval package
-import { AccessPassport } from "../src/access-control/accessPassport";
-import { AlwaysAllowDocumentAccessPolicyFactory } from "../src/access-control/alwaysAllowDocumentAccessPolicyFactory";
-import { PineconeVectorDB } from "../src/data-store/vector-DBs/pineconeVectorDB";
-import { InMemoryDocumentMetadataDB } from "../src/document/metadata/InMemoryDocumentMetadataDB";
-import { FileSystem } from "../src/ingestion/data-sources/fs/fileSystem";
-import * as SimpleDocumentParser from "../src/ingestion/document-parsers/simpleDocumentParser";
-import { OpenAICompletionGenerator } from "../src/generator/llm/openAICompletionGenerator";
-import { VectorDBDocumentRetriever } from "../src/retrieval/vectorDBDocumentRetriever";
+import { AccessPassport } from "../../src/access-control/accessPassport";
+import { AlwaysAllowDocumentAccessPolicyFactory } from "../../src/access-control/alwaysAllowDocumentAccessPolicyFactory";
+import { PineconeVectorDB } from "../../src/data-store/vector-DBs/pineconeVectorDB";
+import { InMemoryDocumentMetadataDB } from "../../src/document/metadata/InMemoryDocumentMetadataDB";
+import { FileSystem } from "../../src/ingestion/data-sources/fs/fileSystem";
+import * as SimpleDocumentParser from "../../src/ingestion/document-parsers/simpleDocumentParser";
+import { OpenAICompletionGenerator } from "../../src/generator/llm/openAICompletionGenerator";
+import { VectorDBDocumentRetriever } from "../../src/retrieval/vectorDBDocumentRetriever";
 
 const metadataDB = new InMemoryDocumentMetadataDB();
 
