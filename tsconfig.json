@@ -9,7 +9,12 @@
     "rootDir": ".",
     "strict": true,
     "target": "es6",
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    // LangChain does some very restrictive things (resolution-mode assertions, exact
+    // pdf-parse module resolution) that would otherwise force us to use nodenext and
+    // .js extension in imports + declare our own pdf-parse types module. Skip lib check
+    // to avoid that.
+    "skipLibCheck": true
   },
-  "exclude": ["dist", "docs", "node_modules"]
+  "exclude": ["dist", "docs", "examples", "node_modules"]
 }
