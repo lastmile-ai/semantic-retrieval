@@ -12,7 +12,7 @@ export class VectorDBDocumentRetriever<
     super(vectorDB);
   }
 
-  protected async _processDocuments(
+  protected async processDocuments(
     documents: Document[],
   ): Promise<Document[]> {
     return documents;

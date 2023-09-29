@@ -12,7 +12,7 @@ export abstract class BaseDocumentRetriever extends BaseRetriever<Document[]> {
    * @param documents The array of retrieved Documents to post-process.
    * @returns A promise that resolves to post-processed data.
    */
-  protected async _processDocuments(
+  protected async processDocuments(
     documents: Document[],
   ): Promise<Document[]> {
     return documents;

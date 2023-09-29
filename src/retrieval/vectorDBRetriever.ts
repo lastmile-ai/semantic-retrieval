@@ -23,7 +23,7 @@ export abstract class BaseVectorDBRetriever<
     this.vectorDB = vectorDB;
   }
 
-  protected async _getDocumentsUnsafe(
+  protected async getDocumentsUnsafe(
     params: BaseRetrieverQueryParams,
   ): Promise<Document[]> {
     const query: VectorDBTextQuery = { text: params.query };
