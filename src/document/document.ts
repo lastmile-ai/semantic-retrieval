@@ -1,6 +1,9 @@
 import { Attributable } from "../common/base";
+import { JSONObject } from "../common/jsonTypes";
 import { BlobIdentifier } from "../common/storage";
 import { DataSource } from "../ingestion/data-sources/dataSource";
+
+export type RawDocumentChunk = { content: string; metadata: JSONObject };
 
 /**
  * The original document, as it was ingested from the data source.
@@ -9,28 +12,32 @@ export interface RawDocument extends Attributable {
   uri: string;
   dataSource: DataSource;
   name: string;
+  // Mime type of the document or "unknown" if not known.
   mimeType: string;
   // The hash of the document content.
   hash?: string;
   // Storage path to the raw document file, if it has been saved.
   blobId?: BlobIdentifier;
 
-  // Some identifiers for the document.
+  // Unique identifier for the source document.
   documentId: string;
+
+  // Unique identifier for the collection that this document belongs to,
+  // if applicable.
   collectionId?: string;
 
   /**
-   * Fetches the document text from the data source.
-   */
-  getDocument(): Promise<string>;
-
-  /**
-   * Get the document text.
+   * Fetch the document text from the data source.
    * TODO: saqadri - instead of fetching the entire document text (which could be large), we should
    * provide a way to fetch the text in chunks or stream the text.
    * Perhaps readable stream with async generators: https://nodejs.org/api/stream.html#creating-readable-streams-with-async-generators
    */
   getContent(): Promise<string>;
+
+  /**
+   * Fetch the document text and metadata in reasonable chunks (e.g. pages) from the data source.
+   */
+  getChunkedContent(): Promise<RawDocumentChunk[]>;
 }
 
 /**
@@ -53,8 +60,8 @@ export interface DocumentFragment extends Attributable {
     | "code"
     | "quote";
 
-  // The document that this fragment belongs to.
-  document: Document;
+  // The ID for the document that this fragment belongs to.
+  documentId: string;
   // The previous fragment in the document.
   previousFragment?: DocumentFragment;
   // The next fragment in the document.
