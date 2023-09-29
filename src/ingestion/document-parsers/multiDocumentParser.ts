@@ -9,9 +9,18 @@ type ParserConfig = {
   parserRegistry?: ParserRegistry;
 };
 
+/**
+ * A basic implementation for parsing Documents from RawDocuments, using
+ * a config to determine which specific parsers to use for each MIME type.
+ * If a metadataDB and accessControlPolicyFactory are provided, the parsed
+ * documents will have relevant metadata and access policies set in the metadataDB.
+ * @param rawDocuments An array of RawDocuments to parse into Documents
+ * @param config A ParserConfig for configuring the parsing implementation
+ * @returns
+ */
 export async function parseDocuments(
   rawDocuments: RawDocument[],
-  config: ParserConfig,
+  config: ParserConfig
 ): Promise<Document[]> {
   const parserRegistry = config.parserRegistry ?? new ParserRegistry();
 
@@ -33,7 +42,7 @@ export async function parseDocuments(
         if (config.accessControlPolicyFactory) {
           accessPolicies =
             await config.accessControlPolicyFactory.getAccessPolicies(
-              rawDocument,
+              rawDocument
             );
         }
 
@@ -41,6 +50,9 @@ export async function parseDocuments(
           documentId: document.documentId,
           rawDocument,
           document,
+          hash: rawDocument.hash, // TODO: Figure out if this is right
+          // Both rawDocument and document have hashes. Most likely raw doc hash
+          // will be most useful here for reingestion purposes.
           uri: rawDocument.uri,
           name: rawDocument.name,
           mimeType: rawDocument.mimeType,
@@ -51,6 +63,6 @@ export async function parseDocuments(
       }
 
       return document;
-    }),
+    })
   );
 }

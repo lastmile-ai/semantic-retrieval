@@ -4,7 +4,7 @@ import { AlwaysAllowDocumentAccessPolicyFactory } from "../../src/access-control
 import { PineconeVectorDB } from "../../src/data-store/vector-DBs/pineconeVectorDB";
 import { InMemoryDocumentMetadataDB } from "../../src/document/metadata/InMemoryDocumentMetadataDB";
 import { FileSystem } from "../../src/ingestion/data-sources/fs/fileSystem";
-import * as SimpleDocumentParser from "../../src/ingestion/document-parsers/simpleDocumentParser";
+import * as MultiDocumentParser from "../../src/ingestion/document-parsers/multiDocumentParser";
 import { OpenAICompletionGenerator } from "../../src/generator/llm/openAICompletionGenerator";
 import { VectorDBDocumentRetriever } from "../../src/retrieval/vectorDBDocumentRetriever";
 
@@ -14,7 +14,7 @@ async function createIndex() {
   const fileSystem = new FileSystem("./example_docs");
   const rawDocuments = await fileSystem.loadDocuments();
 
-  const parsedDocuments = await SimpleDocumentParser.parseDocuments(
+  const parsedDocuments = await MultiDocumentParser.parseDocuments(
     rawDocuments,
     {
       metadataDB,
