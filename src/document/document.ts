@@ -3,7 +3,7 @@ import { JSONObject } from "../common/jsonTypes";
 import { BlobIdentifier } from "../common/storage";
 import { DataSource } from "../ingestion/data-sources/dataSource";
 
-export type RawDocumentChunks = { content: string; metadata: JSONObject }[];
+export type RawDocumentChunk = { content: string; metadata: JSONObject };
 
 /**
  * The original document, as it was ingested from the data source.
@@ -37,7 +37,7 @@ export interface RawDocument extends Attributable {
   /**
    * Fetch the document text and metadata in reasonable chunks (e.g. pages) from the data source.
    */
-  getChunkedContent(): Promise<RawDocumentChunks>;
+  getChunkedContent(): Promise<RawDocumentChunk[]>;
 }
 
 /**
@@ -60,8 +60,8 @@ export interface DocumentFragment extends Attributable {
     | "code"
     | "quote";
 
-  // The document that this fragment belongs to.
-  document: Document;
+  // The ID for the document that this fragment belongs to.
+  documentId: string;
   // The previous fragment in the document.
   previousFragment?: DocumentFragment;
   // The next fragment in the document.

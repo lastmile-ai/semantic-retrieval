@@ -10,6 +10,7 @@ import { v4 as uuid } from "uuid";
 import { DocxFileLoader } from "./docxFileLoader";
 import { PDFFileLoader } from "./pdfFileLoader";
 import { CSVFileLoader } from "./csvFileLoader";
+import { Md5 } from "ts-md5";
 
 type FileLoaderMap = {
   [extension: string]: (path: string) => LangChainFileLoader;
@@ -65,6 +66,13 @@ export class FileSystem implements DataSource {
 
     const mimeType = mime.lookup(filePath);
 
+    const hash = new Md5();
+    const chunks = await fileLoader(filePath).loadChunkedContent();
+    for (const chunk of chunks) {
+      hash.appendStr(chunk.content + '\n');
+    }
+    hash.end();
+
     return {
       uri: filePath,
       dataSource: this,
@@ -78,6 +86,7 @@ export class FileSystem implements DataSource {
         await fileLoader(filePath)
           .loadChunkedContent()
           .then((content) => content.join("\n")),
+      hash: hash.toString(),
       metadata: {},
       attributes: {},
     };

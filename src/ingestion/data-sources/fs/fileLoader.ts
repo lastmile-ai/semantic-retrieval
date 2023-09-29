@@ -1,4 +1,4 @@
-import { RawDocumentChunks } from "../../../document/document";
+import { RawDocumentChunk } from "../../../document/document";
 
 /**
  * Abstract class for loading chunked content from a file.
@@ -10,5 +10,5 @@ export abstract class BaseFileLoader {
       this.path = path;
     }
   
-    abstract loadChunkedContent(): Promise<RawDocumentChunks>;
+    abstract loadChunkedContent(): Promise<RawDocumentChunk[]>;
   }
