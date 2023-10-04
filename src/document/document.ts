@@ -40,6 +40,16 @@ export interface RawDocument extends Attributable {
   getChunkedContent(): Promise<RawDocumentChunk[]>;
 }
 
+export type DocumentFragmentType =
+  | "text"
+  | "image"
+  | "table"
+  | "list"
+  | "paragraph"
+  | "heading"
+  | "code"
+  | "quote";
+
 /**
  *
  */
@@ -50,15 +60,7 @@ export interface DocumentFragment extends Attributable {
   // Storage path to the fragment content
   blobId?: BlobIdentifier;
 
-  fragmentType:
-    | "text"
-    | "image"
-    | "table"
-    | "list"
-    | "paragraph"
-    | "heading"
-    | "code"
-    | "quote";
+  fragmentType: DocumentFragmentType;
 
   // The ID for the document that this fragment belongs to.
   documentId: string;
