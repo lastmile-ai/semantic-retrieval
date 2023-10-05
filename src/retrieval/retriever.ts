@@ -28,7 +28,7 @@ export abstract class BaseRetriever<R> {
    * @param query The query string to obtain relevant Documents for.
    * @returns A promise that resolves to array of retrieved Documents.
    */
-  protected abstract _getDocumentsUnsafe(
+  protected abstract getDocumentsUnsafe(
     _params: BaseRetrieverQueryParams,
   ): Promise<Document[]>;
 
@@ -39,7 +39,7 @@ export abstract class BaseRetriever<R> {
    * @param documents The Documents to filter.
    * @returns A promise that resolves to array of Documents accessible to the current identity.
    */
-  protected async _filterAccessibleDocuments(
+  protected async filterAccessibleDocuments(
     accessPassport: AccessPassport,
     documents: Document[],
   ): Promise<Document[]> {
@@ -82,7 +82,7 @@ export abstract class BaseRetriever<R> {
    * @param documents The array of retrieved Documents to post-process.
    * @returns A promise that resolves to post-processed data.
    */
-  protected abstract _processDocuments(_documents: Document[]): Promise<R>;
+  protected abstract processDocuments(_documents: Document[]): Promise<R>;
 
   /**
    * Get the data relevant to the given query and which the current identity can access.
@@ -92,13 +92,13 @@ export abstract class BaseRetriever<R> {
   async retrieveData(params: BaseRetrieverQueryParams): Promise<R> {
     // By default, just perform a single query to the underlying source and filter the results
     // on access control checks, if applicable
-    const unsafeDocuments = await this._getDocumentsUnsafe(params);
+    const unsafeDocuments = await this.getDocumentsUnsafe(params);
 
-    const accessibleDocuments = await this._filterAccessibleDocuments(
+    const accessibleDocuments = await this.filterAccessibleDocuments(
       params.accessPassport,
       unsafeDocuments,
     );
 
-    return await this._processDocuments(accessibleDocuments);
+    return await this.processDocuments(accessibleDocuments);
   }
 }
