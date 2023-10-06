@@ -1,18 +1,7 @@
 import { JSONObject } from "../../common/jsonTypes";
 import type { Document } from "../../document/document";
 import { DocumentMetadataDB } from "../../document/metadata/documentMetadataDB";
-
-export type EmbeddingVector = number[] & {
-  /**
-   * Number of dimensions in the vector, and min/max values for each dimension.
-   * This can be used to normalize the vector or checking for out-of-bounds values.
-   */
-  extras?: {
-    dimensions: number;
-    min: number;
-    max: number;
-  };
-};
+import { EmbeddingsTransformer } from "../../transformation/embeddings/embeddings";
 
 export interface VectorDBQuery {
   // TODO: saqadri - revisit
@@ -35,7 +24,7 @@ export interface VectorDBQuery {
 
 export interface VectorDBEmbeddingQuery extends VectorDBQuery {
   // The embedding to query
-  embeddingVector: EmbeddingVector;
+  embeddingVector: VectorEmbedding;
 }
 
 export interface VectorDBTextQuery extends VectorDBQuery {
@@ -52,6 +41,7 @@ export abstract class VectorDB {
 
   static async fromDocuments(
     _documents: Document[],
+    _embeddings: EmbeddingsTransformer,
     _metadataDB?: DocumentMetadataDB,
   ): Promise<VectorDB> {
     throw new Error("VectorDB implementation missing override");

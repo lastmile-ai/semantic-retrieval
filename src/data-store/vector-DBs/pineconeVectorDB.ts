@@ -1,5 +1,6 @@
 import type { Document } from "../../document/document";
 import { DocumentMetadataDB } from "../../document/metadata/documentMetadataDB";
+import { EmbeddingsTransformer } from "../../transformation/embeddings/embeddings";
 
 import { VectorDB, VectorDBQuery } from "./vectorDB";
 
@@ -11,7 +12,8 @@ export class PineconeVectorDB extends VectorDB {
 
   static async fromDocuments(
     documents: Document[],
-    metadataDB?: DocumentMetadataDB,
+    embeddings?: EmbeddingsTransformer,
+    metadataDB?: DocumentMetadataDB
   ): Promise<VectorDB> {
     const instance = new this(metadataDB);
     await instance.addDocuments(documents);
