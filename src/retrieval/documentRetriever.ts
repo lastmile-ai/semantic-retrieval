@@ -3,7 +3,7 @@ import { DocumentMetadataDB } from "../document/metadata/documentMetadataDB";
 import { BaseRetriever } from "./retriever";
 
 export abstract class BaseDocumentRetriever extends BaseRetriever<Document[]> {
-  constructor(metadataDB?: DocumentMetadataDB) {
+  constructor(metadataDB: DocumentMetadataDB) {
     super(metadataDB);
   }
 
