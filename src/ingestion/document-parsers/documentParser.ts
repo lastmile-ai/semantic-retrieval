@@ -1,13 +1,13 @@
 import { Attributable } from "../../common/base";
 import { JSONObject } from "../../common/jsonTypes";
-import { Document, RawDocument, DocumentFragment } from "../../document/document";
+import { RawDocument, DocumentFragment, IngestedDocument } from "../../document/document";
 
 export interface DocumentParser extends Attributable {
   // If applicable, restrict the DocumentParser to only parse documents with the specified MIME types.
   mimeTypeRestriction?: string[];
 
   // TODO: saqadri - figure out how to parse a document from a stream (i.e. iteratively instead of all in one go)
-  parse(rawDocument: RawDocument): Promise<Document>;
+  parse(rawDocument: RawDocument): Promise<IngestedDocument>;
 
   /**
    * Parses the next fragment from the raw document.
@@ -43,7 +43,7 @@ export abstract class BaseDocumentParser implements DocumentParser {
     this.metadata = metadata ?? this.metadata;
   }
 
-  abstract parse(rawDocument: RawDocument): Promise<Document>;
+  abstract parse(rawDocument: RawDocument): Promise<IngestedDocument>;
 
   abstract parseNext(
     rawDocument: RawDocument,
