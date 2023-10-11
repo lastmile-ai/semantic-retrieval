@@ -1,7 +1,7 @@
 import { JSONObject } from "../../common/jsonTypes";
 import {
   RawDocument,
-  Document,
+  IngestedDocument,
   DocumentFragment,
 } from "../../document/document";
 import { BaseDocumentParser } from "./documentParser";
@@ -17,7 +17,7 @@ export class DirectDocumentParser extends BaseDocumentParser {
     super(attributes, metadata);
   }
 
-  async parse(rawDocument: RawDocument): Promise<Document> {
+  async parse(rawDocument: RawDocument): Promise<IngestedDocument> {
     const chunks = await rawDocument.getChunkedContent();
     const documentId = uuid();
 

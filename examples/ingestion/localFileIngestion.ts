@@ -21,19 +21,24 @@ async function createIndex() {
     {
       metadataDB,
       accessControlPolicyFactory: new AlwaysAllowDocumentAccessPolicyFactory(),
-    },
+    }
   );
 
-  const documentTransformer = new SeparatorTextChunker({metadataDB});
-  const transformedDocuments = await documentTransformer.transformDocuments(parsedDocuments);
+  const documentTransformer = new SeparatorTextChunker({ metadataDB });
+  const transformedDocuments =
+    await documentTransformer.transformDocuments(parsedDocuments);
 
-  return await PineconeVectorDB.fromDocuments(transformedDocuments, new OpenAIEmbeddings(), metadataDB);
+  return await PineconeVectorDB.fromDocuments(transformedDocuments, {
+    indexName: "test-index",
+    embeddings: new OpenAIEmbeddings(),
+    metadataDB,
+  });
 }
 
 async function main() {
   const vectorDB = await createIndex();
   const accessPassport = new AccessPassport();
-  const retriever = new VectorDBDocumentRetriever(vectorDB);
+  const retriever = new VectorDBDocumentRetriever({vectorDB, metadataDB});
   const generator = new OpenAICompletionGenerator();
   const res = await generator.run({
     accessPassport,

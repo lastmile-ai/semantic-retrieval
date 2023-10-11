@@ -2,9 +2,9 @@ import { AccessPassport } from "../access-control/accessPassport";
 import { Document } from "../document/document";
 import { DocumentMetadataDB } from "../document/metadata/documentMetadataDB";
 
-export type BaseRetrieverQueryParams = {
+export type BaseRetrieverQueryParams<Q> = {
   accessPassport: AccessPassport;
-  query: string;
+  query: Q;
 };
 
 /**
@@ -17,9 +17,9 @@ export type BaseRetrieverQueryParams = {
  * and correctness of the access control logic is the responsibility of the retriever implementation.
  */
 export abstract class BaseRetriever<R> {
-  metadataDB: DocumentMetadataDB | undefined;
+  metadataDB: DocumentMetadataDB;
 
-  constructor(metadataDB?: DocumentMetadataDB) {
+  constructor(metadataDB: DocumentMetadataDB) {
     this.metadataDB = metadataDB;
   }
 
@@ -28,8 +28,8 @@ export abstract class BaseRetriever<R> {
    * @param query The query string to obtain relevant Documents for.
    * @returns A promise that resolves to array of retrieved Documents.
    */
-  protected abstract getDocumentsUnsafe(
-    _params: BaseRetrieverQueryParams,
+  protected abstract getDocumentsUnsafe<Q>(
+    _params: BaseRetrieverQueryParams<Q>
   ): Promise<Document[]>;
 
   /**
@@ -41,7 +41,7 @@ export abstract class BaseRetriever<R> {
    */
   protected async filterAccessibleDocuments(
     accessPassport: AccessPassport,
-    documents: Document[],
+    documents: Document[]
   ): Promise<Document[]> {
     if (this.metadataDB == null) {
       return documents;
@@ -50,7 +50,7 @@ export abstract class BaseRetriever<R> {
     const accessibleDocuments = await Promise.all(
       documents.map(async (unsafeDocument) => {
         const metadata = await this.metadataDB!.getMetadata(
-          unsafeDocument.documentId,
+          unsafeDocument.documentId
         );
 
         if (metadata.accessPolicies) {
@@ -61,9 +61,9 @@ export abstract class BaseRetriever<R> {
                   unsafeDocument,
                   policy.resource
                     ? accessPassport.getIdentity(policy.resource)
-                    : undefined,
-                ),
-            ),
+                    : undefined
+                )
+            )
           );
 
           if (policyChecks.some((check) => check === false)) {
@@ -71,7 +71,7 @@ export abstract class BaseRetriever<R> {
           }
         }
         return unsafeDocument;
-      }),
+      })
     );
 
     return accessibleDocuments.filter((doc): doc is Document => doc != null);
@@ -86,17 +86,17 @@ export abstract class BaseRetriever<R> {
 
   /**
    * Get the data relevant to the given query and which the current identity can access.
-   * @param query The query string to obtain relevant data for.
+   * @param params The retriever query params to use for the query.
    * @returns A promise that resolves to the retrieved data.
    */
-  async retrieveData(params: BaseRetrieverQueryParams): Promise<R> {
+  async retrieveData<Q>(params: BaseRetrieverQueryParams<Q>): Promise<R> {
     // By default, just perform a single query to the underlying source and filter the results
     // on access control checks, if applicable
     const unsafeDocuments = await this.getDocumentsUnsafe(params);
 
     const accessibleDocuments = await this.filterAccessibleDocuments(
       params.accessPassport,
-      unsafeDocuments,
+      unsafeDocuments
     );
 
     return await this.processDocuments(accessibleDocuments);
