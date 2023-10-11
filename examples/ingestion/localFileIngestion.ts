@@ -38,7 +38,7 @@ async function createIndex() {
 async function main() {
   const vectorDB = await createIndex();
   const accessPassport = new AccessPassport();
-  const retriever = new VectorDBDocumentRetriever(vectorDB);
+  const retriever = new VectorDBDocumentRetriever({vectorDB, metadataDB});
   const generator = new OpenAICompletionGenerator();
   const res = await generator.run({
     accessPassport,

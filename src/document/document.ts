@@ -86,8 +86,6 @@ export interface DocumentFragment extends Attributable {
  * A @see RawDocument after it has been parsed into a graph of @see DocumentFragments.
  */
 export interface Document extends Attributable {
-  rawDocument: RawDocument;
-
   // Some identifiers for the document (these could be different from the raw document identifiers)
   documentId: string;
   collectionId?: string;
@@ -99,4 +97,12 @@ export interface Document extends Attributable {
    * Serializes the document to disk, and returns the path to the serialized document.
    */
   serialize(): Promise<string>;
+}
+
+/**
+ * A @see RawDocument after it has been parsed into a graph of @see DocumentFragments during
+ * ingestion; RawDocument is accessible from the Document at ingestion time.
+ */
+export interface IngestedDocument extends Document {
+  rawDocument: RawDocument;
 }
