@@ -23,7 +23,7 @@ export interface VectorDBRetrieverQueryParams
 export abstract class BaseVectorDBRetriever<
   V extends VectorDB,
   R,
-> extends BaseRetriever<R> {
+> extends BaseRetriever<R,VectorDBQuery> {
   vectorDB: V;
 
   constructor(params: VectorDBRetrieverParams<V>) {

@@ -16,7 +16,7 @@ export type BaseRetrieverQueryParams<Q> = {
  * handling is required (e.g. if the underlying source can perform optimized RBAC), but the quality
  * and correctness of the access control logic is the responsibility of the retriever implementation.
  */
-export abstract class BaseRetriever<R> {
+export abstract class BaseRetriever<R, Q> {
   metadataDB: DocumentMetadataDB;
 
   constructor(metadataDB: DocumentMetadataDB) {
@@ -28,7 +28,7 @@ export abstract class BaseRetriever<R> {
    * @param query The query string to obtain relevant Documents for.
    * @returns A promise that resolves to array of retrieved Documents.
    */
-  protected abstract getDocumentsUnsafe<Q>(
+  protected abstract getDocumentsUnsafe(
     _params: BaseRetrieverQueryParams<Q>
   ): Promise<Document[]>;
 
@@ -89,7 +89,7 @@ export abstract class BaseRetriever<R> {
    * @param params The retriever query params to use for the query.
    * @returns A promise that resolves to the retrieved data.
    */
-  async retrieveData<Q>(params: BaseRetrieverQueryParams<Q>): Promise<R> {
+  async retrieveData(params: BaseRetrieverQueryParams<Q>): Promise<R> {
     // By default, just perform a single query to the underlying source and filter the results
     // on access control checks, if applicable
     const unsafeDocuments = await this.getDocumentsUnsafe(params);
