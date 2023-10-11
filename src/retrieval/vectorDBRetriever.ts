@@ -24,9 +24,8 @@ export abstract class BaseVectorDBRetriever<
   }
 
   protected async getDocumentsUnsafe(
-    params: BaseRetrieverQueryParams,
+    _params: BaseRetrieverQueryParams,
   ): Promise<Document[]> {
-    const query: VectorDBTextQuery = { text: params.query };
-    return await this.vectorDB.query(query);
+    throw new Error("Not implemented yet")
   }
 }
