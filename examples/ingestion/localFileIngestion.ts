@@ -21,13 +21,18 @@ async function createIndex() {
     {
       metadataDB,
       accessControlPolicyFactory: new AlwaysAllowDocumentAccessPolicyFactory(),
-    },
+    }
   );
 
-  const documentTransformer = new SeparatorTextChunker({metadataDB});
-  const transformedDocuments = await documentTransformer.transformDocuments(parsedDocuments);
+  const documentTransformer = new SeparatorTextChunker({ metadataDB });
+  const transformedDocuments =
+    await documentTransformer.transformDocuments(parsedDocuments);
 
-  return await PineconeVectorDB.fromDocuments(transformedDocuments, new OpenAIEmbeddings(), metadataDB);
+  return await PineconeVectorDB.fromDocuments(transformedDocuments, {
+    indexName: "test-index",
+    embeddings: new OpenAIEmbeddings(),
+    metadataDB,
+  });
 }
 
 async function main() {
