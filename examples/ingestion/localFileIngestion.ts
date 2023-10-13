@@ -6,7 +6,7 @@ import { InMemoryDocumentMetadataDB } from "../../src/document/metadata/InMemory
 import { FileSystem } from "../../src/ingestion/data-sources/fs/fileSystem";
 import * as MultiDocumentParser from "../../src/ingestion/document-parsers/multiDocumentParser";
 import { OpenAICompletionGenerator } from "../../src/generator/llm/openAICompletionGenerator";
-import { VectorDBDocumentRetriever } from "../../src/retrieval/vectorDBDocumentRetriever";
+import { VectorDBDocumentRetriever } from "../../src/retrieval/vector-DBs/vectorDBDocumentRetriever";
 import { SeparatorTextChunker } from "../../src/transformation/document/text/separatorTextChunker";
 import { OpenAIEmbeddings } from "../../src/transformation/embeddings/openAIEmbedding";
 
@@ -38,7 +38,7 @@ async function createIndex() {
 async function main() {
   const vectorDB = await createIndex();
   const accessPassport = new AccessPassport();
-  const retriever = new VectorDBDocumentRetriever(vectorDB);
+  const retriever = new VectorDBDocumentRetriever({ vectorDB, metadataDB });
   const generator = new OpenAICompletionGenerator();
   const res = await generator.run({
     accessPassport,

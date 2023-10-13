@@ -1,5 +1,5 @@
 import { DocumentAccessPolicyFactory } from "../../access-control/documentAccessPolicyFactory";
-import { Document, RawDocument } from "../../document/document";
+import { IngestedDocument, RawDocument } from "../../document/document";
 import { DocumentMetadataDB } from "../../document/metadata/documentMetadataDB";
 import { ParserRegistry } from "./parserRegistry";
 
@@ -21,7 +21,7 @@ type ParserConfig = {
 export async function parseDocuments(
   rawDocuments: RawDocument[],
   config: ParserConfig
-): Promise<Document[]> {
+): Promise<IngestedDocument[]> {
   const parserRegistry = config.parserRegistry ?? new ParserRegistry();
 
   // Sanity check all parsers are available
