@@ -22,6 +22,7 @@ export interface VectorEmbedding extends Attributable {
   metadata: JSONObject & {
     documentId?: string;
     fragmentId?: string;
+    retrievalScore?: number;
   };
 }
 
