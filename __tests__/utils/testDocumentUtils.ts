@@ -1,8 +1,8 @@
 import { JSONObject } from "../../src/common/jsonTypes";
 import {
-  Document,
   DocumentFragment,
   DocumentFragmentType,
+  IngestedDocument,
   RawDocument,
   RawDocumentChunk,
 } from "../../src/document/document";
@@ -27,7 +27,7 @@ export type TestDocumentConfig = {
   fragments?: DocumentFragment[];
 };
 
-export function getTestDocument(config?: TestDocumentConfig): Document {
+export function getTestDocument(config?: TestDocumentConfig): IngestedDocument {
   const documentId = config?.documentId ?? uuid();
   return {
     metadata: config?.metadata ?? {},

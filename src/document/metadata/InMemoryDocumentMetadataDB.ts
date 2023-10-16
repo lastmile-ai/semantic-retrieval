@@ -1,19 +1,23 @@
 import { DocumentMetadata } from "./documentMetadata";
 import { DocumentMetadataDB } from "./documentMetadataDB";
 
-export class InMemoryDocumentMetadataDB implements DocumentMetadataDB {
-  _metadata: { [key: string]: DocumentMetadata } = {};
+type DocumentMetadataMap = { [key: string]: DocumentMetadata };
 
-  constructor() {}
+export class InMemoryDocumentMetadataDB implements DocumentMetadataDB {
+  private metadata: DocumentMetadataMap = {};
+
+  constructor(metadata?: DocumentMetadataMap) {
+    this.metadata = metadata ?? this.metadata;
+  }
 
   async getMetadata(documentId: string): Promise<DocumentMetadata> {
-    return this._metadata[documentId];
+    return this.metadata[documentId];
   }
 
   async setMetadata(
     documentId: string,
-    metadata: DocumentMetadata,
+    metadata: DocumentMetadata
   ): Promise<void> {
-    this._metadata[documentId] = metadata;
+    this.metadata[documentId] = metadata;
   }
 }
