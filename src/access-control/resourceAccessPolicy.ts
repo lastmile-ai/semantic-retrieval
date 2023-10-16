@@ -6,9 +6,9 @@ import { AccessIdentity } from "./accessIdentity";
  * Access policy for a resource
  */
 export interface ResourceAccessPolicy {
-  resource?: string;
   policy: string;
-  policyJSON: JSONObject;
+  resource?: string;
+  policyJSON?: JSONObject;
 
   /**
    * Tests whether the requestor has read permission for the specified document.

@@ -1,10 +1,11 @@
 import { AccessPassport } from "../access-control/accessPassport";
-import { Document } from "../document/document";
+import { Document, DocumentFragment } from "../document/document";
 import { DocumentMetadataDB } from "../document/metadata/documentMetadataDB";
+import { promises as fs } from "fs";
 
-export type BaseRetrieverQueryParams = {
+export type BaseRetrieverQueryParams<Q> = {
   accessPassport: AccessPassport;
-  query: string;
+  query: Q;
 };
 
 /**
@@ -16,65 +17,131 @@ export type BaseRetrieverQueryParams = {
  * handling is required (e.g. if the underlying source can perform optimized RBAC), but the quality
  * and correctness of the access control logic is the responsibility of the retriever implementation.
  */
-export abstract class BaseRetriever<R> {
-  metadataDB: DocumentMetadataDB | undefined;
+export abstract class BaseRetriever<R, Q> {
+  metadataDB: DocumentMetadataDB;
 
-  constructor(metadataDB?: DocumentMetadataDB) {
+  constructor(metadataDB: DocumentMetadataDB) {
     this.metadataDB = metadataDB;
   }
 
   /**
-   * Get the Documents relevant to the given query without performing any access control checks.
-   * @param query The query string to obtain relevant Documents for.
-   * @returns A promise that resolves to array of retrieved Documents.
+   * Get the DocumentFragments relevant to the given query without performing any access control checks.
+   * @param query The query string to obtain relevant DocumentFragments for.
+   * @returns A promise that resolves to array of retrieved DocumentFragments.
    */
-  protected abstract getDocumentsUnsafe(
-    _params: BaseRetrieverQueryParams,
-  ): Promise<Document[]>;
+  protected abstract getFragmentsUnsafe(
+    _params: BaseRetrieverQueryParams<Q>
+  ): Promise<DocumentFragment[]>;
 
   /**
-   * Simple filtering of Documents with respect to access policies.
+   * Simple filtering of DocumentFragments with respect to access policies.
    * @param accessPassport The AccessPassport for the current identity.
    * @param metadataDB The DocumentMetadataDB to use for access control checks.
-   * @param documents The Documents to filter.
-   * @returns A promise that resolves to array of Documents accessible to the current identity.
+   * @param fragments The DocumentFragments to filter.
+   * @returns A promise that resolves to array of DocumentFragments accessible to the current identity.
    */
-  protected async filterAccessibleDocuments(
+  protected async filterAccessibleFragments(
     accessPassport: AccessPassport,
-    documents: Document[],
-  ): Promise<Document[]> {
+    fragments: DocumentFragment[]
+  ): Promise<DocumentFragment[]> {
     if (this.metadataDB == null) {
-      return documents;
+      return fragments;
     }
 
-    const accessibleDocuments = await Promise.all(
-      documents.map(async (unsafeDocument) => {
+    const accessibleFragments = await Promise.all(
+      fragments.map(async (fragment) => {
         const metadata = await this.metadataDB!.getMetadata(
-          unsafeDocument.documentId,
+          fragment.documentId
         );
 
-        if (metadata.accessPolicies) {
+        // If there is no metadata for the document, assume that the document is accessible
+        if (metadata && metadata.accessPolicies && metadata.document) {
           const policyChecks = await Promise.all(
             metadata.accessPolicies.map(
               async (policy) =>
                 await policy.testDocumentReadPermission(
-                  unsafeDocument,
+                  metadata.document!,
                   policy.resource
                     ? accessPassport.getIdentity(policy.resource)
-                    : undefined,
-                ),
-            ),
+                    : undefined
+                )
+            )
           );
 
           if (policyChecks.some((check) => check === false)) {
             return null;
           }
         }
-        return unsafeDocument;
-      }),
+
+        return fragment;
+      })
     );
 
-    return accessibleDocuments.filter((doc): doc is Document => doc != null);
+    return accessibleFragments.filter(
+      (fragment): fragment is DocumentFragment => fragment != null
+    );
+  }
+
+  /**
+   * Constructs Documents from the given DocumentFragments. Fragments with the same documentId will
+   * be grouped into a single Document.
+   * @param fragments
+   * @returns
+   */
+  protected async getDocumentsForFragments(
+    fragments: DocumentFragment[]
+  ): Promise<Document[]> {
+    const fragmentsByDocumentId = fragments.reduce(
+      (acc, fragment) => {
+        if (!fragment) {
+          return acc;
+        }
+        if (acc[fragment.documentId] == null) {
+          acc[fragment.documentId] = [];
+        }
+        acc[fragment.documentId].push(fragment);
+        return acc;
+      },
+      {} as Record<string, DocumentFragment[]>
+    );
+
+    // We construct Document objects from the subset of fragments obtained from the query.
+    // If needed, all Document fragments can be retrieved from the DocumentMetadataDB.
+    return await Promise.all(
+      Object.entries(fragmentsByDocumentId).map(
+        async ([documentId, fragments]) => {
+          const documentMetadata = {
+            ...(await this.metadataDB.getMetadata(documentId)),
+          };
+
+          const storedDocument = documentMetadata?.document;
+          delete documentMetadata.document;
+
+          return {
+            ...documentMetadata,
+            documentId,
+            fragments,
+            attributes: documentMetadata?.attributes ?? {},
+            metadata: documentMetadata?.metadata ?? {},
+            serialize: async () => {
+              if (storedDocument) {
+                return await storedDocument.serialize();
+              }
+
+              const serializedFragments = (
+                await Promise.all(
+                  fragments.map(async (fragment) => await fragment.serialize())
+                )
+              ).join("\n");
+
+              const filePath = `${documentId}.txt`;
+              await fs.writeFile(filePath, serializedFragments);
+              return filePath;
+            },
+          };
+        }
+      )
+    );
   }
 
   /**
@@ -86,18 +153,21 @@ export abstract class BaseRetriever<R> {
 
   /**
    * Get the data relevant to the given query and which the current identity can access.
-   * @param query The query string to obtain relevant data for.
+   * @param params The retriever query params to use for the query.
    * @returns A promise that resolves to the retrieved data.
    */
-  async retrieveData(params: BaseRetrieverQueryParams): Promise<R> {
+  async retrieveData(params: BaseRetrieverQueryParams<Q>): Promise<R> {
     // By default, just perform a single query to the underlying source and filter the results
     // on access control checks, if applicable
-    const unsafeDocuments = await this.getDocumentsUnsafe(params);
+    const unsafeFragments = await this.getFragmentsUnsafe(params);
 
-    const accessibleDocuments = await this.filterAccessibleDocuments(
+    const accessibleFragments = await this.filterAccessibleFragments(
       params.accessPassport,
-      unsafeDocuments,
+      unsafeFragments
     );
+
+    const accessibleDocuments =
+      await this.getDocumentsForFragments(accessibleFragments);
 
     return await this.processDocuments(accessibleDocuments);
   }
