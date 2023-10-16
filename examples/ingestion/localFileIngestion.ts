@@ -8,6 +8,7 @@ import * as MultiDocumentParser from "../../src/ingestion/document-parsers/multi
 import { OpenAICompletionGenerator } from "../../src/generator/llm/openAICompletionGenerator";
 import { VectorDBDocumentRetriever } from "../../src/retrieval/vectorDBDocumentRetriever";
 import { SeparatorTextChunker } from "../../src/transformation/document/text/separatorTextChunker";
+import { OpenAIEmbeddings } from "../../src/transformation/embeddings/openAIEmbeddings";
 
 const metadataDB = new InMemoryDocumentMetadataDB();
 
@@ -26,7 +27,7 @@ async function createIndex() {
   const documentTransformer = new SeparatorTextChunker({metadataDB});
   const transformedDocuments = await documentTransformer.transformDocuments(parsedDocuments);
 
-  return await PineconeVectorDB.fromDocuments(transformedDocuments, metadataDB);
+  return await PineconeVectorDB.fromDocuments(transformedDocuments, new OpenAIEmbeddings(), metadataDB);
 }
 
 async function main() {
