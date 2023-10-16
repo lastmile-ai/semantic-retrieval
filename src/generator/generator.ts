@@ -13,5 +13,5 @@ export type GeneratorParams<D> = {
  * retrieved data (if applicable).
  */
 export abstract class BaseGenerator<D, G> {
-  protected abstract run(params: GeneratorParams<D>): Promise<G>;
+  abstract run(params: GeneratorParams<D>): Promise<G>;
 }

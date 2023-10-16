@@ -6,7 +6,9 @@ import { InMemoryDocumentMetadataDB } from "../../src/document/metadata/InMemory
 import { FileSystem } from "../../src/ingestion/data-sources/fs/fileSystem";
 import * as MultiDocumentParser from "../../src/ingestion/document-parsers/multiDocumentParser";
 import { OpenAICompletionGenerator } from "../../src/generator/llm/openAICompletionGenerator";
-import { VectorDBDocumentRetriever } from "../../src/retrieval/vectorDBDocumentRetriever";
+import { VectorDBDocumentRetriever } from "../../src/retrieval/vector-DBs/vectorDBDocumentRetriever";
+import { SeparatorTextChunker } from "../../src/transformation/document/text/separatorTextChunker";
+import { OpenAIEmbeddings } from "../../src/transformation/embeddings/openAIEmbeddings";
 
 const metadataDB = new InMemoryDocumentMetadataDB();
 
@@ -19,15 +21,24 @@ async function createIndex() {
     {
       metadataDB,
       accessControlPolicyFactory: new AlwaysAllowDocumentAccessPolicyFactory(),
-    },
+    }
   );
-  return await PineconeVectorDB.fromDocuments(parsedDocuments, metadataDB);
+
+  const documentTransformer = new SeparatorTextChunker({ metadataDB });
+  const transformedDocuments =
+    await documentTransformer.transformDocuments(parsedDocuments);
+
+  return await PineconeVectorDB.fromDocuments(transformedDocuments, {
+    indexName: "test-index",
+    embeddings: new OpenAIEmbeddings(),
+    metadataDB,
+  });
 }
 
 async function main() {
   const vectorDB = await createIndex();
   const accessPassport = new AccessPassport();
-  const retriever = new VectorDBDocumentRetriever(vectorDB);
+  const retriever = new VectorDBDocumentRetriever({ vectorDB, metadataDB });
   const generator = new OpenAICompletionGenerator();
   const res = await generator.run({
     accessPassport,

@@ -40,6 +40,16 @@ export interface RawDocument extends Attributable {
   getChunkedContent(): Promise<RawDocumentChunk[]>;
 }
 
+export type DocumentFragmentType =
+  | "text"
+  | "image"
+  | "table"
+  | "list"
+  | "paragraph"
+  | "heading"
+  | "code"
+  | "quote";
+
 /**
  *
  */
@@ -50,15 +60,7 @@ export interface DocumentFragment extends Attributable {
   // Storage path to the fragment content
   blobId?: BlobIdentifier;
 
-  fragmentType:
-    | "text"
-    | "image"
-    | "table"
-    | "list"
-    | "paragraph"
-    | "heading"
-    | "code"
-    | "quote";
+  fragmentType: DocumentFragmentType;
 
   // The ID for the document that this fragment belongs to.
   documentId: string;
@@ -84,8 +86,6 @@ export interface DocumentFragment extends Attributable {
  * A @see RawDocument after it has been parsed into a graph of @see DocumentFragments.
  */
 export interface Document extends Attributable {
-  rawDocument: RawDocument;
-
   // Some identifiers for the document (these could be different from the raw document identifiers)
   documentId: string;
   collectionId?: string;
@@ -97,4 +97,12 @@ export interface Document extends Attributable {
    * Serializes the document to disk, and returns the path to the serialized document.
    */
   serialize(): Promise<string>;
+}
+
+/**
+ * A @see RawDocument after it has been parsed into a graph of @see DocumentFragments during
+ * ingestion; RawDocument is accessible from the Document at ingestion time.
+ */
+export interface IngestedDocument extends Document {
+  rawDocument: RawDocument;
 }
