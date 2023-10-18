@@ -16,11 +16,28 @@ type FileLoaderMap = {
   [extension: string]: (path: string) => LangChainFileLoader;
 };
 
+type Callbacks = {
+  [event_name: string]: (callback_input: object) => Promise<void>
+}
+
 const DEFAULT_FILE_LOADERS: FileLoaderMap = {
   ".csv": (path: string) => new CSVFileLoader(path),
   ".docx": (path: string) => new DocxFileLoader(path),
   ".pdf": (path: string) => new PDFFileLoader(path),
   ".txt": (path: string) => new TxtFileLoader(path),
+};
+
+const DEFAULT_CALLBACKS: Callbacks = {
+  // TODO
+}
+
+// TODO: move this to utils
+const runCallback = async (event_name: string, callbacks: Callbacks, callback_input: object): Promise<void> => {
+  // check if callbacks object contains event_name.
+  if (event_name in callbacks) {
+    const callback = callbacks[event_name];
+    await callback(callback_input);
+  }
 };
 
 /**
@@ -32,15 +49,18 @@ export class FileSystem implements DataSource {
   path: string;
   collectionId: string | undefined;
   fileLoaders: FileLoaderMap = {};
+  callbacks: Callbacks = {};
 
   constructor(
     path: string,
     collectionId?: string,
-    fileLoaders?: FileLoaderMap
+    fileLoaders?: FileLoaderMap,
+    callbacks?: Callbacks
   ) {
     this.path = path;
     this.collectionId = collectionId;
     this.fileLoaders = fileLoaders ?? DEFAULT_FILE_LOADERS;
+    this.callbacks = callbacks ?? DEFAULT_CALLBACKS;
   }
 
   private async getStats(): Promise<{
@@ -73,7 +93,7 @@ export class FileSystem implements DataSource {
     }
     hash.end();
 
-    return {
+    const out = {
       uri: filePath,
       dataSource: this,
       name: filePath,
@@ -90,6 +110,8 @@ export class FileSystem implements DataSource {
       metadata: {},
       attributes: {},
     };
+    await runCallback("onFileLoaded", this.callbacks, out);
+    return out;
   }
 
   async testConnection(): Promise<number> {
