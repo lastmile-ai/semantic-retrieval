@@ -12,6 +12,12 @@ import { PDFFileLoader } from "./pdfFileLoader";
 import { CSVFileLoader } from "./csvFileLoader";
 import { Md5 } from "ts-md5";
 
+// the import from src/utils/callbacks.ts
+import { CallbackManager, LoadDocumentsSuccessEvent} from "../../../utils/callbacks";
+
+
+
+
 type FileLoaderMap = {
   [extension: string]: (path: string) => LangChainFileLoader;
 };
@@ -23,6 +29,7 @@ const DEFAULT_FILE_LOADERS: FileLoaderMap = {
   ".txt": (path: string) => new TxtFileLoader(path),
 };
 
+
 /**
  * A data source that loads documents from a file or directory (recursive) in
  * the local file system.
@@ -31,16 +38,19 @@ export class FileSystem implements DataSource {
   name: string = "FileSystem";
   path: string;
   collectionId: string | undefined;
+  callbackManager?: CallbackManager;
   fileLoaders: FileLoaderMap = {};
 
   constructor(
     path: string,
     collectionId?: string,
-    fileLoaders?: FileLoaderMap
+    fileLoaders?: FileLoaderMap,
+    callbackManager?: CallbackManager,
   ) {
     this.path = path;
     this.collectionId = collectionId;
     this.fileLoaders = fileLoaders ?? DEFAULT_FILE_LOADERS;
+    this.callbackManager = callbackManager ?? undefined;
   }
 
   private async getStats(): Promise<{
@@ -141,6 +151,13 @@ export class FileSystem implements DataSource {
       throw new Error(`${this.path} is neither a file nor a directory.`);
     }
 
+    if (this.callbackManager !== undefined) {
+      const event: LoadDocumentsSuccessEvent = {
+        name: "onLoadDocumentsSuccess",
+        rawDocuments: rawDocuments,
+      }
+      await this.callbackManager.runCallbacks(event);
+    }
     return rawDocuments;
   }
 }
