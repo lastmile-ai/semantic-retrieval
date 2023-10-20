@@ -1,4 +1,4 @@
-import type { RawDocument } from "../document/document";
+import type { IngestedDocument, RawDocument } from "../document/document";
 
 export type LoadDocumentsSuccessEvent = {
   name: "onLoadDocumentsSuccess";
@@ -21,11 +21,29 @@ export type DataSourceTestConnectionErrorEvent = {
   error: any;
 };
 
+export type ParseNextErrorEvent = {
+  name: "onParseNextError";
+  error: any;
+};
+
+export type ParseErrorEvent = {
+  name: "onParseError";
+  error: any;
+};
+
+export type ParseSuccessEvent = {
+  name: "onParseSuccess";
+  ingestedDocument: IngestedDocument;
+};
+
 type CallbackEvent =
   | LoadDocumentsSuccessEvent
   | LoadDocumentsErrorEvent
   | DataSourceTestConnectionSuccessEvent
-  | DataSourceTestConnectionErrorEvent;
+  | DataSourceTestConnectionErrorEvent
+  | ParseNextErrorEvent
+  | ParseErrorEvent
+  | ParseSuccessEvent;
 
 // type CallbackEvent = DataSourceEventData; // | other stuff
 
@@ -39,7 +57,9 @@ interface CallbackMapping {
   onLoadDocumentsError?: Callback<LoadDocumentsErrorEvent>[];
   onDataSourceTestConnectionSuccess?: Callback<DataSourceTestConnectionSuccessEvent>[];
   onDataSourceTestConnectionError?: Callback<DataSourceTestConnectionErrorEvent>[];
-  // 2 more cases, for GoogleDrive
+  onParseNextError?: Callback<ParseNextErrorEvent>[];
+  onParseError?: Callback<ParseErrorEvent>[];
+  onParseSuccess?: Callback<ParseSuccessEvent>[];
 }
 
 const DEFAULT_CALLBACKS: CallbackMapping = {
@@ -84,6 +104,25 @@ class CallbackManager {
           event,
           this.callbacks.onDataSourceTestConnectionError,
           DEFAULT_CALLBACKS.onDataSourceTestConnectionError
+        );
+      // add the cases for parseNext and parse
+      case "onParseNextError":
+        return await this.callback_helper(
+          event,
+          this.callbacks.onParseNextError,
+          DEFAULT_CALLBACKS.onParseNextError
+        );
+      case "onParseError":
+        return await this.callback_helper(
+          event,
+          this.callbacks.onParseError,
+          DEFAULT_CALLBACKS.onParseError
+        );
+      case "onParseSuccess":
+        return await this.callback_helper(
+          event,
+          this.callbacks.onParseSuccess,
+          DEFAULT_CALLBACKS.onParseSuccess
         );
       default:
         assertUnreachable(event);
