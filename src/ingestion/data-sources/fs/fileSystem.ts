@@ -13,10 +13,10 @@ import { CSVFileLoader } from "./csvFileLoader";
 import { Md5 } from "ts-md5";
 
 // the import from src/utils/callbacks.ts
-import { CallbackManager, LoadDocumentsSuccessEvent} from "../../../utils/callbacks";
-
-
-
+import {
+  CallbackManager,
+  ILoadDocumentsSuccessEvent,
+} from "../../../utils/callbacks";
 
 type FileLoaderMap = {
   [extension: string]: (path: string) => LangChainFileLoader;
@@ -28,7 +28,6 @@ const DEFAULT_FILE_LOADERS: FileLoaderMap = {
   ".pdf": (path: string) => new PDFFileLoader(path),
   ".txt": (path: string) => new TxtFileLoader(path),
 };
-
 
 /**
  * A data source that loads documents from a file or directory (recursive) in
@@ -45,7 +44,7 @@ export class FileSystem implements DataSource {
     path: string,
     collectionId?: string,
     fileLoaders?: FileLoaderMap,
-    callbackManager?: CallbackManager,
+    callbackManager?: CallbackManager
   ) {
     this.path = path;
     this.collectionId = collectionId;
@@ -79,7 +78,7 @@ export class FileSystem implements DataSource {
     const hash = new Md5();
     const chunks = await fileLoader(filePath).loadChunkedContent();
     for (const chunk of chunks) {
-      hash.appendStr(chunk.content + '\n');
+      hash.appendStr(chunk.content + "\n");
     }
     hash.end();
 
@@ -152,10 +151,10 @@ export class FileSystem implements DataSource {
     }
 
     if (this.callbackManager !== undefined) {
-      const event: LoadDocumentsSuccessEvent = {
+      const event: ILoadDocumentsSuccessEvent = {
         name: "onLoadDocumentsSuccess",
-        rawDocuments: rawDocuments,
-      }
+        data: rawDocuments,
+      };
       await this.callbackManager.runCallbacks(event);
     }
     return rawDocuments;
