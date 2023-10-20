@@ -10,7 +10,22 @@ export type LoadDocumentsErrorEvent = {
   message: string;
 };
 
-type DataSourceEventData = LoadDocumentsSuccessEvent | LoadDocumentsErrorEvent;
+export type DataSourceTestConnectionSuccessEvent = {
+  name: "onDataSourceTestConnectionSuccess";
+  code: number;
+};
+
+// Same as above but for error
+export type DataSourceTestConnectionErrorEvent = {
+  name: "onDataSourceTestConnectionError";
+  code: number;
+};
+
+type DataSourceEventData =
+  | LoadDocumentsSuccessEvent
+  | LoadDocumentsErrorEvent
+  | DataSourceTestConnectionSuccessEvent
+  | DataSourceTestConnectionErrorEvent;
 
 type CallbackEvent = DataSourceEventData; // | other stuff
 
@@ -23,6 +38,9 @@ type Callback<T extends CallbackEvent> = (
 interface CallbackMapping {
   onLoadDocumentsSuccess?: Callback<LoadDocumentsSuccessEvent>[];
   onLoadDocumentsError?: Callback<LoadDocumentsErrorEvent>[];
+  // 2 more cases, for testConnection
+  onDataSourceTestConnectionSuccess?: Callback<DataSourceTestConnectionSuccessEvent>[];
+  onDataSourceTestConnectionError?: Callback<DataSourceTestConnectionErrorEvent>[];
 }
 
 const DEFAULT_CALLBACKS: CallbackMapping = {
@@ -53,6 +71,20 @@ class CallbackManager {
           event,
           this.callbacks.onLoadDocumentsError,
           DEFAULT_CALLBACKS.onLoadDocumentsError
+        );
+      // 2 more cases, for testConnection
+      case "onDataSourceTestConnectionSuccess":
+        return await this.callback_helper(
+          event,
+          this.callbacks.onDataSourceTestConnectionSuccess,
+          DEFAULT_CALLBACKS.onDataSourceTestConnectionSuccess
+        );
+      // same as above but for error
+      case "onDataSourceTestConnectionError":
+        return await this.callback_helper(
+          event,
+          this.callbacks.onDataSourceTestConnectionError,
+          DEFAULT_CALLBACKS.onDataSourceTestConnectionError
         );
       default:
         assertUnreachable(event);
