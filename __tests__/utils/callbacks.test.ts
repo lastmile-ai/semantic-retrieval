@@ -6,10 +6,13 @@ import {
   CallbackManager,
   CallbackMapping,
   LoadDocumentsSuccessEvent,
-  LoadDocumentsErrorEvent,
 } from "../../src/utils/callbacks";
 
 import type { RawDocument } from "../../src/document/document";
+import {
+  GoogleDrive,
+  OneDrive,
+} from "../../src/ingestion/data-sources/dataSource";
 
 describe("Callbacks", () => {
   test("Callback arg static type", async () => {
@@ -39,7 +42,7 @@ describe("Callbacks", () => {
     // This test passes by virtue of static type checking. No dynamic condition to check.
     expect(1).toBe(1);
   });
-  test("Correct callback called on event", async () => {
+  test("Correct callback called on load docs call, FileSystem", async () => {
     const onLoadSuccessCallbacks = [jest.fn(), jest.fn()];
     const onLoadDocumentsErrorCallback1 = jest.fn();
 
@@ -62,5 +65,78 @@ describe("Callbacks", () => {
       expect(onLoadCallback).toHaveBeenCalled();
     }
     expect(onLoadDocumentsErrorCallback1).not.toHaveBeenCalled();
+  });
+  // Duplicate the above test for testConnection
+  test("Correct callback called on test connection call, FileSystem", async () => {
+    const onTestConnectionSuccessCallbacks = [jest.fn(), jest.fn()];
+    const onTestConnectionErrorCallback1 = jest.fn();
+
+    const callbacks: CallbackMapping = {
+      onDataSourceTestConnectionSuccess: onTestConnectionSuccessCallbacks,
+      onDataSourceTestConnectionError: [onTestConnectionErrorCallback1],
+    };
+    const callbackManager = new CallbackManager("rag-run-0", callbacks);
+    const fileSystem = new FileSystem(
+      "./examples/example_data/DonQuixote.txt",
+      undefined,
+      undefined,
+      callbackManager
+    );
+
+    const _ = await fileSystem.testConnection();
+
+    // Duplicate the expect calls
+    for (const onTestConnectionCallback of onTestConnectionSuccessCallbacks) {
+      expect(onTestConnectionCallback).toHaveBeenCalled();
+    }
+    expect(onTestConnectionErrorCallback1).not.toHaveBeenCalled();
+  });
+
+  test("Correct callback called on test connection call, GoogleDrive", async () => {
+    const onTestConnectionSuccessCallbacks = [jest.fn(), jest.fn()];
+    const onTestConnectionErrorCallback1 = jest.fn();
+
+    const callbacks: CallbackMapping = {
+      onDataSourceTestConnectionSuccess: onTestConnectionSuccessCallbacks,
+      onDataSourceTestConnectionError: [onTestConnectionErrorCallback1],
+    };
+    const callbackManager = new CallbackManager("rag-run-0", callbacks);
+    const gdrive = new GoogleDrive(callbackManager);
+
+    try {
+      const _ = await gdrive.testConnection();
+    } catch (error) {
+      //expected
+    }
+
+    // Duplicate the expect calls
+    for (const onTestConnectionCallback of onTestConnectionSuccessCallbacks) {
+      expect(onTestConnectionCallback).not.toHaveBeenCalled();
+    }
+    expect(onTestConnectionErrorCallback1).toHaveBeenCalled();
+  });
+
+  test("Correct callback called on test connection call, OneDrive", async () => {
+    const onTestConnectionSuccessCallbacks = [jest.fn(), jest.fn()];
+    const onTestConnectionErrorCallback1 = jest.fn();
+
+    const callbacks: CallbackMapping = {
+      onDataSourceTestConnectionSuccess: onTestConnectionSuccessCallbacks,
+      onDataSourceTestConnectionError: [onTestConnectionErrorCallback1],
+    };
+    const callbackManager = new CallbackManager("rag-run-0", callbacks);
+    const gdrive = new OneDrive(callbackManager);
+
+    try {
+      const _ = await gdrive.testConnection();
+    } catch (error) {
+      //expected
+    }
+
+    // Duplicate the expect calls
+    for (const onTestConnectionCallback of onTestConnectionSuccessCallbacks) {
+      expect(onTestConnectionCallback).not.toHaveBeenCalled();
+    }
+    expect(onTestConnectionErrorCallback1).toHaveBeenCalled();
   });
 });
