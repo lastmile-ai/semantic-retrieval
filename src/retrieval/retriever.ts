@@ -36,7 +36,6 @@ export abstract class BaseRetriever<R, Q> {
   /**
    * Simple filtering of DocumentFragments with respect to access policies.
    * @param accessPassport The AccessPassport for the current identity.
-   * @param metadataDB The DocumentMetadataDB to use for access control checks.
    * @param fragments The DocumentFragments to filter.
    * @returns A promise that resolves to array of DocumentFragments accessible to the current identity.
    */
