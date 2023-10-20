@@ -14,6 +14,10 @@ import {
   OneDrive,
 } from "../../src/ingestion/data-sources/dataSource";
 
+import { DirectDocumentParser } from "../../src/ingestion/document-parsers/directDocumentParser";
+import { TextDocumentParser } from "../../src/ingestion/document-parsers/textDocumentParser";
+import { getTestRawDocument } from "./testDocumentUtils";
+
 describe("Callbacks", () => {
   test("Callback arg static type", async () => {
     async function onLoadDocumentsSuccessCallback1(
@@ -138,5 +142,66 @@ describe("Callbacks", () => {
       expect(onTestConnectionCallback).not.toHaveBeenCalled();
     }
     expect(onTestConnectionErrorCallback1).toHaveBeenCalled();
+  });
+  test("Direct Document Parser", async () => {
+    const onParseNextErrorCallbacks = [jest.fn(), jest.fn()];
+    const onParseErrorCallback1 = jest.fn();
+    const onParseSuccessCallback1 = jest.fn();
+
+    const callbacks: CallbackMapping = {
+      onParseNextError: onParseNextErrorCallbacks,
+      onParseError: [onParseErrorCallback1],
+      onParseSuccess: [onParseSuccessCallback1],
+    };
+    const callbackManager = new CallbackManager("rag-run-0", callbacks);
+    const documentParser = new DirectDocumentParser(
+      undefined,
+      undefined,
+      callbackManager
+    );
+
+    try {
+      const _ = await documentParser.parse(getTestRawDocument());
+    } catch (error) {}
+    try {
+      const __ = await documentParser.parseNext(getTestRawDocument());
+    } catch (error) {}
+    expect(onParseSuccessCallback1).toHaveBeenCalled();
+    // expect the other callbacks to not have been called
+    for (const onParseNextErrorCallback of onParseNextErrorCallbacks) {
+      expect(onParseNextErrorCallback).toHaveBeenCalled();
+    }
+    expect(onParseErrorCallback1).not.toHaveBeenCalled();
+  });
+  // test as above, but for text document parser
+  test("Text Document Parser", async () => {
+    const onParseNextErrorCallbacks = [jest.fn(), jest.fn()];
+    const onParseErrorCallback1 = jest.fn();
+    const onParseSuccessCallback1 = jest.fn();
+
+    const callbacks: CallbackMapping = {
+      onParseNextError: onParseNextErrorCallbacks,
+      onParseError: [onParseErrorCallback1],
+      onParseSuccess: [onParseSuccessCallback1],
+    };
+    const callbackManager = new CallbackManager("rag-run-0", callbacks);
+    const documentParser = new TextDocumentParser(
+      undefined,
+      undefined,
+      callbackManager
+    );
+
+    try {
+      const _ = await documentParser.parse(getTestRawDocument());
+    } catch (error) {}
+    try {
+      const __ = await documentParser.parseNext(getTestRawDocument());
+    } catch (error) {}
+
+    expect(onParseSuccessCallback1).not.toHaveBeenCalled();
+    for (const onParseNextErrorCallback of onParseNextErrorCallbacks) {
+      expect(onParseNextErrorCallback).toHaveBeenCalled();
+    }
+    expect(onParseErrorCallback1).toHaveBeenCalled();
   });
 });
