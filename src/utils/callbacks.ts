@@ -1,4 +1,4 @@
-import type { RawDocument } from "../document/document";
+import type { IngestedDocument, RawDocument } from "../document/document";
 
 export type LoadDocumentsSuccessEvent = {
   name: "onLoadDocumentsSuccess";
@@ -7,22 +7,59 @@ export type LoadDocumentsSuccessEvent = {
 
 export type LoadDocumentsErrorEvent = {
   name: "onLoadDocumentsError";
-  message: string;
+  error: Error;
 };
 
-type DataSourceEventData = LoadDocumentsSuccessEvent | LoadDocumentsErrorEvent;
+export type DataSourceTestConnectionSuccessEvent = {
+  name: "onDataSourceTestConnectionSuccess";
+  code: number;
+};
 
-type CallbackEvent = DataSourceEventData; // | other stuff
+export type DataSourceTestConnectionErrorEvent = {
+  name: "onDataSourceTestConnectionError";
+  code: number;
+  error: any;
+};
+
+export type ParseNextErrorEvent = {
+  name: "onParseNextError";
+  error: any;
+};
+
+export type ParseErrorEvent = {
+  name: "onParseError";
+  error: any;
+};
+
+export type ParseSuccessEvent = {
+  name: "onParseSuccess";
+  ingestedDocument: IngestedDocument;
+};
+
+type CallbackEvent =
+  | LoadDocumentsSuccessEvent
+  | LoadDocumentsErrorEvent
+  | DataSourceTestConnectionSuccessEvent
+  | DataSourceTestConnectionErrorEvent
+  | ParseNextErrorEvent
+  | ParseErrorEvent
+  | ParseSuccessEvent;
+
+// type CallbackEvent = DataSourceEventData; // | other stuff
 
 type Callback<T extends CallbackEvent> = (
   event: T,
   runId: string
 ) => Promise<void>;
 
-// type CallbackMapping = { [key: string]: Callback[] }
 interface CallbackMapping {
   onLoadDocumentsSuccess?: Callback<LoadDocumentsSuccessEvent>[];
   onLoadDocumentsError?: Callback<LoadDocumentsErrorEvent>[];
+  onDataSourceTestConnectionSuccess?: Callback<DataSourceTestConnectionSuccessEvent>[];
+  onDataSourceTestConnectionError?: Callback<DataSourceTestConnectionErrorEvent>[];
+  onParseNextError?: Callback<ParseNextErrorEvent>[];
+  onParseError?: Callback<ParseErrorEvent>[];
+  onParseSuccess?: Callback<ParseSuccessEvent>[];
 }
 
 const DEFAULT_CALLBACKS: CallbackMapping = {
@@ -53,6 +90,39 @@ class CallbackManager {
           event,
           this.callbacks.onLoadDocumentsError,
           DEFAULT_CALLBACKS.onLoadDocumentsError
+        );
+      // 2 more cases, for testConnection
+      case "onDataSourceTestConnectionSuccess":
+        return await this.callback_helper(
+          event,
+          this.callbacks.onDataSourceTestConnectionSuccess,
+          DEFAULT_CALLBACKS.onDataSourceTestConnectionSuccess
+        );
+      // same as above but for error
+      case "onDataSourceTestConnectionError":
+        return await this.callback_helper(
+          event,
+          this.callbacks.onDataSourceTestConnectionError,
+          DEFAULT_CALLBACKS.onDataSourceTestConnectionError
+        );
+      // add the cases for parseNext and parse
+      case "onParseNextError":
+        return await this.callback_helper(
+          event,
+          this.callbacks.onParseNextError,
+          DEFAULT_CALLBACKS.onParseNextError
+        );
+      case "onParseError":
+        return await this.callback_helper(
+          event,
+          this.callbacks.onParseError,
+          DEFAULT_CALLBACKS.onParseError
+        );
+      case "onParseSuccess":
+        return await this.callback_helper(
+          event,
+          this.callbacks.onParseSuccess,
+          DEFAULT_CALLBACKS.onParseSuccess
         );
       default:
         assertUnreachable(event);

@@ -1,5 +1,10 @@
 import { JSONObject } from "../../common/jsonTypes";
 import { RawDocument } from "../../document/document";
+import {
+  CallbackManager,
+  DataSourceTestConnectionErrorEvent,
+  LoadDocumentsErrorEvent,
+} from "../../utils/callbacks";
 
 export interface Authentication {
   authToken?: string;
@@ -48,14 +53,33 @@ export class GoogleDrive implements DataSource {
   connectionInfo?: ConnectionInfo | undefined;
   metadata?: { [key: string]: string } | undefined;
   attributes?: { [key: string]: string } | undefined;
+  callbackManager?: CallbackManager;
+
+  constructor(callbackManager?: CallbackManager) {
+    this.callbackManager = callbackManager ?? undefined;
+  }
+
   testConnection(): Promise<number> {
-    throw new Error("Method not implemented.");
+    const err = new Error("Method not implemented.");
+    const event: DataSourceTestConnectionErrorEvent = {
+      name: "onDataSourceTestConnectionError",
+      code: -1,
+      error: err,
+    };
+    this.callbackManager?.runCallbacks(event);
+    throw err;
   }
   loadDocuments(
     _filters: JSONObject,
-    _limit?: number | undefined,
+    _limit?: number | undefined
   ): Promise<RawDocument[]> {
-    throw new Error("Method not implemented.");
+    const err = new Error("Method not implemented.");
+    const event: LoadDocumentsErrorEvent = {
+      name: "onLoadDocumentsError",
+      error: err,
+    };
+    this.callbackManager?.runCallbacks(event);
+    throw err;
   }
 }
 
@@ -64,13 +88,32 @@ export class OneDrive implements DataSource {
   connectionInfo?: ConnectionInfo | undefined;
   metadata?: { [key: string]: string } | undefined;
   attributes?: { [key: string]: string } | undefined;
+  callbackManager?: CallbackManager;
+
+  constructor(callbackManager?: CallbackManager) {
+    this.callbackManager = callbackManager ?? undefined;
+  }
+
   testConnection(): Promise<number> {
-    throw new Error("Method not implemented.");
+    const err = new Error("Method not implemented.");
+    const event: DataSourceTestConnectionErrorEvent = {
+      name: "onDataSourceTestConnectionError",
+      code: -1,
+      error: err,
+    };
+    this.callbackManager?.runCallbacks(event);
+    throw err;
   }
   loadDocuments(
     _filters: JSONObject,
-    _limit?: number | undefined,
+    _limit?: number | undefined
   ): Promise<RawDocument[]> {
-    throw new Error("Method not implemented.");
+    const err = new Error("Method not implemented.");
+    const event: LoadDocumentsErrorEvent = {
+      name: "onLoadDocumentsError",
+      error: err,
+    };
+    this.callbackManager?.runCallbacks(event);
+    throw err;
   }
 }
