@@ -6,7 +6,6 @@ import {
   CallbackManager,
   CallbackMapping,
   LoadDocumentsSuccessEvent,
-  LoadDocumentsErrorEvent,
 } from "../../src/utils/callbacks";
 
 import type { RawDocument } from "../../src/document/document";
@@ -39,7 +38,7 @@ describe("Callbacks", () => {
     // This test passes by virtue of static type checking. No dynamic condition to check.
     expect(1).toBe(1);
   });
-  test("Correct callback called on event", async () => {
+  test("Correct callback called on load docs call", async () => {
     const onLoadSuccessCallbacks = [jest.fn(), jest.fn()];
     const onLoadDocumentsErrorCallback1 = jest.fn();
 
@@ -62,5 +61,30 @@ describe("Callbacks", () => {
       expect(onLoadCallback).toHaveBeenCalled();
     }
     expect(onLoadDocumentsErrorCallback1).not.toHaveBeenCalled();
+  });
+  // Duplicate the above test for testConnection
+  test("Correct callback called on test connection call", async () => {
+    const onTestConnectionSuccessCallbacks = [jest.fn(), jest.fn()];
+    const onTestConnectionErrorCallback1 = jest.fn();
+
+    const callbacks: CallbackMapping = {
+      onDataSourceTestConnectionSuccess: onTestConnectionSuccessCallbacks,
+      onDataSourceTestConnectionError: [onTestConnectionErrorCallback1],
+    };
+    const callbackManager = new CallbackManager("rag-run-0", callbacks);
+    const fileSystem = new FileSystem(
+      "./examples/example_data/DonQuixote.txt",
+      undefined,
+      undefined,
+      callbackManager
+    );
+
+    const _ = await fileSystem.testConnection();
+
+    // Duplicate the expect calls
+    for (const onTestConnectionCallback of onTestConnectionSuccessCallbacks) {
+      expect(onTestConnectionCallback).toHaveBeenCalled();
+    }
+    expect(onTestConnectionErrorCallback1).not.toHaveBeenCalled();
   });
 });
