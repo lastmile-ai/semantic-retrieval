@@ -1,3 +1,4 @@
+import { ChunkTextEvent } from "../../../utils/callbacks";
 import {
   TextChunkConfig,
   TextChunkTransformer,
@@ -23,8 +24,16 @@ export class SeparatorTextChunker extends TextChunkTransformer {
     this.separator = params?.separator ?? this.separator;
   }
 
-  chunkText(text: string): Promise<string[]> {
+  async chunkText(text: string): Promise<string[]> {
     const subChunks = this.subChunkOnSeparator(text, this.separator);
-    return this.mergeSubChunks(subChunks, this.separator);
+    const mergedChunks = await this.mergeSubChunks(subChunks, this.separator);
+    
+    const event: ChunkTextEvent = {
+      name: "onChunkText",
+      chunks: mergedChunks,
+    };
+    this.callbackManager?.runCallbacks(event);
+
+    return mergedChunks;
   }
 }

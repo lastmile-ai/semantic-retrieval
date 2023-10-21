@@ -3,6 +3,7 @@ import { Document, DocumentFragment } from "../../../document/document";
 import { DocumentMetadataDB } from "../../../document/metadata/documentMetadataDB";
 import { v4 as uuid } from "uuid";
 import { Md5 } from "ts-md5";
+import { TransformDocumentEvent } from "../../../utils/callbacks";
 
 export interface TextChunkConfig {
   // The size limit of each chunk, measured by sizeFn. Each chunk (including overlap)
@@ -99,6 +100,9 @@ export abstract class TextChunkTransformer
         transformedFragments.push(currentFragment);
       }
     }
+
+    const event: TransformDocumentEvent = {name: 'onTransformDocument', document, documentId, fragments: transformedFragments};
+    this.callbackManager?.runCallbacks(event);
 
     // TODO: Think through metadata handling, since setting new doc metadata on each transformation
     // can cause proliferation of DB entries. On the other hand, we probably don't want to mutate
