@@ -12,6 +12,7 @@ import type { RawDocument } from "../../src/document/document";
 import { DirectDocumentParser } from "../../src/ingestion/document-parsers/directDocumentParser";
 import { getTestRawDocument } from "./testDocumentUtils";
 import {SeparatorTextChunker} from "../../src/transformation/document/text/separatorTextChunker";
+import {AccessPassport} from "../../src/access-control/accessPassport";
 
 describe("Callbacks", () => {
   test("Callback arg static type", async () => {
@@ -141,4 +142,25 @@ describe("Callbacks", () => {
 
     expect(onTransformDocumentsCallbacks[0]).toHaveBeenCalled();
   })
+
+  test("Access Passport", async() => {
+    const onRegisterAccessIdentityCallback = jest.fn();
+    const onGetAccessIdentityCallback = jest.fn();
+
+    const callbacks: CallbackMapping = {
+      onRegisterAccessIdentity: [onRegisterAccessIdentityCallback],
+      onGetAccessIdentity: [onGetAccessIdentityCallback],
+    };
+    const callbackManager = new CallbackManager("rag-run-0", callbacks);
+    const accessPassport = new AccessPassport();
+    accessPassport.callbackManager = callbackManager;
+
+    try {
+      accessPassport.register({resource: 'test-resource', metadata: {}, attributes: {}});
+      accessPassport.getIdentity('test-resource');
+    } catch (error) {}
+    
+    expect(onRegisterAccessIdentityCallback).toHaveBeenCalled();
+    expect(onGetAccessIdentityCallback).toHaveBeenCalled();
+  });
 });
