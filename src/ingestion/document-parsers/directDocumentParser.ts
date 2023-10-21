@@ -7,14 +7,23 @@ import {
 import { BaseDocumentParser } from "./documentParser";
 import { v4 as uuid } from "uuid";
 import { Md5 } from "ts-md5";
+import {
+  CallbackManager,
+  ParseNextErrorEvent,
+  ParseSuccessEvent,
+} from "../../utils/callbacks";
 
 /**
  * Parse a RawDocument directly into a Document, with each DocumentFragment
  * representing a RawDocumentChunk.
  */
 export class DirectDocumentParser extends BaseDocumentParser {
-  constructor(attributes?: JSONObject, metadata?: JSONObject) {
-    super(attributes, metadata);
+  constructor(
+    attributes?: JSONObject,
+    metadata?: JSONObject,
+    callbackManager?: CallbackManager
+  ) {
+    super(attributes, metadata, callbackManager);
   }
 
   async parse(rawDocument: RawDocument): Promise<IngestedDocument> {
@@ -44,7 +53,7 @@ export class DirectDocumentParser extends BaseDocumentParser {
       fragments.push(currentFragment);
     }
 
-    return {
+    const out = {
       documentId,
       rawDocument,
       collectionId: rawDocument.collectionId,
@@ -53,16 +62,22 @@ export class DirectDocumentParser extends BaseDocumentParser {
       attributes: this.attributes,
       metadata: this.metadata,
     };
+    const event: ParseSuccessEvent = {
+      name: "onParseSuccess",
+      ingestedDocument: out,
+    };
+    this.callbackManager?.runCallbacks(event);
+    return out;
   }
 
   // TODO: This is mainly useful for parsing the raw document as a stream/buffer
   // instead of chunking the full document at once when loading.
   // Revisit when we add support for that
-  parseNext(
+  async parseNext(
     _rawDocument: RawDocument,
     _previousFragment?: DocumentFragment,
     _take?: number
   ): Promise<DocumentFragment> {
-    throw new Error("Not implemented");
+    throw new Error("Method not implemented.");
   }
 }

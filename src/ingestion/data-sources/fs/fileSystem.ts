@@ -16,6 +16,9 @@ import { Md5 } from "ts-md5";
 import {
   CallbackManager,
   LoadDocumentsSuccessEvent,
+  DataSourceTestConnectionErrorEvent,
+  DataSourceTestConnectionSuccessEvent,
+  LoadDocumentsErrorEvent,
 } from "../../../utils/callbacks";
 
 type FileLoaderMap = {
@@ -49,7 +52,7 @@ export class FileSystem implements DataSource {
     this.path = path;
     this.collectionId = collectionId;
     this.fileLoaders = fileLoaders ?? DEFAULT_FILE_LOADERS;
-    this.callbackManager = callbackManager ?? undefined;
+    this.callbackManager = callbackManager;
   }
 
   private async getStats(): Promise<{
@@ -105,9 +108,24 @@ export class FileSystem implements DataSource {
     try {
       await this.getStats();
       // If stat succeeds, then the path exists.
-      return 200;
-    } catch (err) {
-      return 404;
+      const out = 200;
+
+      const event: DataSourceTestConnectionSuccessEvent = {
+        name: "onDataSourceTestConnectionSuccess",
+        code: out,
+      };
+      await this.callbackManager?.runCallbacks(event);
+      return out;
+    } catch (err: any) {
+      const out = 404;
+
+      const event: DataSourceTestConnectionErrorEvent = {
+        name: "onDataSourceTestConnectionError",
+        code: out,
+        error: err,
+      };
+      await this.callbackManager?.runCallbacks(event);
+      return out;
     }
   }
 
@@ -147,16 +165,21 @@ export class FileSystem implements DataSource {
     } else if (isFile()) {
       rawDocuments.push(await this.loadFile(this.path));
     } else {
-      throw new Error(`${this.path} is neither a file nor a directory.`);
+      const err = new Error(`${this.path} is neither a file nor a directory.`);
+
+      const event: LoadDocumentsErrorEvent = {
+        name: "onLoadDocumentsError",
+        error: err,
+      };
+      await this.callbackManager?.runCallbacks(event);
+      throw err;
     }
 
-    if (this.callbackManager !== undefined) {
-      const event: LoadDocumentsSuccessEvent = {
-        name: "onLoadDocumentsSuccess",
-        rawDocuments: rawDocuments,
-      };
-      await this.callbackManager.runCallbacks(event);
-    }
+    const event: LoadDocumentsSuccessEvent = {
+      name: "onLoadDocumentsSuccess",
+      rawDocuments: rawDocuments,
+    };
+    await this.callbackManager?.runCallbacks(event);
     return rawDocuments;
   }
 }
