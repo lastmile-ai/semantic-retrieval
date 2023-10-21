@@ -1,8 +1,14 @@
 import { Attributable } from "../../common/base";
 import { JSONObject } from "../../common/jsonTypes";
-import { RawDocument, DocumentFragment, IngestedDocument } from "../../document/document";
+import {
+  RawDocument,
+  DocumentFragment,
+  IngestedDocument,
+} from "../../document/document";
 
-export interface DocumentParser extends Attributable {
+import { CallbackManager, Traceable } from "../../utils/callbacks";
+
+export interface DocumentParser extends Attributable, Traceable {
   // If applicable, restrict the DocumentParser to only parse documents with the specified MIME types.
   mimeTypeRestriction?: string[];
 
@@ -18,7 +24,7 @@ export interface DocumentParser extends Attributable {
   parseNext(
     rawDocument: RawDocument,
     previousFragment?: DocumentFragment,
-    take?: number,
+    take?: number
   ): Promise<DocumentFragment>;
 
   /**
@@ -37,10 +43,16 @@ export interface DocumentParser extends Attributable {
 export abstract class BaseDocumentParser implements DocumentParser {
   attributes = {};
   metadata = {};
+  callbackManager?: CallbackManager;
 
-  constructor(attributes?: JSONObject, metadata?: JSONObject) {
+  constructor(
+    attributes?: JSONObject,
+    metadata?: JSONObject,
+    callbackManager?: CallbackManager
+  ) {
     this.attributes = attributes ?? this.attributes;
     this.metadata = metadata ?? this.metadata;
+    this.callbackManager = callbackManager;
   }
 
   abstract parse(rawDocument: RawDocument): Promise<IngestedDocument>;
@@ -48,7 +60,7 @@ export abstract class BaseDocumentParser implements DocumentParser {
   abstract parseNext(
     rawDocument: RawDocument,
     previousFragment?: DocumentFragment,
-    take?: number,
+    take?: number
   ): Promise<DocumentFragment>;
 
   async toString(rawDocument: RawDocument): Promise<string> {
@@ -57,6 +69,6 @@ export abstract class BaseDocumentParser implements DocumentParser {
 
   async serialize(_rawDocument: RawDocument): Promise<string> {
     // TODO: Is this even needed?
-    throw new Error("Method not implemented.")
+    throw new Error("Method not implemented.");
   }
 }

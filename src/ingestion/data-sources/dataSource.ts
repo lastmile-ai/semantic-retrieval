@@ -1,5 +1,11 @@
 import { JSONObject } from "../../common/jsonTypes";
 import { RawDocument } from "../../document/document";
+import {
+  CallbackManager,
+  DataSourceTestConnectionErrorEvent,
+  LoadDocumentsErrorEvent,
+  Traceable,
+} from "../../utils/callbacks";
 
 export interface Authentication {
   authToken?: string;
@@ -18,7 +24,7 @@ export type ConnectionInfo = JSONObject & {
 /**
  * The base interface for all data sources to load documents from.
  */
-export interface DataSource {
+export interface DataSource extends Traceable {
   // The name of the data source.
   name: string;
 
@@ -43,33 +49,45 @@ export interface DataSource {
   loadDocuments(filters: JSONObject, limit?: number): Promise<RawDocument[]>;
 }
 
-export class GoogleDrive implements DataSource {
+export class GoogleDrive implements DataSource, Traceable {
   name: string = "GDrive";
   connectionInfo?: ConnectionInfo | undefined;
   metadata?: { [key: string]: string } | undefined;
   attributes?: { [key: string]: string } | undefined;
+  callbackManager?: CallbackManager;
+
+  constructor(callbackManager?: CallbackManager) {
+    this.callbackManager = callbackManager;
+  }
+
   testConnection(): Promise<number> {
     throw new Error("Method not implemented.");
   }
   loadDocuments(
     _filters: JSONObject,
-    _limit?: number | undefined,
+    _limit?: number | undefined
   ): Promise<RawDocument[]> {
     throw new Error("Method not implemented.");
   }
 }
 
-export class OneDrive implements DataSource {
+export class OneDrive implements DataSource, Traceable {
   name: string = "OneDrive";
   connectionInfo?: ConnectionInfo | undefined;
   metadata?: { [key: string]: string } | undefined;
   attributes?: { [key: string]: string } | undefined;
+  callbackManager?: CallbackManager;
+
+  constructor(callbackManager?: CallbackManager) {
+    this.callbackManager = callbackManager ?? undefined;
+  }
+
   testConnection(): Promise<number> {
     throw new Error("Method not implemented.");
   }
   loadDocuments(
     _filters: JSONObject,
-    _limit?: number | undefined,
+    _limit?: number | undefined
   ): Promise<RawDocument[]> {
     throw new Error("Method not implemented.");
   }
