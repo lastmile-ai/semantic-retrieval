@@ -1,9 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { AccessIdentity } from "../access-control/accessIdentity";
 import type {
   IngestedDocument,
   RawDocument,
   Document,
-  DocumentFragment
+  DocumentFragment,
 } from "../document/document";
 
 export type LoadDocumentsSuccessEvent = {
@@ -59,6 +60,17 @@ export type ChunkTextEvent = {
   chunks: string[];
 };
 
+export type RegisterAccessIdentityEvent = {
+  name: "onRegisterAccessIdentity";
+  identity: AccessIdentity;
+};
+
+export type GetAccessIdentityEvent = {
+  name: "onGetAccessIdentity";
+  resource: string;
+  identity?: AccessIdentity;
+};
+
 type CallbackEvent =
   | LoadDocumentsSuccessEvent
   | LoadDocumentsErrorEvent
@@ -69,7 +81,9 @@ type CallbackEvent =
   | ParseSuccessEvent
   | TranformDocumentsEvent
   | TransformDocumentEvent
-  | ChunkTextEvent;
+  | ChunkTextEvent
+  | RegisterAccessIdentityEvent
+  | GetAccessIdentityEvent;
 
 type Callback<T extends CallbackEvent> = (
   event: T,
@@ -87,6 +101,8 @@ interface CallbackMapping {
   onTransformDocuments?: Callback<TranformDocumentsEvent>[];
   onTransformDocument?: Callback<TransformDocumentEvent>[];
   onChunkText?: Callback<ChunkTextEvent>[];
+  onRegisterAccessIdentity?: Callback<RegisterAccessIdentityEvent>[];
+  onGetAccessIdentity?: Callback<GetAccessIdentityEvent>[];
 }
 
 const DEFAULT_CALLBACKS: CallbackMapping = {
@@ -158,11 +174,23 @@ class CallbackManager {
           this.callbacks.onTransformDocument,
           DEFAULT_CALLBACKS.onTransformDocument
         );
-      case 'onChunkText':
+      case "onChunkText":
         return await this.callback_helper(
           event,
           this.callbacks.onChunkText,
           DEFAULT_CALLBACKS.onChunkText
+        );
+      case "onRegisterAccessIdentity":
+        return await this.callback_helper(
+          event,
+          this.callbacks.onRegisterAccessIdentity,
+          DEFAULT_CALLBACKS.onRegisterAccessIdentity
+        );
+      case 'onGetAccessIdentity':
+        return await this.callback_helper(
+          event,
+          this.callbacks.onGetAccessIdentity,
+          DEFAULT_CALLBACKS.onGetAccessIdentity
         );
       default:
         assertUnreachable(event);
