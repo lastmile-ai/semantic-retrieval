@@ -5,6 +5,7 @@ import type {
   IngestedDocument,
   RawDocument,
   Document,
+  DocumentFragment,
 } from "../document/document";
 import { VectorEmbedding } from "../transformation/embeddings/embeddings";
 
