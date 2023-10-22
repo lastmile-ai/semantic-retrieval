@@ -4,6 +4,7 @@
   "parser": "@typescript-eslint/parser",
   "parserOptions": { "project": ["./tsconfig.json"] },
   "plugins": ["@typescript-eslint"],
+  "ignorePatterns": ["__tests__", "jest.config.ts"],
   "rules": {
     "@typescript-eslint/no-unused-vars": [
       "warn",

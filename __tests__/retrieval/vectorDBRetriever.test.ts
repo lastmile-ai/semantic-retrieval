@@ -10,7 +10,7 @@ import { ResourceAccessPolicy } from "../../src/access-control/resourceAccessPol
 import {
   getTestDocument,
   getTestDocumentFragment,
-} from "../utils/testDocumentUtils";
+} from "../__utils__/testDocumentUtils";
 import { AlwaysAllowAccessPolicy } from "../../src/access-control/policies/alwaysAllowAccessPolicy";
 
 const mockQuery = jest.fn();
