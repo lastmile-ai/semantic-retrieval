@@ -26,6 +26,7 @@
   "scripts": {
     "build": "tsc",
     "test": "NODE_OPTIONS='--experimental-vm-modules' jest --runInBand",
+    "compile": "tsc",
     "lint": "eslint ."
   },
   "devDependencies": {

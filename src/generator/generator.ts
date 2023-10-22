@@ -5,7 +5,7 @@ import { BaseRetriever } from "../retrieval/retriever";
 export type GeneratorParams<D> = {
   prompt: JSONValue;
   accessPassport?: AccessPassport;
-  retriever?: BaseRetriever<D>;
+  retriever?: BaseRetriever<D, unknown>;
 };
 
 /**
