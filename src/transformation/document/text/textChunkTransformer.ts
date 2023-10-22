@@ -3,6 +3,7 @@ import { Document, DocumentFragment } from "../../../document/document";
 import { DocumentMetadataDB } from "../../../document/metadata/documentMetadataDB";
 import { v4 as uuid } from "uuid";
 import { Md5 } from "ts-md5";
+import { Traceable, TransformDocumentEvent } from "../../../utils/callbacks";
 
 export interface TextChunkConfig {
   // The size limit of each chunk, measured by sizeFn. Each chunk (including overlap)
@@ -16,9 +17,10 @@ export interface TextChunkConfig {
   sizeFn?: (text: string) => Promise<number>;
 }
 
-export type TextChunkTransformerParams = TextChunkConfig & {
-  metadataDB?: DocumentMetadataDB;
-};
+export type TextChunkTransformerParams = TextChunkConfig &
+  Traceable & {
+    metadataDB?: DocumentMetadataDB;
+  };
 
 /**
  * A DocumentTransformer that splits a Document's fragments into chunks of
@@ -35,7 +37,7 @@ export abstract class TextChunkTransformer
   sizeFn = async (text: string) => text.length;
 
   constructor(params?: TextChunkTransformerParams) {
-    super(params?.metadataDB);
+    super(params?.metadataDB, params?.callbackManager);
     this.chunkSizeLimit = params?.chunkSizeLimit ?? this.chunkSizeLimit;
     this.chunkOverlap = params?.chunkOverlap ?? this.chunkOverlap;
     this.sizeFn = params?.sizeFn ?? this.sizeFn;
@@ -100,17 +102,26 @@ export abstract class TextChunkTransformer
       }
     }
 
+    const transformedDocument = {
+      ...document,
+      documentId,
+      fragments: transformedFragments,
+    };
+
+    const event: TransformDocumentEvent = {
+      name: "onTransformDocument",
+      originalDocument: document,
+      transformedDocument,
+    };
+    this.callbackManager?.runCallbacks(event);
+
     // TODO: Think through metadata handling, since setting new doc metadata on each transformation
     // can cause proliferation of DB entries. On the other hand, we probably don't want to mutate
     // the document in place since we may want to perform different operations on the same document.
     // With optional metadata DB, we can just pass it through in the 'final' transformations / those
     // we want to persist document metadata for. But, access policies are currently constructed from the raw document
     // during parsing, so we'd need to support the same policy factory stuff in each transformer...
-    return {
-      ...document,
-      documentId,
-      fragments: transformedFragments,
-    };
+    return transformedDocument;
   }
 
   protected joinSubChunks(
