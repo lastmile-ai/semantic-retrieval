@@ -7,6 +7,10 @@ import { InMemoryDocumentMetadataDB } from "../../../src/document/metadata/InMem
 import { DocumentMetadataDB } from "../../../src/document/metadata/documentMetadataDB";
 import { VectorEmbedding } from "../../../src/transformation/embeddings/embeddings";
 import { TestEmbeddings } from "../transformation/embeddings/testEmbeddings";
+import {
+  AddDocumentsToVectorDBEvent,
+  QueryVectorDBEvent,
+} from "../../../src/utils/callbacks";
 
 /**
  * A VectorDB to use for testing with mocked addDocuments and query methods.
@@ -30,9 +34,28 @@ export default class TestVectorDB extends VectorDB {
 
   async addDocuments(_documents: Document[]): Promise<void> {
     // Should use mockAddDocuments instead
+    const event: AddDocumentsToVectorDBEvent = {
+      name: "onAddDocumentsToVectorDB",
+      documents: _documents,
+    };
+
+    // Open Q: Should this be await'ed
+    this.callbackManager?.runCallbacks(event);
   }
 
   async query(_query: VectorDBQuery): Promise<VectorEmbedding[]> {
-    throw new Error("Should use mockQuery instead");
+    // Should use mockQuery instead
+    const vectorEmbeddings = new Array<VectorEmbedding>();
+
+    const event: QueryVectorDBEvent = {
+      name: "onQueryVectorDB",
+      query: _query,
+      vectorEmbeddings,
+    };
+
+    // Open Q: Should this be await'ed
+    this.callbackManager?.runCallbacks(event);
+
+    return vectorEmbeddings;
   }
 }
