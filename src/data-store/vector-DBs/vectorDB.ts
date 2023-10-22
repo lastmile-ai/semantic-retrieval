@@ -6,7 +6,9 @@ import {
   VectorEmbedding,
 } from "../../transformation/embeddings/embeddings";
 
-export interface VectorDBQuery {
+export type VectorDBQuery = VectorDBEmbeddingQuery | VectorDBTextQuery;
+
+export interface VectorDBBaseQuery {
   // TODO: saqadri - revisit
   mode?:
     | "default"
@@ -24,7 +26,7 @@ export interface VectorDBQuery {
   topK: number;
 }
 
-export interface VectorDBEmbeddingQuery extends VectorDBQuery {
+export interface VectorDBEmbeddingQuery extends VectorDBBaseQuery {
   // The embedding to query
   embeddingVector: VectorEmbedding;
 }
@@ -35,7 +37,7 @@ export function isEmbeddingQuery(
   return (query as VectorDBEmbeddingQuery).embeddingVector != null;
 }
 
-export interface VectorDBTextQuery extends VectorDBQuery {
+export interface VectorDBTextQuery extends VectorDBBaseQuery {
   // The text to query
   text: string;
 }

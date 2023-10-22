@@ -7,10 +7,7 @@ import { VectorEmbedding } from "../../src/transformation/embeddings/embeddings"
 import { VectorDBTextQuery } from "../../src/data-store/vector-DBs/vectorDB";
 import { AccessPassport } from "../../src/access-control/accessPassport";
 import { ResourceAccessPolicy } from "../../src/access-control/resourceAccessPolicy";
-import {
-  getTestDocument,
-  getTestDocumentFragment,
-} from "../utils/testDocumentUtils";
+import { getTestDocument } from "../utils/testDocumentUtils";
 import { AlwaysAllowAccessPolicy } from "../../src/access-control/policies/alwaysAllowAccessPolicy";
 
 const mockQuery = jest.fn();
