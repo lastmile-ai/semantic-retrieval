@@ -1,6 +1,6 @@
 import TestVectorDB from "../__mocks__/retrieval/testVectorDB";
 
-import { InMemoryDocumentMetadataDB } from "../../src/document/metadata/InMemoryDocumentMetadataDB";
+import { InMemoryDocumentMetadataDB } from "../../src/document/metadata/inMemoryDocumentMetadataDB";
 import { VectorDBDocumentRetriever } from "../../src/retrieval/vector-DBs/vectorDBDocumentRetriever";
 import { TEST_VECTOR } from "../__mocks__/transformation/embeddings/testEmbeddings";
 import { VectorEmbedding } from "../../src/transformation/embeddings/embeddings";
@@ -10,7 +10,7 @@ import { ResourceAccessPolicy } from "../../src/access-control/resourceAccessPol
 import {
   getTestDocument,
   getTestDocumentFragment,
-} from "../utils/testDocumentUtils";
+} from "../__utils__/testDocumentUtils";
 import { AlwaysAllowAccessPolicy } from "../../src/access-control/policies/alwaysAllowAccessPolicy";
 
 const mockQuery = jest.fn();

@@ -10,8 +10,9 @@ import {
 import type { RawDocument } from "../../src/document/document";
 
 import { DirectDocumentParser } from "../../src/ingestion/document-parsers/directDocumentParser";
-import { TextDocumentParser } from "../../src/ingestion/document-parsers/textDocumentParser";
-import { getTestRawDocument } from "./testDocumentUtils";
+import { getTestRawDocument } from "../__utils__/testDocumentUtils";
+import { SeparatorTextChunker } from "../../src/transformation/document/text/separatorTextChunker";
+import { AccessPassport } from "../../src/access-control/accessPassport";
 
 describe("Callbacks", () => {
   test("Callback arg static type", async () => {
@@ -113,5 +114,55 @@ describe("Callbacks", () => {
     expect(onParseSuccessCallback1).toHaveBeenCalled();
 
     expect(onParseErrorCallback1).not.toHaveBeenCalled();
+  });
+
+  test("Document Transformer", async () => {
+    const onTransformDocumentsCallbacks = [jest.fn(), jest.fn()];
+    const onTransformDocumentCallback1 = jest.fn();
+    const onChunkTextCallback1 = jest.fn();
+
+    const callbacks: CallbackMapping = {
+      onTransformDocuments: onTransformDocumentsCallbacks,
+      onTransformDocument: [onTransformDocumentCallback1],
+      onChunkText: [onChunkTextCallback1],
+    };
+    const callbackManager = new CallbackManager("rag-run-0", callbacks);
+    const documentParser = new DirectDocumentParser();
+
+    const documentChunker = new SeparatorTextChunker({ callbackManager });
+
+    try {
+      const document = await documentParser.parse(getTestRawDocument());
+      await documentChunker.transformDocuments([document]);
+    } catch (error) {}
+
+    expect(onTransformDocumentCallback1).toHaveBeenCalled();
+    expect(onChunkTextCallback1).toHaveBeenCalled();
+
+    expect(onTransformDocumentsCallbacks[0]).toHaveBeenCalled();
+  });
+
+  test("Access Passport", async () => {
+    const onRegisterAccessIdentityCallback = jest.fn();
+    const onGetAccessIdentityCallback = jest.fn();
+
+    const callbacks: CallbackMapping = {
+      onRegisterAccessIdentity: [onRegisterAccessIdentityCallback],
+      onGetAccessIdentity: [onGetAccessIdentityCallback],
+    };
+    const callbackManager = new CallbackManager("rag-run-0", callbacks);
+    const accessPassport = new AccessPassport(callbackManager);
+
+    try {
+      accessPassport.register({
+        resource: "test-resource",
+        metadata: {},
+        attributes: {},
+      });
+      accessPassport.getIdentity("test-resource");
+    } catch (error) {}
+
+    expect(onRegisterAccessIdentityCallback).toHaveBeenCalled();
+    expect(onGetAccessIdentityCallback).toHaveBeenCalled();
   });
 });

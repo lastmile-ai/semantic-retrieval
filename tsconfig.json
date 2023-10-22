@@ -16,6 +16,6 @@
     // to avoid that.
     "skipLibCheck": true
   },
-  "include": ["src"],
+  "include": ["src", "index.ts"],
   "exclude": ["dist", "docs", "examples", "node_modules", "__tests__"]
 }

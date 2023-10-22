@@ -1,4 +1,12 @@
-import type { IngestedDocument, RawDocument } from "../document/document";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { AccessIdentity } from "../access-control/accessIdentity";
+import { VectorDBQuery } from "../data-store/vector-DBs/vectorDB";
+import type {
+  IngestedDocument,
+  RawDocument,
+  Document,
+} from "../document/document";
+import { VectorEmbedding } from "../transformation/embeddings/embeddings";
 
 export type LoadDocumentsSuccessEvent = {
   name: "onLoadDocumentsSuccess";
@@ -36,6 +44,45 @@ export type ParseSuccessEvent = {
   ingestedDocument: IngestedDocument;
 };
 
+export type TranformDocumentsEvent = {
+  name: "onTransformDocuments";
+  transformedDocuments: Document[];
+  originalDocuments: Document[];
+};
+
+export type TransformDocumentEvent = {
+  name: "onTransformDocument";
+  originalDocument: Document;
+  transformedDocument: Document;
+};
+
+export type ChunkTextEvent = {
+  name: "onChunkText";
+  chunks: string[];
+};
+
+export type RegisterAccessIdentityEvent = {
+  name: "onRegisterAccessIdentity";
+  identity: AccessIdentity;
+};
+
+export type GetAccessIdentityEvent = {
+  name: "onGetAccessIdentity";
+  resource: string;
+  identity?: AccessIdentity;
+};
+
+export type AddDocumentsToVectorDBEvent = {
+  name: "onAddDocumentsToVectorDB";
+  documents: Document[];
+};
+
+export type QueryVectorDBEvent = {
+  name: "onQueryVectorDB";
+  query: VectorDBQuery;
+  vectorEmbeddings: VectorEmbedding[];
+};
+
 type CallbackEvent =
   | LoadDocumentsSuccessEvent
   | LoadDocumentsErrorEvent
@@ -43,7 +90,14 @@ type CallbackEvent =
   | DataSourceTestConnectionErrorEvent
   | ParseNextErrorEvent
   | ParseErrorEvent
-  | ParseSuccessEvent;
+  | ParseSuccessEvent
+  | TranformDocumentsEvent
+  | TransformDocumentEvent
+  | ChunkTextEvent
+  | RegisterAccessIdentityEvent
+  | GetAccessIdentityEvent
+  | AddDocumentsToVectorDBEvent
+  | QueryVectorDBEvent;
 
 type Callback<T extends CallbackEvent> = (
   event: T,
@@ -58,6 +112,13 @@ interface CallbackMapping {
   onParseNextError?: Callback<ParseNextErrorEvent>[];
   onParseError?: Callback<ParseErrorEvent>[];
   onParseSuccess?: Callback<ParseSuccessEvent>[];
+  onTransformDocuments?: Callback<TranformDocumentsEvent>[];
+  onTransformDocument?: Callback<TransformDocumentEvent>[];
+  onChunkText?: Callback<ChunkTextEvent>[];
+  onRegisterAccessIdentity?: Callback<RegisterAccessIdentityEvent>[];
+  onGetAccessIdentity?: Callback<GetAccessIdentityEvent>[];
+  onAddDocumentToVectorDB?: Callback<AddDocumentsToVectorDBEvent>[];
+  onQueryVectorDB?: Callback<QueryVectorDBEvent>[];
 }
 
 const DEFAULT_CALLBACKS: CallbackMapping = {
@@ -116,6 +177,48 @@ class CallbackManager {
           event,
           this.callbacks.onParseSuccess,
           DEFAULT_CALLBACKS.onParseSuccess
+        );
+      case "onTransformDocuments":
+        return await this.callback_helper(
+          event,
+          this.callbacks.onTransformDocuments,
+          DEFAULT_CALLBACKS.onTransformDocuments
+        );
+      case "onTransformDocument":
+        return await this.callback_helper(
+          event,
+          this.callbacks.onTransformDocument,
+          DEFAULT_CALLBACKS.onTransformDocument
+        );
+      case "onChunkText":
+        return await this.callback_helper(
+          event,
+          this.callbacks.onChunkText,
+          DEFAULT_CALLBACKS.onChunkText
+        );
+      case "onRegisterAccessIdentity":
+        return await this.callback_helper(
+          event,
+          this.callbacks.onRegisterAccessIdentity,
+          DEFAULT_CALLBACKS.onRegisterAccessIdentity
+        );
+      case "onGetAccessIdentity":
+        return await this.callback_helper(
+          event,
+          this.callbacks.onGetAccessIdentity,
+          DEFAULT_CALLBACKS.onGetAccessIdentity
+        );
+      case 'onAddDocumentsToVectorDB':
+        return await this.callback_helper(
+          event,
+          this.callbacks.onAddDocumentToVectorDB,
+          DEFAULT_CALLBACKS.onAddDocumentToVectorDB
+        );
+      case 'onQueryVectorDB':
+        return await this.callback_helper(
+          event,
+          this.callbacks.onQueryVectorDB,
+          DEFAULT_CALLBACKS.onQueryVectorDB
         );
       default:
         assertUnreachable(event);

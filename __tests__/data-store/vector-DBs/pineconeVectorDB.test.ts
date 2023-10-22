@@ -3,7 +3,7 @@ import {
 } from "@pinecone-database/pinecone";
 import getEnvVar from "../../../src/utils/getEnvVar";
 import { PineconeVectorDB } from "../../../src/data-store/vector-DBs/pineconeVectorDB";
-import { InMemoryDocumentMetadataDB } from "../../../src/document/metadata/InMemoryDocumentMetadataDB";
+import { InMemoryDocumentMetadataDB } from "../../../src/document/metadata/inMemoryDocumentMetadataDB";
 import {
   TEST_VECTOR,
   TestEmbeddings,
@@ -11,7 +11,7 @@ import {
 import {
   getTestDocument,
   getTestDocumentFragment,
-} from "../../utils/testDocumentUtils";
+} from "../../__utils__/testDocumentUtils";
 import { VectorDBTextQuery } from "../../../src/data-store/vector-DBs/vectorDB";
 
 jest.mock("../../../src/utils/getEnvVar");
