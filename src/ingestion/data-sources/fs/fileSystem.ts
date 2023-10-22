@@ -116,6 +116,7 @@ export class FileSystem implements DataSource {
       };
       await this.callbackManager?.runCallbacks(event);
       return out;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       const out = 404;
 

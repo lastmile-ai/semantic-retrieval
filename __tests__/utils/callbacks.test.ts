@@ -10,7 +10,7 @@ import {
 import type { RawDocument } from "../../src/document/document";
 
 import { DirectDocumentParser } from "../../src/ingestion/document-parsers/directDocumentParser";
-import { getTestRawDocument } from "./testDocumentUtils";
+import { getTestRawDocument } from "../__utils__/testDocumentUtils";
 import { SeparatorTextChunker } from "../../src/transformation/document/text/separatorTextChunker";
 import { AccessPassport } from "../../src/access-control/accessPassport";
 
