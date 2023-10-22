@@ -6,8 +6,9 @@ import { InMemoryDocumentMetadataDB } from "../../src/document/metadata/inMemory
 import { Pinecone } from "@pinecone-database/pinecone";
 import { DirectDocumentParser } from "../../src/ingestion/document-parsers/directDocumentParser";
 import { CallbackManager, CallbackMapping } from "../../src/utils/callbacks";
-import { getTestRawDocument } from "./testDocumentUtils";
 import { TestEmbeddings } from "../__mocks__/transformation/embeddings/testEmbeddings";
+import { getTestRawDocument } from "../__utils__/testDocumentUtils";
+
 jest.mock("@pinecone-database/pinecone", () => {
   return {
     Pinecone: jest.fn().mockImplementation(() => {

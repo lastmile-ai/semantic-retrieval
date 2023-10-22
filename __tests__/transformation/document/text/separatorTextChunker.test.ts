@@ -4,7 +4,7 @@ import { Document } from "../../../../src/document/document";
 import {
   getTestDocument,
   getTestDocumentFragment,
-} from "../../../utils/testDocumentUtils";
+} from "../../../__utils__/testDocumentUtils";
 
 const testFragment1Text = "This is a small fragment for simple testing";
 
