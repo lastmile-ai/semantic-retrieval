@@ -7,11 +7,7 @@ import {
 import { BaseDocumentParser } from "./documentParser";
 import { v4 as uuid } from "uuid";
 import { Md5 } from "ts-md5";
-import {
-  CallbackManager,
-  ParseNextErrorEvent,
-  ParseSuccessEvent,
-} from "../../utils/callbacks";
+import { CallbackManager, ParseSuccessEvent } from "../../utils/callbacks";
 
 /**
  * Parse a RawDocument directly into a Document, with each DocumentFragment
