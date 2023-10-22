@@ -5,6 +5,7 @@ import {
   EmbeddingsTransformer,
   VectorEmbedding,
 } from "../../transformation/embeddings/embeddings";
+import { CallbackManager, Traceable } from "../../utils/callbacks";
 
 export interface VectorDBQuery {
   // TODO: saqadri - revisit
@@ -57,9 +58,10 @@ export interface VectorDBConfig {
  * Please make sure that the underlying VectorDB implementation supports the dimensionality
  * of the embeddings produced by the provided EmbeddingsTransformer.
  */
-export abstract class VectorDB implements VectorDBConfig {
+export abstract class VectorDB implements VectorDBConfig, Traceable {
   embeddings: EmbeddingsTransformer;
   metadataDB: DocumentMetadataDB;
+  callbackManager?: CallbackManager;
 
   constructor(
     embeddings: EmbeddingsTransformer,
