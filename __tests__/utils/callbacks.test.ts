@@ -10,8 +10,8 @@ import {
 import type { RawDocument } from "../../src/document/document";
 
 import { DirectDocumentParser } from "../../src/ingestion/document-parsers/directDocumentParser";
-import { TextDocumentParser } from "../../src/ingestion/document-parsers/textDocumentParser";
 import { getTestRawDocument } from "./testDocumentUtils";
+import {SeparatorTextChunker} from "../../src/transformation/document/text/separatorTextChunker";
 
 describe("Callbacks", () => {
   test("Callback arg static type", async () => {
@@ -114,4 +114,31 @@ describe("Callbacks", () => {
 
     expect(onParseErrorCallback1).not.toHaveBeenCalled();
   });
+
+  test("Document Transformer", async() => {
+    const onTransformDocumentsCallbacks = [jest.fn(), jest.fn()];
+    const onTransformDocumentCallback1 = jest.fn();
+    const onChunkTextCallback1 = jest.fn();
+
+    const callbacks: CallbackMapping = {
+      onTransformDocuments: onTransformDocumentsCallbacks,
+      onTransformDocument: [onTransformDocumentCallback1],
+      onChunkText: [onChunkTextCallback1],
+    };
+    const callbackManager = new CallbackManager("rag-run-0", callbacks);
+    const documentParser = new DirectDocumentParser();
+
+    const documentChunker = new SeparatorTextChunker();
+    documentChunker.callbackManager = callbackManager;
+
+    try {
+      const document = await documentParser.parse(getTestRawDocument());
+      await documentChunker.transformDocuments([document]);
+    } catch (error) {}
+    
+    expect(onTransformDocumentCallback1).toHaveBeenCalled();
+    expect(onChunkTextCallback1).toHaveBeenCalled();
+
+    expect(onTransformDocumentsCallbacks[0]).toHaveBeenCalled();
+  })
 });
