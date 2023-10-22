@@ -19,6 +19,7 @@ import { flatten, unflatten } from "safe-flat";
 import { v4 as uuid } from "uuid";
 import { VectorEmbedding } from "../../transformation/embeddings/embeddings";
 import { JSONObject } from "../../common/jsonTypes";
+import { AddDocumentsToVectorDBEvent, QueryVectorDBEvent } from "../../utils/callbacks";
 
 export type PineconeVectorDBConfig = VectorDBConfig & {
   indexName: string;
@@ -171,6 +172,10 @@ export class PineconeVectorDB extends VectorDB {
       }
       await Promise.all(requests);
     }
+
+    // TODO: Unsure if this should be documents passed here or something else
+    const event: AddDocumentsToVectorDBEvent = {name: "onAddDocumentsToVectorDB", documents};
+    this.callbackManager?.runCallbacks(event);
   }
 
   async query(query: VectorDBQuery): Promise<VectorEmbedding[]> {
@@ -189,7 +194,7 @@ export class PineconeVectorDB extends VectorDB {
       filter: query.metadataFilter,
     });
 
-    return (results.matches ?? []).map((match) => {
+    const vectorEmbeddings = (results.matches ?? []).map((match) => {
       const metadata = unflatten({ ...match.metadata }) as JSONObject;
       const attributes = (metadata.attributes ?? {}) as JSONObject;
       const text = (metadata.text as string | undefined) ?? "";
@@ -205,5 +210,10 @@ export class PineconeVectorDB extends VectorDB {
         attributes,
       };
     });
+
+    const event: QueryVectorDBEvent = {name: "onQueryVectorDB", query: query, vectorEmbeddings: vectorEmbeddings};
+    this.callbackManager?.runCallbacks(event);
+
+    return vectorEmbeddings;
   }
 }
