@@ -6,6 +6,7 @@ import {
 import { DocumentMetadataDB } from "../../document/metadata/documentMetadataDB";
 import { BaseRetriever, BaseRetrieverQueryParams } from "../retriever";
 import { Md5 } from "ts-md5";
+import { GetFragmentsEvent, RetrieveDataEvent } from "../../utils/callbacks";
 
 export type VectorDBRetrieverParams<V extends VectorDB> = {
   vectorDB: V;
@@ -59,9 +60,17 @@ export abstract class BaseVectorDBRetriever<
       })
     );
 
-    return fragments.filter(
+    const documentFragments = fragments.filter(
       (fragment) => fragment != null
     ) as DocumentFragment[];
+
+    const event: GetFragmentsEvent = {
+      name: "onGetFragments",
+      fragments: documentFragments,
+    };
+    this.callbackManager?.runCallbacks(event);
+
+    return documentFragments;
   }
 
   // Many VectorDBs don't support pagination, so we try to obtain the best K results after
@@ -90,6 +99,14 @@ export abstract class BaseVectorDBRetriever<
     const accessibleDocuments =
       await this.getDocumentsForFragments(accessibleFragments);
 
-    return await this.processDocuments(accessibleDocuments);
+    const processedDocuments = await this.processDocuments(accessibleDocuments);
+
+    const event: RetrieveDataEvent = {
+      name: "onRetrieveData",
+      data: processedDocuments,
+    };
+    this.callbackManager?.runCallbacks(event);
+
+    return processedDocuments;
   }
 }

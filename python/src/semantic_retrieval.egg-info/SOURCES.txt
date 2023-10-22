@@ -1,0 +1,9 @@
+README.md
+pyproject.toml
+src/semantic_retrieval/__init__.py
+src/semantic_retrieval.egg-info/PKG-INFO
+src/semantic_retrieval.egg-info/SOURCES.txt
+src/semantic_retrieval.egg-info/dependency_links.txt
+src/semantic_retrieval.egg-info/requires.txt
+src/semantic_retrieval.egg-info/top_level.txt
+tests/test.py
