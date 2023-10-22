@@ -1,5 +1,6 @@
 import { VectorDB } from "../../data-store/vector-DBs/vectorDB";
 import { Document } from "../../document/document";
+import { RetrieverProcessDocumentsEvent } from "../../utils/callbacks";
 import {
   BaseVectorDBRetriever,
   VectorDBRetrieverParams,
@@ -16,6 +17,12 @@ export class VectorDBDocumentRetriever<
   }
 
   protected async processDocuments(documents: Document[]): Promise<Document[]> {
+    const event: RetrieverProcessDocumentsEvent = {
+      name: "onRetrieverProcessDocuments",
+      documents,
+    };
+    this.callbackManager?.runCallbacks(event);
+
     return documents;
   }
 }
