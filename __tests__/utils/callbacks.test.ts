@@ -11,8 +11,8 @@ import type { RawDocument } from "../../src/document/document";
 
 import { DirectDocumentParser } from "../../src/ingestion/document-parsers/directDocumentParser";
 import { getTestRawDocument } from "./testDocumentUtils";
-import {SeparatorTextChunker} from "../../src/transformation/document/text/separatorTextChunker";
-import {AccessPassport} from "../../src/access-control/accessPassport";
+import { SeparatorTextChunker } from "../../src/transformation/document/text/separatorTextChunker";
+import { AccessPassport } from "../../src/access-control/accessPassport";
 
 describe("Callbacks", () => {
   test("Callback arg static type", async () => {
@@ -116,7 +116,7 @@ describe("Callbacks", () => {
     expect(onParseErrorCallback1).not.toHaveBeenCalled();
   });
 
-  test("Document Transformer", async() => {
+  test("Document Transformer", async () => {
     const onTransformDocumentsCallbacks = [jest.fn(), jest.fn()];
     const onTransformDocumentCallback1 = jest.fn();
     const onChunkTextCallback1 = jest.fn();
@@ -136,14 +136,13 @@ describe("Callbacks", () => {
       const document = await documentParser.parse(getTestRawDocument());
       await documentChunker.transformDocuments([document]);
     } catch (error) {}
-    
     expect(onTransformDocumentCallback1).toHaveBeenCalled();
     expect(onChunkTextCallback1).toHaveBeenCalled();
 
     expect(onTransformDocumentsCallbacks[0]).toHaveBeenCalled();
-  })
+  });
 
-  test("Access Passport", async() => {
+  test("Access Passport", async () => {
     const onRegisterAccessIdentityCallback = jest.fn();
     const onGetAccessIdentityCallback = jest.fn();
 
@@ -156,10 +155,14 @@ describe("Callbacks", () => {
     accessPassport.callbackManager = callbackManager;
 
     try {
-      accessPassport.register({resource: 'test-resource', metadata: {}, attributes: {}});
-      accessPassport.getIdentity('test-resource');
+      accessPassport.register({
+        resource: "test-resource",
+        metadata: {},
+        attributes: {},
+      });
+      accessPassport.getIdentity("test-resource");
     } catch (error) {}
-    
+
     expect(onRegisterAccessIdentityCallback).toHaveBeenCalled();
     expect(onGetAccessIdentityCallback).toHaveBeenCalled();
   });
