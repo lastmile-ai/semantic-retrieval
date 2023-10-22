@@ -11,7 +11,7 @@ import {
 import {
   getTestDocument,
   getTestDocumentFragment,
-} from "../../utils/testDocumentUtils";
+} from "../../__utils__/testDocumentUtils";
 import { VectorDBTextQuery } from "../../../src/data-store/vector-DBs/vectorDB";
 
 jest.mock("../../../src/utils/getEnvVar");
