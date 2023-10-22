@@ -2,7 +2,7 @@ import { OpenAIEmbeddings } from "../../../src/transformation/embeddings/openAIE
 import {
   getTestDocument,
   getTestDocumentFragment,
-} from "../../utils/testDocumentUtils";
+} from "../../__utils__/testDocumentUtils";
 import getEnvVar from "../../../src/utils/getEnvVar";
 import { OpenAI } from "openai";
 import {
