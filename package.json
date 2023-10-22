@@ -27,7 +27,7 @@
     "build": "tsc",
     "test": "NODE_OPTIONS='--experimental-vm-modules' jest --runInBand",
     "compile": "tsc",
-    "lint": "eslint ."
+    "lint": "eslint . --max-warnings=0"
   },
   "devDependencies": {
     "@types/jest": "^29.5.0",

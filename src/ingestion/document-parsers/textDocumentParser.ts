@@ -4,11 +4,7 @@ import {
   DocumentFragment,
   IngestedDocument,
 } from "../../document/document";
-import {
-  CallbackManager,
-  ParseErrorEvent,
-  ParseNextErrorEvent,
-} from "../../utils/callbacks";
+import { CallbackManager } from "../../utils/callbacks";
 import { BaseDocumentParser } from "./documentParser";
 
 /**
