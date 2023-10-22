@@ -3,7 +3,7 @@ import {
   VectorDBQuery,
 } from "../../../src/data-store/vector-DBs/vectorDB";
 import { Document } from "../../../src/document/document";
-import { InMemoryDocumentMetadataDB } from "../../../src/document/metadata/InMemoryDocumentMetadataDB";
+import { InMemoryDocumentMetadataDB } from "../../../src/document/metadata/inMemoryDocumentMetadataDB";
 import { DocumentMetadataDB } from "../../../src/document/metadata/documentMetadataDB";
 import { VectorEmbedding } from "../../../src/transformation/embeddings/embeddings";
 import { TestEmbeddings } from "../transformation/embeddings/testEmbeddings";
