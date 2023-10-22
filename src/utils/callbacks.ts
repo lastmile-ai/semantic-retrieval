@@ -5,6 +5,7 @@ import type {
   IngestedDocument,
   RawDocument,
   Document,
+  DocumentFragment,
 } from "../document/document";
 import { VectorEmbedding } from "../transformation/embeddings/embeddings";
 
@@ -83,6 +84,31 @@ export type QueryVectorDBEvent = {
   vectorEmbeddings: VectorEmbedding[];
 };
 
+export type RetrieverFilterAccessibleFragmentsEvent = {
+  name: "onRetrieverFilterAccessibleFragments";
+  fragments: DocumentFragment[];
+};
+
+export type RetrieverGetDocumentsForFragmentsEvent = {
+  name: "onRetrieverGetDocumentsForFragments";
+  documents: Document[];
+};
+
+export type RetrieverProcessDocumentsEvent = {
+  name: "onRetrieverProcessDocuments";
+  documents: Document[];
+};
+
+export type RetrieveDataEvent = {
+  name: "onRetrieveData";
+  data: any;
+};
+
+export type GetFragmentsEvent = {
+  name: "onGetFragments";
+  fragments: DocumentFragment[];
+};
+
 type CallbackEvent =
   | LoadDocumentsSuccessEvent
   | LoadDocumentsErrorEvent
@@ -97,7 +123,12 @@ type CallbackEvent =
   | RegisterAccessIdentityEvent
   | GetAccessIdentityEvent
   | AddDocumentsToVectorDBEvent
-  | QueryVectorDBEvent;
+  | QueryVectorDBEvent
+  | RetrieverFilterAccessibleFragmentsEvent
+  | RetrieverGetDocumentsForFragmentsEvent
+  | RetrieverProcessDocumentsEvent
+  | RetrieveDataEvent
+  | GetFragmentsEvent;
 
 type Callback<T extends CallbackEvent> = (
   event: T,
@@ -119,6 +150,11 @@ interface CallbackMapping {
   onGetAccessIdentity?: Callback<GetAccessIdentityEvent>[];
   onAddDocumentToVectorDB?: Callback<AddDocumentsToVectorDBEvent>[];
   onQueryVectorDB?: Callback<QueryVectorDBEvent>[];
+  onRetrieverFilterAccessibleFragments?: Callback<RetrieverFilterAccessibleFragmentsEvent>[];
+  onRetrieverGetDocumentsForFragments?: Callback<RetrieverGetDocumentsForFragmentsEvent>[];
+  onRetrieverProcessDocuments?: Callback<RetrieverProcessDocumentsEvent>[];
+  onRetrieveData?: Callback<RetrieveDataEvent>[];
+  onGetFragments?: Callback<GetFragmentsEvent>[];
 }
 
 const DEFAULT_CALLBACKS: CallbackMapping = {
@@ -208,17 +244,47 @@ class CallbackManager {
           this.callbacks.onGetAccessIdentity,
           DEFAULT_CALLBACKS.onGetAccessIdentity
         );
-      case 'onAddDocumentsToVectorDB':
+      case "onAddDocumentsToVectorDB":
         return await this.callback_helper(
           event,
           this.callbacks.onAddDocumentToVectorDB,
           DEFAULT_CALLBACKS.onAddDocumentToVectorDB
         );
-      case 'onQueryVectorDB':
+      case "onQueryVectorDB":
         return await this.callback_helper(
           event,
           this.callbacks.onQueryVectorDB,
           DEFAULT_CALLBACKS.onQueryVectorDB
+        );
+      case "onRetrieverFilterAccessibleFragments":
+        return await this.callback_helper(
+          event,
+          this.callbacks.onRetrieverFilterAccessibleFragments,
+          DEFAULT_CALLBACKS.onRetrieverFilterAccessibleFragments
+        );
+      case "onRetrieverGetDocumentsForFragments":
+        return await this.callback_helper(
+          event,
+          this.callbacks.onRetrieverGetDocumentsForFragments,
+          DEFAULT_CALLBACKS.onRetrieverGetDocumentsForFragments
+        );
+      case "onRetrieverProcessDocuments":
+        return await this.callback_helper(
+          event,
+          this.callbacks.onRetrieverProcessDocuments,
+          DEFAULT_CALLBACKS.onRetrieverProcessDocuments
+        );
+      case "onRetrieveData":
+        return await this.callback_helper(
+          event,
+          this.callbacks.onRetrieveData,
+          DEFAULT_CALLBACKS.onRetrieveData
+        );
+      case "onGetFragments":
+        return await this.callback_helper(
+          event,
+          this.callbacks.onGetFragments,
+          DEFAULT_CALLBACKS.onGetFragments
         );
       default:
         assertUnreachable(event);

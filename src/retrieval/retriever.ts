@@ -2,6 +2,13 @@ import { AccessPassport } from "../access-control/accessPassport";
 import { Document, DocumentFragment } from "../document/document";
 import { DocumentMetadataDB } from "../document/metadata/documentMetadataDB";
 import { promises as fs } from "fs";
+import {
+  CallbackManager,
+  RetrieveDataEvent,
+  RetrieverFilterAccessibleFragmentsEvent,
+  RetrieverGetDocumentsForFragmentsEvent,
+  Traceable,
+} from "../utils/callbacks";
 
 export type BaseRetrieverQueryParams<Q> = {
   accessPassport: AccessPassport;
@@ -17,8 +24,9 @@ export type BaseRetrieverQueryParams<Q> = {
  * handling is required (e.g. if the underlying source can perform optimized RBAC), but the quality
  * and correctness of the access control logic is the responsibility of the retriever implementation.
  */
-export abstract class BaseRetriever<R, Q> {
+export abstract class BaseRetriever<R, Q> implements Traceable {
   metadataDB: DocumentMetadataDB;
+  callbackManager?: CallbackManager;
 
   constructor(metadataDB: DocumentMetadataDB) {
     this.metadataDB = metadataDB;
@@ -77,9 +85,17 @@ export abstract class BaseRetriever<R, Q> {
       })
     );
 
-    return accessibleFragments.filter(
+    const filteredFragments = accessibleFragments.filter(
       (fragment): fragment is DocumentFragment => fragment != null
     );
+
+    const event: RetrieverFilterAccessibleFragmentsEvent = {
+      name: "onRetrieverFilterAccessibleFragments",
+      fragments: filteredFragments,
+    };
+    this.callbackManager?.runCallbacks(event);
+
+    return filteredFragments;
   }
 
   /**
@@ -107,7 +123,7 @@ export abstract class BaseRetriever<R, Q> {
 
     // We construct Document objects from the subset of fragments obtained from the query.
     // If needed, all Document fragments can be retrieved from the DocumentMetadataDB.
-    return await Promise.all(
+    const documents = await Promise.all(
       Object.entries(fragmentsByDocumentId).map(
         async ([documentId, fragments]) => {
           const documentMetadata = {
@@ -142,6 +158,14 @@ export abstract class BaseRetriever<R, Q> {
         }
       )
     );
+
+    const event: RetrieverGetDocumentsForFragmentsEvent = {
+      name: "onRetrieverGetDocumentsForFragments",
+      documents,
+    };
+    this.callbackManager?.runCallbacks(event);
+
+    return documents;
   }
 
   /**
@@ -169,6 +193,14 @@ export abstract class BaseRetriever<R, Q> {
     const accessibleDocuments =
       await this.getDocumentsForFragments(accessibleFragments);
 
-    return await this.processDocuments(accessibleDocuments);
+    const processedDocuments = await this.processDocuments(accessibleDocuments);
+
+    const event: RetrieveDataEvent = {
+      name: "onRetrieveData",
+      data: processedDocuments,
+    };
+    this.callbackManager?.runCallbacks(event);
+
+    return processedDocuments;
   }
 }
