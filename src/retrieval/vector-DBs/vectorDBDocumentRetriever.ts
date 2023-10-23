@@ -1,4 +1,3 @@
-import { VectorDB } from "../../data-store/vector-DBs/vectorDB";
 import { Document } from "../../document/document";
 import { RetrieverProcessDocumentsEvent } from "../../utils/callbacks";
 import {
@@ -9,10 +8,10 @@ import {
 /**
  * Base class for retrieving Documents from an underlying VectorDB
  */
-export class VectorDBDocumentRetriever<
-  V extends VectorDB,
-> extends BaseVectorDBRetriever<V, Document[]> {
-  constructor(params: VectorDBRetrieverParams<V>) {
+export class VectorDBDocumentRetriever extends BaseVectorDBRetriever<
+  Document[]
+> {
+  constructor(params: VectorDBRetrieverParams) {
     super(params);
   }
 

@@ -5,15 +5,16 @@ import { PineconeVectorDB } from "../../src/data-store/vector-DBs/pineconeVector
 import { InMemoryDocumentMetadataDB } from "../../src/document/metadata/InMemoryDocumentMetadataDB";
 import { FileSystem } from "../../src/ingestion/data-sources/fs/fileSystem";
 import * as MultiDocumentParser from "../../src/ingestion/document-parsers/multiDocumentParser";
-import { OpenAICompletionGenerator } from "../../src/generator/llm/openAICompletionGenerator";
+import { OpenAIChatModel } from "../../src/generator/completion-models/openai/openAIChatModel";
 import { VectorDBDocumentRetriever } from "../../src/retrieval/vector-DBs/vectorDBDocumentRetriever";
 import { SeparatorTextChunker } from "../../src/transformation/document/text/separatorTextChunker";
 import { OpenAIEmbeddings } from "../../src/transformation/embeddings/openAIEmbeddings";
+import { VectorDBRAGCompletionGenerator } from "../../src/generator/retrieval-augmented-generation/vectorDBRAGCompletionGenerator";
 
 const metadataDB = new InMemoryDocumentMetadataDB();
 
 async function createIndex() {
-  const fileSystem = new FileSystem("./example_docs");
+  const fileSystem = new FileSystem("examples/example_data");
   const rawDocuments = await fileSystem.loadDocuments();
 
   const parsedDocuments = await MultiDocumentParser.parseDocuments(
@@ -38,8 +39,10 @@ async function createIndex() {
 async function main() {
   const vectorDB = await createIndex();
   const accessPassport = new AccessPassport();
+
   const retriever = new VectorDBDocumentRetriever({ vectorDB, metadataDB });
-  const generator = new OpenAICompletionGenerator();
+  const generator = new VectorDBRAGCompletionGenerator(new OpenAIChatModel());
+
   const res = await generator.run({
     accessPassport,
     prompt: "How do I use parameters in a workbook?",
