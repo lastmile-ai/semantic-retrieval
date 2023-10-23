@@ -38,13 +38,11 @@ async function createIndex() {
 
 async function main() {
   const vectorDB = await createIndex();
-  const accessPassport = new AccessPassport();
-
   const retriever = new VectorDBDocumentRetriever({ vectorDB, metadataDB });
   const generator = new VectorDBRAGCompletionGenerator(new OpenAIChatModel());
 
   const res = await generator.run({
-    accessPassport,
+    accessPassport: new AccessPassport(), // not necessary in this case, but include for example
     prompt: "How do I use parameters in a workbook?",
     retriever,
   });
