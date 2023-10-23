@@ -30,7 +30,7 @@ describe("VectorDBCallbacks", () => {
     try {
       const document = await documentParser.parse(getTestRawDocument());
       await testVectorDB.addDocuments([document]);
-      await testVectorDB.query({ topK: 10 });
+      await testVectorDB.query({ topK: 10, text: "test" });
     } catch (error) {}
 
     expect(onAddDocumentToVectorDBCallback).toHaveBeenCalled();

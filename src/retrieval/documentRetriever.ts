@@ -3,7 +3,7 @@ import { DocumentMetadataDB } from "../document/metadata/documentMetadataDB";
 import { RetrieverProcessDocumentsEvent } from "../utils/callbacks";
 import { BaseRetriever } from "./retriever";
 
-export abstract class BaseDocumentRetriever<Q> extends BaseRetriever<
+export abstract class DocumentRetriever<Q> extends BaseRetriever<
   Document[],
   Q
 > {
