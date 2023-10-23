@@ -9,8 +9,8 @@ import {
 
 export interface RAGCompletionGeneratorParams<P, Q>
   extends LLMCompletionGeneratorParams<P> {
-  accessPassport: AccessPassport;
   retriever: BaseRetriever<Document[], Q>;
+  accessPassport?: AccessPassport;
   ragPromptTemplate?: PromptTemplate;
 }
 

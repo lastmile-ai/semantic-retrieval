@@ -4,7 +4,7 @@ import { DocumentMetadataDB } from "../document/metadata/documentMetadataDB";
 import { promises as fs } from "fs";
 
 export type BaseRetrieverQueryParams<Q> = {
-  accessPassport: AccessPassport;
+  accessPassport?: AccessPassport;
   query: Q;
 };
 
@@ -35,13 +35,13 @@ export abstract class BaseRetriever<R, Q> {
 
   /**
    * Simple filtering of DocumentFragments with respect to access policies.
-   * @param accessPassport The AccessPassport for the current identity.
    * @param fragments The DocumentFragments to filter.
+   * @param accessPassport The AccessPassport for the current identity.
    * @returns A promise that resolves to array of DocumentFragments accessible to the current identity.
    */
   protected async filterAccessibleFragments(
-    accessPassport: AccessPassport,
-    fragments: DocumentFragment[]
+    fragments: DocumentFragment[],
+    accessPassport?: AccessPassport
   ): Promise<DocumentFragment[]> {
     if (this.metadataDB == null) {
       return fragments;
@@ -61,7 +61,7 @@ export abstract class BaseRetriever<R, Q> {
                 await policy.testDocumentReadPermission(
                   metadata.document!,
                   policy.resource
-                    ? accessPassport.getIdentity(policy.resource)
+                    ? accessPassport?.getIdentity(policy.resource)
                     : undefined
                 )
             )
@@ -161,8 +161,8 @@ export abstract class BaseRetriever<R, Q> {
     const unsafeFragments = await this.getFragmentsUnsafe(params);
 
     const accessibleFragments = await this.filterAccessibleFragments(
-      params.accessPassport,
-      unsafeFragments
+      unsafeFragments,
+      params.accessPassport
     );
 
     const accessibleDocuments =

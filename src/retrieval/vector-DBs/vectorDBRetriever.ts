@@ -82,8 +82,8 @@ export abstract class BaseVectorDBRetriever<R> extends BaseRetriever<
 
     const accessibleFragments = (
       await this.filterAccessibleFragments(
-        params.accessPassport,
-        unsafeFragments
+        unsafeFragments,
+        params.accessPassport
       )
     ).slice(0, requestedTopK);
 
