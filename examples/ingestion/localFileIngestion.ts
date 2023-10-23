@@ -10,6 +10,9 @@ import { VectorDBDocumentRetriever } from "../../src/retrieval/vector-DBs/vector
 import { SeparatorTextChunker } from "../../src/transformation/document/text/separatorTextChunker";
 import { OpenAIEmbeddings } from "../../src/transformation/embeddings/openAIEmbeddings";
 import { VectorDBRAGCompletionGenerator } from "../../src/generator/retrieval-augmented-generation/vectorDBRAGCompletionGenerator";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 const metadataDB = new InMemoryDocumentMetadataDB();
 
