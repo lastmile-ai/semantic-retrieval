@@ -2,7 +2,7 @@ import { Document } from "../document/document";
 import { DocumentMetadataDB } from "../document/metadata/documentMetadataDB";
 import { BaseRetriever } from "./retriever";
 
-export abstract class BaseDocumentRetriever<Q> extends BaseRetriever<
+export abstract class DocumentRetriever<Q> extends BaseRetriever<
   Document[],
   Q
 > {
