@@ -13,6 +13,10 @@ import { DirectDocumentParser } from "../../src/ingestion/document-parsers/direc
 import { getTestRawDocument } from "../__utils__/testDocumentUtils";
 import { SeparatorTextChunker } from "../../src/transformation/document/text/separatorTextChunker";
 import { AccessPassport } from "../../src/access-control/accessPassport";
+import { VectorDBDocumentRetriever } from "../../src/retrieval/vector-DBs/vectorDBDocumentRetriever";
+import { InMemoryDocumentMetadataDB } from "../../src/document/metadata/inMemoryDocumentMetadataDB";
+import TestVectorDB from "../__mocks__/retrieval/testVectorDB";
+import { VectorDBTextQuery } from "../../src/data-store/vector-DBs/vectorDB";
 
 describe("Callbacks", () => {
   test("Callback arg static type", async () => {
@@ -164,5 +168,58 @@ describe("Callbacks", () => {
 
     expect(onRegisterAccessIdentityCallback).toHaveBeenCalled();
     expect(onGetAccessIdentityCallback).toHaveBeenCalled();
+  });
+
+  test("Document Retrievers", async () => {
+    const onRetrieverFilterAccessibleFragment = jest.fn();
+    const onRetrieverGetDocumentsForFragment = jest.fn();
+    const onRetrieverProcessDocument = jest.fn();
+    const onRetrieveData = jest.fn();
+    const onGetFragments = jest.fn();
+
+    const callbacks: CallbackMapping = {
+      onRetrieverFilterAccessibleFragments: [
+        onRetrieverFilterAccessibleFragment,
+      ],
+      onRetrieverGetDocumentsForFragments: [onRetrieverGetDocumentsForFragment],
+      onRetrieverProcessDocuments: [onRetrieverProcessDocument],
+      onRetrieveData: [onRetrieveData],
+      onGetFragments: [onGetFragments],
+    };
+    const callbackManager = new CallbackManager("rag-run-0", callbacks);
+    const documentRetriever = new DirectDocumentParser();
+
+    const metadataDB = new InMemoryDocumentMetadataDB({
+      "test-document-id-A": {
+        documentId: "1",
+        uri: "",
+        attributes: {},
+        metadata: {
+          test: "test metadata for document A",
+        },
+      },
+    });
+
+    const vectorDB = new TestVectorDB(metadataDB);
+    const retriever = new VectorDBDocumentRetriever({ vectorDB, metadataDB });
+    retriever.callbackManager = callbackManager;
+
+    try {
+      const query: VectorDBTextQuery = {
+        text: "test",
+        topK: 5,
+      };
+
+      await retriever.retrieveData({
+        query,
+        accessPassport: new AccessPassport(),
+      });
+    } catch (error) {}
+
+    expect(onRetrieverFilterAccessibleFragment).toHaveBeenCalled();
+    expect(onRetrieverGetDocumentsForFragment).toHaveBeenCalled();
+    expect(onRetrieverProcessDocument).toHaveBeenCalled();
+    expect(onRetrieveData).toHaveBeenCalled();
+    expect(onGetFragments).toHaveBeenCalled();
   });
 });
