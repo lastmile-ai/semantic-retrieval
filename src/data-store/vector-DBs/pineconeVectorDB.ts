@@ -160,7 +160,7 @@ export class PineconeVectorDB extends VectorDB {
     const PARALLEL_REQUESTS = 5;
     let vectorIdx = 0;
     while (vectorIdx < pineconeVectors.length) {
-      const requests = [];
+      const requests: Promise<void>[] = [];
       for (let i = 0; i < PARALLEL_REQUESTS; i++) {
         const vectors = pineconeVectors.slice(
           vectorIdx,

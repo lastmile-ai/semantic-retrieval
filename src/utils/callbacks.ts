@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { AccessIdentity } from "../access-control/accessIdentity";
+import { assertUnreachable } from "../common/core";
 import { VectorDBQuery } from "../data-store/vector-DBs/vectorDB";
 import type {
   IngestedDocument,

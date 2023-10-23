@@ -1,11 +1,6 @@
 import { JSONObject } from "../../common/jsonTypes";
 import { RawDocument } from "../../document/document";
-import {
-  CallbackManager,
-  DataSourceTestConnectionErrorEvent,
-  LoadDocumentsErrorEvent,
-  Traceable,
-} from "../../utils/callbacks";
+import { CallbackManager, Traceable } from "../../utils/callbacks";
 
 export interface Authentication {
   authToken?: string;
