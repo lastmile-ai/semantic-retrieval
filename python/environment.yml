@@ -1,0 +1,7 @@
+name: semantic_retrieval
+channels:
+  - defaults
+dependencies:
+  - pip
+  - pip:
+      - -r requirements.txt

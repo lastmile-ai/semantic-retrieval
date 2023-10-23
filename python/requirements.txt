@@ -1,0 +1,7 @@
+requests==2.30.0
+black
+flake8
+pytest
+pydantic>=2.1
+openai
+python-dotenv

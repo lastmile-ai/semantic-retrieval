@@ -2,3 +2,9 @@ node_modules
 dist
 tsconfig.tsbuildinfo
 .env
+
+__pycache__/
+.mypy_cache/
+.pytest_cache/
+semantic_retrieval.egg-info
+
