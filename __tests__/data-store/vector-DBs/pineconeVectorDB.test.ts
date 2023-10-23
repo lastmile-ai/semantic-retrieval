@@ -1,6 +1,4 @@
-import {
-  Pinecone,
-} from "@pinecone-database/pinecone";
+import { Pinecone } from "@pinecone-database/pinecone";
 import getEnvVar from "../../../src/utils/getEnvVar";
 import { PineconeVectorDB } from "../../../src/data-store/vector-DBs/pineconeVectorDB";
 import { InMemoryDocumentMetadataDB } from "../../../src/document/metadata/inMemoryDocumentMetadataDB";
@@ -11,8 +9,11 @@ import {
 import {
   getTestDocument,
   getTestDocumentFragment,
+  getTestRawDocument,
 } from "../../__utils__/testDocumentUtils";
 import { VectorDBTextQuery } from "../../../src/data-store/vector-DBs/vectorDB";
+import { CallbackManager, CallbackMapping } from "../../../src/utils/callbacks";
+import { DirectDocumentParser } from "../../../src/ingestion/document-parsers/directDocumentParser";
 
 jest.mock("../../../src/utils/getEnvVar");
 jest.mock("uuid");
@@ -261,5 +262,42 @@ describe("pineconeVectorDB query", () => {
         attributes: {},
       },
     ]);
+  });
+
+  test("callbacks are called", async () => {
+    mockQuery.mockImplementationOnce(async () => {
+      return { matches: [] };
+    });
+
+    const onAddDocumentToVectorDBCallback = jest.fn();
+    const onQueryVectorDBCallback = jest.fn();
+
+    const callbacks: CallbackMapping = {
+      onAddDocumentToVectorDB: [onAddDocumentToVectorDBCallback],
+      onQueryVectorDB: [onQueryVectorDBCallback],
+    };
+    const callbackManager = new CallbackManager("rag-run-0", callbacks);
+    const documentParser = new DirectDocumentParser();
+
+    const embeddingsTransformer = new TestEmbeddings();
+    const documentMetadataDB = new InMemoryDocumentMetadataDB();
+
+    const pineconeVectorDB = new PineconeVectorDB({
+      apiKey: "1",
+      environment: "a",
+      indexName: "b",
+      embeddings: embeddingsTransformer,
+      metadataDB: documentMetadataDB,
+    });
+    pineconeVectorDB.callbackManager = callbackManager;
+
+    try {
+      const document = await documentParser.parse(getTestRawDocument());
+      await pineconeVectorDB.addDocuments([document]);
+      await pineconeVectorDB.query({ topK: 10 });
+    } catch (error) {}
+
+    expect(onAddDocumentToVectorDBCallback).toHaveBeenCalled();
+    expect(onQueryVectorDBCallback).toHaveBeenCalled();
   });
 });
