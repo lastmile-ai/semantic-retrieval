@@ -294,7 +294,7 @@ describe("pineconeVectorDB query", () => {
     try {
       const document = await documentParser.parse(getTestRawDocument());
       await pineconeVectorDB.addDocuments([document]);
-      await pineconeVectorDB.query({ topK: 10 });
+      await pineconeVectorDB.query({ topK: 10, text: "test" });
     } catch (error) {}
 
     expect(onAddDocumentToVectorDBCallback).toHaveBeenCalled();
