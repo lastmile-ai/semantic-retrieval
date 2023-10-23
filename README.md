@@ -19,8 +19,22 @@ yarn test
 
 To run an individual test, use `yarn test <filename.test.ts>`.
 
+# Examples & Demos
+Example scripts, such as `localFileIngestion` can be run via `ts-node`:
+```
+npx ts-node examples/ingestion/localFileIngestion.ts
+```
+Ensure you have the correct openai and pinecone environment variables set up in a `.env` file if not
+passing the values through the constructors in the scripts:
+```
+OPENAI_API_KEY=
+PINECONE_ENVIRONMENT=
+PINECONE_API_KEY=
+```
+if using `PineconeVectorDB`, ensure you have an Pinecone index created beforehand and set the proper `indexName`.
+
 # What is this library?
-Information retrieval/synthesis from unstructured data is one of the productionizable use cases for LLMs. The LastMile semantic-retrieval library provides everything an enterprise should need to integrate powerful semantic retrieval flows into their systems.
+The LastMile semantic-retrieval library provides everything an enterprise should need to integrate powerful semantic retrieval flows into their systems.
 
 # The Key Components of Semantic Retrieval
 
@@ -45,8 +59,11 @@ Transformed `Document`s and other data can be stored in various underlying index
 
 
 ## Data Retrieval
-// TODO
+Data that is stored in an underyling data store or index can be obtained using a `Retriever` which has knowledge of the underlying implementation and its relevant query structure. Retrievers are not limited to retrieving data from a single underlying data store: they can support any desired custom retrieval logic for more complex use cases (composition of retrievers, heuristics such as staleness, etc.).
 
+
+## Completion Generators
+`CompletionGenerator`s define how an input query or prompt (e.g. from a user) is used to generate a completion response from an underlying `CompletionModel`, and what the final result looks like. Similar to retrievers, completion generators are not limited to performing completion requests to a model, but can support any desired custom logic between an input query and finalized response.
 
 ## Access Control
 // TODO

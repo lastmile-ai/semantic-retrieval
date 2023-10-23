@@ -10,6 +10,9 @@ import { VectorDBDocumentRetriever } from "../../src/retrieval/vector-DBs/vector
 import { SeparatorTextChunker } from "../../src/transformation/document/text/separatorTextChunker";
 import { OpenAIEmbeddings } from "../../src/transformation/embeddings/openAIEmbeddings";
 import { VectorDBRAGCompletionGenerator } from "../../src/generator/retrieval-augmented-generation/vectorDBRAGCompletionGenerator";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 const metadataDB = new InMemoryDocumentMetadataDB();
 
@@ -30,7 +33,7 @@ async function createIndex() {
     await documentTransformer.transformDocuments(parsedDocuments);
 
   return await PineconeVectorDB.fromDocuments(transformedDocuments, {
-    indexName: "test-index",
+    indexName: "test",
     embeddings: new OpenAIEmbeddings(),
     metadataDB,
   });
@@ -46,7 +49,7 @@ async function main() {
     prompt: "How do I use parameters in a workbook?",
     retriever,
   });
-  console.log(res);
+  console.log(JSON.stringify(res));
 }
 
 main();
