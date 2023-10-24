@@ -30,10 +30,16 @@ export class VectorDBRAGCompletionGenerator<
     const { prompt, retrievalQuery } = params;
     const text = typeof prompt === "string" ? prompt : await prompt.toString();
     const topK = retrievalQuery?.topK ?? 3;
-    return {
+    const query = {
       ...params.retrievalQuery,
       topK,
       text,
-    } as VectorDBTextQuery;
+    };
+    await this.callbackManager?.runCallbacks({
+      name: "onGetRAGCompletionRetrievalQuery",
+      params,
+      query,
+    });
+    return query;
   }
 }

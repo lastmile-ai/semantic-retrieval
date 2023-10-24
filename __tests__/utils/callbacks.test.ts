@@ -17,6 +17,8 @@ import { VectorDBDocumentRetriever } from "../../src/retrieval/vector-DBs/vector
 import { InMemoryDocumentMetadataDB } from "../../src/document/metadata/inMemoryDocumentMetadataDB";
 import TestVectorDB from "../__mocks__/retrieval/testVectorDB";
 import { VectorDBTextQuery } from "../../src/data-store/vector-DBs/vectorDB";
+import { TestCompletionModel } from "../__mocks__/generator/testCompletionModel";
+import { TestVectorDBRAGCompletionGenerator } from "../__mocks__/generator/testVectorDBRAGCompletionGenerator";
 
 describe("Callbacks", () => {
   test("Callback arg static type", async () => {
@@ -187,7 +189,6 @@ describe("Callbacks", () => {
       onGetFragments: [onGetFragments],
     };
     const callbackManager = new CallbackManager("rag-run-0", callbacks);
-    const documentRetriever = new DirectDocumentParser();
 
     const metadataDB = new InMemoryDocumentMetadataDB({
       "test-document-id-A": {
@@ -221,5 +222,37 @@ describe("Callbacks", () => {
     expect(onRetrieverProcessDocument).toHaveBeenCalled();
     expect(onRetrieveData).toHaveBeenCalled();
     expect(onGetFragments).toHaveBeenCalled();
+  });
+
+  test("RAG Completion Generator and Completion Model", async () => {
+    const onRunCompletion = jest.fn();
+    const onGetRAGCompletionRetrievalQuery = jest.fn();
+    const onRunCompletionGeneration = jest.fn();
+
+    const callbacks: CallbackMapping = {
+      onRunCompletion: [onRunCompletion],
+      onGetRAGCompletionRetrievalQuery: [onGetRAGCompletionRetrievalQuery],
+      onRunCompletionGeneration: [onRunCompletionGeneration],
+    };
+
+    const callbackManager = new CallbackManager("rag-run-0", callbacks);
+    const completionModel = new TestCompletionModel(callbackManager);
+
+    const generator = new TestVectorDBRAGCompletionGenerator(
+      completionModel,
+      callbackManager
+    );
+
+    await generator.run({
+      prompt: "test",
+      retriever: new VectorDBDocumentRetriever({
+        vectorDB: new TestVectorDB(),
+        metadataDB: new InMemoryDocumentMetadataDB(),
+      }),
+    });
+
+    expect(onRunCompletion).toHaveBeenCalled();
+    expect(onGetRAGCompletionRetrievalQuery).toHaveBeenCalled();
+    expect(onRunCompletionGeneration).toHaveBeenCalled();
   });
 });
