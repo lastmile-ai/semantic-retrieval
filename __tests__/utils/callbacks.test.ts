@@ -18,6 +18,7 @@ import { InMemoryDocumentMetadataDB } from "../../src/document/metadata/inMemory
 import TestVectorDB from "../__mocks__/retrieval/testVectorDB";
 import { VectorDBTextQuery } from "../../src/data-store/vector-DBs/vectorDB";
 import { TestCompletionModel } from "../__mocks__/generator/testCompletionModel";
+import { TestVectorDBRAGCompletionGenerator } from "../__mocks__/generator/testVectorDBRAGCompletionGenerator";
 
 describe("Callbacks", () => {
   test("Callback arg static type", async () => {
@@ -223,16 +224,35 @@ describe("Callbacks", () => {
     expect(onGetFragments).toHaveBeenCalled();
   });
 
-  test("Completion Model", async () => {
+  test("RAG Completion Generator and Completion Model", async () => {
     const onRunCompletion = jest.fn();
+    const onGetRAGCompletionRetrievalQuery = jest.fn();
+    const onRunCompletionGeneration = jest.fn();
+
     const callbacks: CallbackMapping = {
       onRunCompletion: [onRunCompletion],
+      onGetRAGCompletionRetrievalQuery: [onGetRAGCompletionRetrievalQuery],
+      onRunCompletionGeneration: [onRunCompletionGeneration],
     };
 
     const callbackManager = new CallbackManager("rag-run-0", callbacks);
     const completionModel = new TestCompletionModel(callbackManager);
 
-    await completionModel.run({ prompt: "test" });
+    const generator = new TestVectorDBRAGCompletionGenerator(
+      completionModel,
+      callbackManager
+    );
+
+    await generator.run({
+      prompt: "test",
+      retriever: new VectorDBDocumentRetriever({
+        vectorDB: new TestVectorDB(),
+        metadataDB: new InMemoryDocumentMetadataDB(),
+      }),
+    });
+
     expect(onRunCompletion).toHaveBeenCalled();
+    expect(onGetRAGCompletionRetrievalQuery).toHaveBeenCalled();
+    expect(onRunCompletionGeneration).toHaveBeenCalled();
   });
 });

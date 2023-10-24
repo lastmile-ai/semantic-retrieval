@@ -67,6 +67,17 @@ export abstract class RAGCompletionGenerator<
       context,
     });
 
-    return await this.model.run({ ...modelParams, prompt: ragPromptTemplate });
+    const response = await this.model.run({
+      ...modelParams,
+      prompt: ragPromptTemplate,
+    });
+
+    await this.callbackManager?.runCallbacks({
+      name: "onRunCompletionGeneration",
+      params,
+      response,
+    });
+
+    return response;
   }
 }

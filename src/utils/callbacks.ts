@@ -9,6 +9,7 @@ import type {
   DocumentFragment,
 } from "../document/document";
 import { CompletionModelParams } from "../generator/completion-models/completionModel";
+import { LLMCompletionGeneratorParams } from "../generator/completionGenerator";
 import { VectorEmbedding } from "../transformation/embeddings/embeddings";
 
 export type LoadDocumentsSuccessEvent = {
@@ -117,6 +118,18 @@ export type RunCompletionEvent = {
   response: any;
 };
 
+export type RunCompletionGenerationEvent = {
+  name: "onRunCompletionGeneration";
+  params: LLMCompletionGeneratorParams<any>;
+  response: any;
+};
+
+export type GetRAGCompletionRetrievalQueryEvent = {
+  name: "onGetRAGCompletionRetrievalQuery";
+  params: any;
+  query: any;
+};
+
 type CallbackEvent =
   | LoadDocumentsSuccessEvent
   | LoadDocumentsErrorEvent
@@ -137,7 +150,9 @@ type CallbackEvent =
   | RetrieverProcessDocumentsEvent
   | RetrieveDataEvent
   | GetFragmentsEvent
-  | RunCompletionEvent;
+  | RunCompletionEvent
+  | RunCompletionGenerationEvent
+  | GetRAGCompletionRetrievalQueryEvent;
 
 type Callback<T extends CallbackEvent> = (
   event: T,
@@ -165,6 +180,8 @@ interface CallbackMapping {
   onRetrieveData?: Callback<RetrieveDataEvent>[];
   onGetFragments?: Callback<GetFragmentsEvent>[];
   onRunCompletion?: Callback<RunCompletionEvent>[];
+  onRunCompletionGeneration?: Callback<RunCompletionGenerationEvent>[];
+  onGetRAGCompletionRetrievalQuery?: Callback<GetRAGCompletionRetrievalQueryEvent>[];
 }
 
 const DEFAULT_CALLBACKS: CallbackMapping = {
@@ -301,6 +318,18 @@ class CallbackManager {
           event,
           this.callbacks.onRunCompletion,
           DEFAULT_CALLBACKS.onRunCompletion
+        );
+      case "onRunCompletionGeneration":
+        return await this.callback_helper(
+          event,
+          this.callbacks.onRunCompletionGeneration,
+          DEFAULT_CALLBACKS.onRunCompletionGeneration
+        );
+      case "onGetRAGCompletionRetrievalQuery":
+        return await this.callback_helper(
+          event,
+          this.callbacks.onGetRAGCompletionRetrievalQuery,
+          DEFAULT_CALLBACKS.onGetRAGCompletionRetrievalQuery
         );
       default:
         assertUnreachable(event);
