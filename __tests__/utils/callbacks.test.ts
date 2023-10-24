@@ -17,6 +17,7 @@ import { VectorDBDocumentRetriever } from "../../src/retrieval/vector-DBs/vector
 import { InMemoryDocumentMetadataDB } from "../../src/document/metadata/inMemoryDocumentMetadataDB";
 import TestVectorDB from "../__mocks__/retrieval/testVectorDB";
 import { VectorDBTextQuery } from "../../src/data-store/vector-DBs/vectorDB";
+import { TestCompletionModel } from "../__mocks__/generator/testCompletionModel";
 
 describe("Callbacks", () => {
   test("Callback arg static type", async () => {
@@ -187,7 +188,6 @@ describe("Callbacks", () => {
       onGetFragments: [onGetFragments],
     };
     const callbackManager = new CallbackManager("rag-run-0", callbacks);
-    const documentRetriever = new DirectDocumentParser();
 
     const metadataDB = new InMemoryDocumentMetadataDB({
       "test-document-id-A": {
@@ -221,5 +221,18 @@ describe("Callbacks", () => {
     expect(onRetrieverProcessDocument).toHaveBeenCalled();
     expect(onRetrieveData).toHaveBeenCalled();
     expect(onGetFragments).toHaveBeenCalled();
+  });
+
+  test("Completion Model", async () => {
+    const onRunCompletion = jest.fn();
+    const callbacks: CallbackMapping = {
+      onRunCompletion: [onRunCompletion],
+    };
+
+    const callbackManager = new CallbackManager("rag-run-0", callbacks);
+    const completionModel = new TestCompletionModel(callbackManager);
+
+    await completionModel.run({ prompt: "test" });
+    expect(onRunCompletion).toHaveBeenCalled();
   });
 });

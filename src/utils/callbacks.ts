@@ -8,6 +8,7 @@ import type {
   Document,
   DocumentFragment,
 } from "../document/document";
+import { CompletionModelParams } from "../generator/completion-models/completionModel";
 import { VectorEmbedding } from "../transformation/embeddings/embeddings";
 
 export type LoadDocumentsSuccessEvent = {
@@ -110,6 +111,12 @@ export type GetFragmentsEvent = {
   fragments: DocumentFragment[];
 };
 
+export type RunCompletionEvent = {
+  name: "onRunCompletion";
+  params: CompletionModelParams<any>;
+  response: any;
+};
+
 type CallbackEvent =
   | LoadDocumentsSuccessEvent
   | LoadDocumentsErrorEvent
@@ -129,7 +136,8 @@ type CallbackEvent =
   | RetrieverGetDocumentsForFragmentsEvent
   | RetrieverProcessDocumentsEvent
   | RetrieveDataEvent
-  | GetFragmentsEvent;
+  | GetFragmentsEvent
+  | RunCompletionEvent;
 
 type Callback<T extends CallbackEvent> = (
   event: T,
@@ -156,6 +164,7 @@ interface CallbackMapping {
   onRetrieverProcessDocuments?: Callback<RetrieverProcessDocumentsEvent>[];
   onRetrieveData?: Callback<RetrieveDataEvent>[];
   onGetFragments?: Callback<GetFragmentsEvent>[];
+  onRunCompletion?: Callback<RunCompletionEvent>[];
 }
 
 const DEFAULT_CALLBACKS: CallbackMapping = {
@@ -287,6 +296,12 @@ class CallbackManager {
           this.callbacks.onGetFragments,
           DEFAULT_CALLBACKS.onGetFragments
         );
+      case "onRunCompletion":
+        return await this.callback_helper(
+          event,
+          this.callbacks.onRunCompletion,
+          DEFAULT_CALLBACKS.onRunCompletion
+        );
       default:
         assertUnreachable(event);
     }
@@ -299,7 +314,6 @@ class CallbackManager {
   ) {
     const allCallbacks = (userCallbacks || []).concat(defaultCallbacks || []);
     for (const callback of allCallbacks) {
-      // TODO return
       await callback(event, this.runId);
     }
   }
