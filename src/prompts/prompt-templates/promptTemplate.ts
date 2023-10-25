@@ -1,3 +1,4 @@
+import { compile } from "handlebars";
 import { IPrompt } from "../prompt";
 
 export type PromptTemplateParameters = { [key: string]: string };
@@ -18,10 +19,9 @@ export class PromptTemplate implements IPrompt {
     this.parameters = params;
   }
 
-  resolveTemplate(_parameters?: PromptTemplateParameters): string {
-    // TODO: Implement using handlebars. Merge parameters with this.parameters and have
-    // method parameters take precedence.
-    return "";
+  resolveTemplate(parameters?: PromptTemplateParameters): string {
+    const compiledTemplate = compile(this.template);
+    return compiledTemplate(parameters ?? this.parameters);
   }
 
   async toString(): Promise<string> {
