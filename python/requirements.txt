@@ -5,3 +5,4 @@ pytest
 pydantic>=2.1
 openai
 python-dotenv
+pytest-asyncio
