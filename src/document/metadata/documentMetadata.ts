@@ -20,7 +20,7 @@ export interface DocumentMetadata {
   accessPolicies?: ResourceAccessPolicy[];
 
   // Any JSON-serializable metadata associated with the document.
-  metadata: { [key: string]: string };
+  metadata?: { [key: string]: string };
   // A general property bag associated with this object.
-  attributes: { [key: string]: string };
+  attributes?: { [key: string]: string };
 }
