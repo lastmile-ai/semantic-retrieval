@@ -1,3 +1,4 @@
+import { CallbackManager, Traceable } from "../utils/callbacks";
 import {
   CompletionModel,
   CompletionModelParams,
@@ -11,11 +12,13 @@ export interface LLMCompletionGeneratorParams<P>
  * based on a prompt and any applicable internal logic. Extend this base class to add
  * additional logic.
  */
-export abstract class LLMCompletionGenerator<P, R> {
+export abstract class LLMCompletionGenerator<P, R> implements Traceable {
   model: CompletionModel<P, R>;
+  callbackManager?: CallbackManager;
 
-  constructor(model: CompletionModel<P, R>) {
+  constructor(model: CompletionModel<P, R>, callbackManager?: CallbackManager) {
     this.model = model;
+    this.callbackManager = callbackManager;
   }
 
   /**
