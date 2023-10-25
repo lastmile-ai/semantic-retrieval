@@ -8,7 +8,7 @@ import * as path from "node:path";
 
 function resolveExamplesPath(examplePath: string = "") {
   return path.resolve(
-    `./examples/example_data${examplePath ? "/" : ""}${examplePath}`
+    `./examples/example_data/ingestion${examplePath ? "/" : ""}${examplePath}`
   );
 }
 
