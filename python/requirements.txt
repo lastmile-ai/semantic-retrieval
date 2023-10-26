@@ -6,3 +6,8 @@ pydantic>=2.1
 openai
 python-dotenv
 pytest-asyncio
+pyright
+cchardet
+pandas
+chardet
+scikit-learn
