@@ -1,7 +1,5 @@
-import {
-  BaseRetriever,
-  BaseRetrieverQueryParams,
-} from "../retrieval/retriever";
+import { DocumentRetriever } from "../retrieval/documentRetriever";
+import { BaseRetrieverQueryParams } from "../retrieval/retriever";
 
 // Interface
 
@@ -24,7 +22,7 @@ E: expected data type
 Example: R = Document[], Q = VectorDBQuery, E = Fragment[]
 */
 export async function evaluateRetrievers<R, Q, E>(
-  retrievers: BaseRetriever<R, Q>[],
+  retrievers: DocumentRetriever<R, Q>[],
   data: RetrievalEvaluationDataset<E, Q>,
   metrics: RetrievalMetric<R, E>[]
 ) {
@@ -76,7 +74,7 @@ function setIntersect<T>(a: Set<T>, b: Set<T>): Set<T> {
 }
 
 async function averageMetricValue<R, Q, E>(
-  retriever: BaseRetriever<R, Q>,
+  retriever: DocumentRetriever<R, Q>,
   metric: RetrievalMetric<R, E>,
   data: RetrievalEvaluationDataset<E, Q>
 ): Promise<number> {
