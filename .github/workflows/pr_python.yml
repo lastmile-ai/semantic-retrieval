@@ -21,6 +21,9 @@ jobs:
       - name: Install lib
         run: |
           cd python && pip install -e .
+      - uses: jakebailey/pyright-action@v1
+        with:
+          working-directory: "./python"
       - name: Run tests
         run: |
           cd python && pytest
