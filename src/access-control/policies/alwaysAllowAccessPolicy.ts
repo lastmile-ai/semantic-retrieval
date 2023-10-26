@@ -9,13 +9,13 @@ export class AlwaysAllowAccessPolicy implements ResourceAccessPolicy {
 
   async testDocumentReadPermission(
     _document: Document,
-    _requestor?: AccessIdentity,
-  ): Promise<boolean> {
+    _requestor?: AccessIdentity
+  ): Promisie<boolean> {
     return true;
   }
 
   async testPolicyPermission(
-    _requestor: AccessIdentity,
+    _requestor: AccessIdentity
   ): Promise<string[] | boolean> {
     return true;
   }
