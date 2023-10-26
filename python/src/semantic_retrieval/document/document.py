@@ -1,19 +1,22 @@
 from abc import ABC, abstractmethod
+from pydantic.dataclasses import dataclass
 
 from semantic_retrieval.common.base import Attributable
 from semantic_retrieval.common.storage import BlobIdentifier
 from enum import Enum
-from typing import Optional
+from typing import Any, Optional
 
 
+@dataclass
 class RawDocumentChunk(ABC):
     content: str
-    metadata: dict[any, any]
+    metadata: dict[Any, Any]
 
 
+@dataclass
 class RawDocument(ABC):
     url: str
-    data_source: any  # TODO: Update this to DataSource type when it is defined
+    data_source: Any  # TODO: Update this to DataSource type when it is defined
     name: str
     mime_type: str
     hash: Optional[str]
@@ -41,6 +44,7 @@ class DocumentFragmentType(Enum):
     QUOTE = "quote"
 
 
+@dataclass
 class DocumentFragment(Attributable):
     fragment_id: str
     hash: Optional[str]
@@ -60,6 +64,7 @@ class DocumentFragment(Attributable):
         return "Not Implemented"
 
 
+@dataclass
 class Document(Attributable):
     document_id: str
     collection_id: Optional[str]
@@ -71,5 +76,6 @@ class Document(Attributable):
         pass
 
 
+@dataclass
 class IngestedDocument(Document):
     raw_document: RawDocument
