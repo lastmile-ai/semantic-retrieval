@@ -1,7 +1,9 @@
+from pydantic.dataclasses import dataclass
 from abc import ABC, abstractmethod
 from typing import Optional
 
 
+@dataclass
 class BlobStorage(ABC):
     @abstractmethod
     def write(self, blob: bytes, name: Optional[str]) -> "BlobIdentifier":
@@ -24,6 +26,7 @@ class BlobStorage(ABC):
         pass
 
 
+@dataclass
 class BlobIdentifier(ABC):
     blob_uri: str
     storage: BlobStorage

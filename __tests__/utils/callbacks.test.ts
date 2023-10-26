@@ -38,7 +38,7 @@ describe("Callbacks", () => {
     };
     const callbackManager = new CallbackManager("rag-run-0", callbacks);
     const fileSystem = new FileSystem(
-      "./examples/example_data/DonQuixote.txt",
+      "./examples/example_data/ingestion/DonQuixote.txt",
       undefined,
       undefined,
       callbackManager
@@ -58,7 +58,7 @@ describe("Callbacks", () => {
     };
     const callbackManager = new CallbackManager("rag-run-0", callbacks);
     const fileSystem = new FileSystem(
-      "./examples/example_data/DonQuixote.txt",
+      "./examples/example_data/ingestion/DonQuixote.txt",
       undefined,
       undefined,
       callbackManager
@@ -83,7 +83,7 @@ describe("Callbacks", () => {
     };
     const callbackManager = new CallbackManager("rag-run-0", callbacks);
     const fileSystem = new FileSystem(
-      "./examples/example_data/DonQuixote.txt",
+      "./examples/example_data/ingestion/DonQuixote.txt",
       undefined,
       undefined,
       callbackManager
