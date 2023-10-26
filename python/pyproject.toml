@@ -40,3 +40,22 @@ exclude = '''
     | dist
   )/
 '''
+
+
+[tool.pyright]
+typeCheckingMode = "strict"
+include = ["src", "tests"]
+exclude = [
+]
+ignore = []
+defineConstant = { DEBUG = true }
+venv = "semantic-retrieval"
+
+# reportMissingImports = true
+# reportMissingTypeStubs = false
+
+reportUnknownMemberType = false
+reportUnknownVariableType = false
+reportUnknownArgumentType = false
+
+pythonVersion = "3.11.5"
