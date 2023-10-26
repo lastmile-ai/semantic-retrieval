@@ -3,7 +3,9 @@
       "dbaeumer.vscode-eslint",
       "esbenp.prettier-vscode",
       "github.copilot",
-      "meta.sapling-scm"
+      "meta.sapling-scm",
+      "ms-python.python",
+      "ms-python.vscode-pylance",
     ]
   }
   
