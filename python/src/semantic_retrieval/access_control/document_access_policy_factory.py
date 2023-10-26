@@ -1,0 +1,2 @@
+class DocumentAccessPolicyFactory:
+    pass
