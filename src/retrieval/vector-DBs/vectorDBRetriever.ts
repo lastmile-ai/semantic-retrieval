@@ -4,13 +4,19 @@ import {
   DocumentFragmentType,
 } from "../../document/document";
 import { DocumentMetadataDB } from "../../document/metadata/documentMetadataDB";
-import { BaseRetriever, BaseRetrieverQueryParams } from "../retriever";
+import { BaseRetrieverQueryParams } from "../retriever";
+import { DocumentRetriever } from "../documentRetriever";
 import { Md5 } from "ts-md5";
-import { GetFragmentsEvent, RetrieveDataEvent } from "../../utils/callbacks";
+import {
+  CallbackManager,
+  GetFragmentsEvent,
+  RetrieveDataEvent,
+} from "../../utils/callbacks";
 
 export type VectorDBRetrieverParams = {
   vectorDB: VectorDB;
   metadataDB: DocumentMetadataDB;
+  callbackManager?: CallbackManager;
 };
 
 export interface VectorDBRetrieverQueryParams
@@ -19,14 +25,14 @@ export interface VectorDBRetrieverQueryParams
 /**
  * Abstract class for retrieving data R from an underlying VectorDB
  */
-export abstract class BaseVectorDBRetriever<R> extends BaseRetriever<
+export abstract class BaseVectorDBRetriever<R> extends DocumentRetriever<
   R,
   VectorDBQuery
 > {
   vectorDB: VectorDB;
 
   constructor(params: VectorDBRetrieverParams) {
-    super(params.metadataDB);
+    super(params.metadataDB, params.callbackManager);
     this.vectorDB = params.vectorDB;
   }
 
