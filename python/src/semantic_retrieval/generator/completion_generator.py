@@ -1,3 +1,4 @@
+from typing import Optional
 from semantic_retrieval.utils.callbacks import (
     CallbackManager,
     Traceable,
@@ -15,7 +16,7 @@ class LLMCompletionGeneratorParams(CompletionModelParams):
 
 
 class LLMCompletionGenerator(Traceable):
-    def __init__(self, model: CompletionModel, callback_manager: CallbackManager = None):
+    def __init__(self, model: CompletionModel, callback_manager: Optional[CallbackManager] = None):
         self.model = model
         self.callback_manager = callback_manager
 

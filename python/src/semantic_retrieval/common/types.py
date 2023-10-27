@@ -1,6 +1,6 @@
 # Don't rely on the generic type. Wrong annotation might be missed.
 # Use `Any` to signal that uncertainty explicitly.
-from typing import Any
+from typing import Any, Coroutine, TypeVar
 import numpy.typing as npt
 
 
@@ -8,3 +8,13 @@ import numpy.typing as npt
 NPA = npt.NDArray[Any]
 
 ArrayLike = npt.ArrayLike
+
+
+# Canonical typevar for generator params
+T = TypeVar("T")
+
+# Canonical typevar for generator return type
+R = TypeVar("R")
+
+# Canonical typevar for retriever query type
+Q = TypeVar("Q")
