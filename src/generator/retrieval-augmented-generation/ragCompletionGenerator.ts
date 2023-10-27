@@ -1,7 +1,7 @@
 import { AccessPassport } from "../../access-control/accessPassport";
 import { PromptTemplate } from "../../prompts/prompt-templates/promptTemplate";
 import { Document } from "../../document/document";
-import { BaseRetriever } from "../../retrieval/retriever";
+import { DocumentRetriever } from "../../retrieval/documentRetriever";
 import {
   LLMCompletionGeneratorParams,
   LLMCompletionGenerator,
@@ -9,7 +9,7 @@ import {
 
 export interface RAGCompletionGeneratorParams<P, Q>
   extends LLMCompletionGeneratorParams<P> {
-  retriever: BaseRetriever<Document[], Q>;
+  retriever: DocumentRetriever<Document[], Q>;
   accessPassport?: AccessPassport;
   ragPromptTemplate?: PromptTemplate;
 }
