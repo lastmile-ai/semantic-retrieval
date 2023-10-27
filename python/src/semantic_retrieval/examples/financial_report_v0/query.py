@@ -36,7 +36,7 @@ def generate_with_context(query: str, chunks: List[str]) -> str:
         "content": (
             "You are a helpful assistant. "
             "Rearrange the context to answer the question. "
-            "Do not include any words that do not appear in the context. "
+            "Do not include Any words that do not appear in the context. "
             "CONTEXT:"
         )
         + "\n * ".join(chunks)

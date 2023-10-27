@@ -1,10 +1,10 @@
 from abc import ABC
-from typing import Optional
+from typing import Any, Optional
 
 
 class Attributable(ABC):
-    metadata: Optional[dict[any, any]]
-    attributes: Optional[dict[any, any]]
+    metadata: Optional[dict[Any, Any]]
+    attributes: Optional[dict[Any, Any]]
 
 
 class Identifiable(ABC):
