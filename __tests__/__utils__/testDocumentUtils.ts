@@ -79,7 +79,7 @@ export type TestRawDocumentConfig = {
   metadata?: JSONObject;
   attributes?: JSONObject;
   documentId?: string;
-  dataSource: DataSource;
+  dataSource?: DataSource;
   chunkedContent?: RawDocumentChunk[];
 };
 
