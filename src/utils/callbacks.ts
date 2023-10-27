@@ -130,7 +130,7 @@ export type GetRAGCompletionRetrievalQueryEvent = {
   query: any;
 };
 
-type CallbackEvent =
+export type CallbackEvent =
   | LoadDocumentsSuccessEvent
   | LoadDocumentsErrorEvent
   | DataSourceTestConnectionSuccessEvent
