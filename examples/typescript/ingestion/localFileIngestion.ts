@@ -33,6 +33,7 @@ async function createIndex() {
     await documentTransformer.transformDocuments(parsedDocuments);
 
   return await PineconeVectorDB.fromDocuments(transformedDocuments, {
+    // Make sure this matches your Pinecone index name & it has 1536 dimensions for openai embeddings
     indexName: "test",
     embeddings: new OpenAIEmbeddings(),
     metadataDB,

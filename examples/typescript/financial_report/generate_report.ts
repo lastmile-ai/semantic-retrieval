@@ -1,23 +1,50 @@
+import { AccessPassport } from "../../../src/access-control/accessPassport";
 import { PineconeVectorDB } from "../../../src/data-store/vector-DBs/pineconeVectorDB";
 import { InMemoryDocumentMetadataDB } from "../../../src/document/metadata/inMemoryDocumentMetadataDB";
+import { OpenAIChatModel } from "../../../src/generator/completion-models/openai/openAIChatModel";
+import { CSVRetriever } from "../../../src/retrieval/csvRetriever";
+import { VectorDBDocumentRetriever } from "../../../src/retrieval/vector-DBs/vectorDBDocumentRetriever";
 import { OpenAIEmbeddings } from "../../../src/transformation/embeddings/openAIEmbeddings";
+import { AdvisorIdentity } from "./access_control/advisorIdentity";
 
 async function main() {
-  // TODO: This needs to be a metadata DB implementation that persists/loads from disk
-  const metadataDB = new InMemoryDocumentMetadataDB();
+  // Load the metadataDB persisted from ingest_data script
+  const metadataDB =
+    await InMemoryDocumentMetadataDB.fromJSONFile("./metadataDB.json");
 
-  const _vectorDB = await new PineconeVectorDB({
+  const vectorDB = await new PineconeVectorDB({
     indexName: "test-financial-report",
+    // TODO: Make this dynamic via script param
     namespace: "GET NAMESPACE FROM ingest_data RUN",
     embeddings: new OpenAIEmbeddings(),
     metadataDB,
   });
 
-  // const retriever = new FinancialReportDocumentRetriever({documentRetriever: vectorDB, metadataDB});
-  // const generator = new FinancialReportGenerator(new OpenAIChatModel());
+  const _documentRetriever = new VectorDBDocumentRetriever({
+    vectorDB,
+    metadataDB,
+  });
 
-  // const accessPassport = new AccessPassport();
-  // accessPassport.registerIdentity("DemoAccess", "User" or "Admin");
+  // TODO: Make this dynamic via script param
+  const _portfolioRetriever = new CSVRetriever(
+    "examples/example_data/financial_report/portfolios/client_a_portfolio.csv"
+  );
+
+  const accessPassport = new AccessPassport();
+  const identity = new AdvisorIdentity("client_a"); // TODO: Make this dynamic via script param
+  accessPassport.register(identity);
+
+  // const retriever = new FinancialReportDocumentRetriever({
+  //   accessPassport,
+  //   documentRetriever,
+  //   portfolioRetriever,
+  //   metadataDB,
+  // });
+
+  // const generator = new FinancialReportGenerator({
+  //   model: new OpenAIChatModel(),
+  //   retriever,
+  // });
 
   // const prompt = new PromptTemplate("Use the following data to construct a financial report matching the following format ... {data}")
 
