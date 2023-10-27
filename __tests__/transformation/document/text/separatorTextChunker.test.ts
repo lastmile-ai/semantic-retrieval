@@ -1,4 +1,3 @@
-// TODO(LAS-399): Figure out proper project build structure to prevent lint error here
 import { SeparatorTextChunker } from "../../../../src/transformation/document/text/separatorTextChunker";
 import { Document } from "../../../../src/document/document";
 import {
@@ -164,7 +163,7 @@ describe("SeparatorTextChunker transformations", () => {
     const transformedDoc = await chunker.transformDocument(testLargerDocument);
     await validateFragmentChunks(transformedDoc, 500, [
       "This is a small fragment for simple testing",
-      `This is a longer fragment for more complex testing. It has multiple lines and punctuation.
+      `This is a longer fragment for more complex testing. It has multiple lines and punctuation. \
 Contrary to popular belief, Lorem Ipsum is not simply random text. It has roots in a piece of classical Latin literature from 45 BC, \
 making it over 2000 years old. Richard McClintock, a Latin professor at Hampden-Sydney College in Virginia, looked up one of the more \
 obscure Latin words, consectetur, from a Lorem Ipsum passage, and going through the cites of the word in classical literature, discovered the`,
@@ -181,7 +180,7 @@ obscure Latin words, consectetur, from a Lorem Ipsum passage, and going through 
     await validateFragmentChunks(transformedDoc, 70, [
       "This is a small fragment for simple testing",
       "This is a longer fragment for more complex testing. It has multiple",
-      "It has multiple lines and punctuation.\nContrary to popular belief,",
+      "It has multiple lines and punctuation. Contrary to popular belief,",
       "to popular belief, Lorem Ipsum is not simply random text. It has roots",
       "text. It has roots in a piece of classical Latin literature from 45",
       "literature from 45 BC, making it over 2000 years old. Richard",
@@ -201,7 +200,7 @@ obscure Latin words, consectetur, from a Lorem Ipsum passage, and going through 
     const transformedDoc = await chunker.transformDocument(testLargerDocument);
     await validateFragmentChunks(transformedDoc, 500, [
       "This is a small fragment for simple testing",
-      `This is a longer fragment for more complex testing. It has multiple lines and punctuation.
+      `This is a longer fragment for more complex testing. It has multiple lines and punctuation. \
 Contrary to popular belief, Lorem Ipsum is not simply random text. It has roots in a piece of classical Latin literature from 45 BC, \
 making it over 2000 years old. Richard McClintock, a Latin professor at Hampden-Sydney College in Virginia, looked up one of the more \
 obscure Latin words, consectetur, from a Lorem Ipsum passage, and going through the cites of the word in classical literature, discovered the`,

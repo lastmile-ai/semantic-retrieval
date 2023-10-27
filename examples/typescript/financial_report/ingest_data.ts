@@ -8,6 +8,10 @@ import { PineconeVectorDB } from "../../../src/data-store/vector-DBs/pineconeVec
 import { OpenAIEmbeddings } from "../../../src/transformation/embeddings/openAIEmbeddings";
 import { v4 as uuid } from "uuid";
 
+// Uncomment this for logging
+// import { LogEventCallbackManager } from "../../../src/utils/logEventCallbackManager";
+// const logCallbackManager = new LogEventCallbackManager("ingest_data_example");
+
 dotenv.config();
 
 async function main() {
