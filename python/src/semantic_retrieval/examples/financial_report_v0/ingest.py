@@ -18,7 +18,7 @@ def simple_chunk(text: str, max_chunk_size: int, stride: int) -> List[str]:
 
 def get_raw_data():
     # return "This is a test of the emergency broadcast system. This is only a test."
-    with open("../examples/demo_data/10k/10k-meta-plain-text-ascii.txt") as f_10k:
+    with open("/examples/example_data/financial_report/10ks/10k-meta-plain-text-ascii.txt") as f_10k:
         # TODO: dont truncate
         return f_10k.read()[:2000]
 

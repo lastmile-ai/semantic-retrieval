@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Any, Optional
 from semantic_retrieval.ingestion.data_sources.data_source import DataSource
 from semantic_retrieval.document.document import RawDocument
 
@@ -11,6 +11,6 @@ class FileSystem(DataSource):
         self.path = path
 
     def load_documents(
-        self, filters: Optional[any] = None, limit: Optional[int] = None
+        self, filters: Optional[Any] = None, limit: Optional[int] = None
     ) -> list[RawDocument]:
         return []
