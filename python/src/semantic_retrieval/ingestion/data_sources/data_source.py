@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from semantic_retrieval.document.document import RawDocument
 
+
 from typing import Any
 
 
