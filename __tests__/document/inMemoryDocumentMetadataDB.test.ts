@@ -14,6 +14,10 @@ const TEST_METADATA: DocumentMetadata = {
   collectionId: "test-collection-id",
   uri: "test-document-uri",
   accessPolicies: [new AlwaysAllowAccessPolicy()],
+  metadata: {
+    key1: "value1",
+    key2: "value2",
+  },
 };
 
 describe("inMemoryDocumentMetadataDB", () => {
@@ -69,5 +73,52 @@ describe("inMemoryDocumentMetadataDB", () => {
     expect(retrievedMetadata.accessPolicies).toEqual(
       TEST_METADATA.accessPolicies
     );
+  });
+
+  test("query document ids from metadata", async () => {
+    const testDocumentID2 = "test-document-id-2";
+    const metadataDB = new InMemoryDocumentMetadataDB({
+      [TEST_DOCUMENT_ID]: TEST_METADATA,
+      [testDocumentID2]: {
+        documentId: testDocumentID2,
+        rawDocument: getTestRawDocument({ documentId: testDocumentID2 }),
+        document: getTestDocument({ documentId: testDocumentID2 }),
+        uri: "test-document-2-uri",
+        metadata: {
+          key1: "value A",
+          key2: "value2",
+          key3: "Look for random value here",
+        },
+      },
+    });
+
+    expect(
+      await metadataDB.queryDocumentIds({
+        metadataKey: "key2",
+        metadataValue: "value2",
+        matchType: "exact",
+      })
+    ).toEqual([TEST_DOCUMENT_ID, testDocumentID2]);
+    expect(
+      await metadataDB.queryDocumentIds({
+        metadataKey: "key1",
+        metadataValue: "value A",
+        matchType: "exact",
+      })
+    ).toEqual([testDocumentID2]);
+    expect(
+      await metadataDB.queryDocumentIds({
+        metadataKey: "key3",
+        metadataValue: "random",
+        matchType: "includes",
+      })
+    ).toEqual([testDocumentID2]);
+    expect(
+      await metadataDB.queryDocumentIds({
+        metadataKey: "key3",
+        metadataValue: "random",
+        matchType: "exact",
+      })
+    ).toEqual([]);
   });
 });
