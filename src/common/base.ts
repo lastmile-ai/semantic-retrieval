@@ -5,10 +5,10 @@ import { JSONObject } from "./jsonTypes";
  */
 export interface Attributable {
   // Any JSON-serializable metadata (like configuration settings) associated with the object.
-  metadata: JSONObject;
+  metadata?: JSONObject;
 
   // A general property bag associated with this object.
-  attributes: JSONObject;
+  attributes?: JSONObject;
 }
 
 /**
