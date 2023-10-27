@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from uuid import uuid4
 from hashlib import md5
 from typing import List, Optional
@@ -11,20 +12,23 @@ from semantic_retrieval.transformation.document.document_transformer import (
 from semantic_retrieval.document.document import Document, RawDocument
 
 
+@dataclass
 class TextChunkConfig:
     chunkSizeLimit: int
     chunkOverlap: int
     sizeFn: None
 
 
-class TextChunkTransformerParams(TextChunkConfig):
+@dataclass
+class TextChunkTransformerParams:
     metadata_db: Optional[DocumentMetadataDB]
+    text_chunk_config: TextChunkConfig
 
 
-class TextChunkTransformer(BaseDocumentTransformer, TextChunkConfig):
+class TextChunkTransformer(BaseDocumentTransformer):
     def __init__(self, params: Optional[TextChunkTransformerParams] = None):
         # TODO
-        pass
+        self.params = params
 
     async def chunk_text(self, text: str) -> List[str]:
         raise NotImplementedError("This method must be implemented in a derived class")

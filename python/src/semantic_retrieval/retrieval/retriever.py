@@ -39,7 +39,9 @@ class BaseRetriever(Traceable):
                         identity = access_passport.get_identity(policy.resource)
 
                     policy_checks.append(
-                        policy.test_document_read_permission(metadata.document, identity)
+                        policy.test_document_read_permission(
+                            metadata.document, identity
+                        )
                     )
 
                 if any(check is False for check in policy_checks):
@@ -113,7 +115,9 @@ class BaseRetriever(Traceable):
             unsafe_fragments, params["accessPassport"]
         )
 
-        accessible_documents = await self.get_documents_for_fragments(accessible_fragments)
+        accessible_documents = await self.get_documents_for_fragments(
+            accessible_fragments
+        )
 
         processed_documents = await self.process_documents(accessible_documents)
 
