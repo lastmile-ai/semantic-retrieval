@@ -1,5 +1,4 @@
-from typing import List, Optional
-import asyncio
+from typing import List, Optional, Sequence
 
 from semantic_retrieval.document.document import Document
 from semantic_retrieval.document.metadata.document_metadata_db import DocumentMetadataDB
@@ -25,6 +24,6 @@ class BaseDocumentTransformer(DocumentTransformer, Traceable):
     async def transform_document(self, document: Document) -> Document:
         raise NotImplementedError("This method must be implemented in a derived class")
 
-    async def transform_documents(self, documents: List[Document]) -> List[Document]:
+    async def transform_documents(self, documents: Sequence[Document]) -> List[Document]:
         # TODO
         return []
