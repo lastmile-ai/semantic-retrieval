@@ -1,11 +1,9 @@
 from dataclasses import dataclass
 from typing import Any, Awaitable, Callable, List, Sequence, Union
 
-
-# Define AccessIdentity
-class AccessIdentity:
-    pass
-
+from semantic_retrieval.access_control.access_identity import (
+    AccessIdentity,
+)
 
 # Define assertUnreachable function
 def assertUnreachable(x: Any) -> None:
@@ -119,14 +117,14 @@ class ChunkTextEvent:
 @dataclass
 class RegisterAccessIdentityEvent:
     name: str = "onRegisterAccessIdentity"
-    identity: AccessIdentity = AccessIdentity()
+    identity: AccessIdentity | None = None
 
 
 @dataclass
 class GetAccessIdentityEvent:
     name: str = "onGetAccessIdentity"
     resource: str = ""
-    identity: AccessIdentity = AccessIdentity()
+    identity: AccessIdentity | None = None
 
 
 @dataclass
