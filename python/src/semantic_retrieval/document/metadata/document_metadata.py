@@ -1,24 +1,52 @@
 from typing import List, Dict, Optional
 
+# from dataclasses import dataclass
+from pydantic import BaseModel
+
 from semantic_retrieval.document.document import Document, RawDocument
 from semantic_retrieval.ingestion.data_sources.data_source import DataSource
 
-from semantic_retrieval.access_control.resource_access_policy import ResourceAccessPolicy
+from semantic_retrieval.access_control.resource_access_policy import (
+    ResourceAccessPolicy,
+)
 
 
-class DocumentMetadata:
-    documentId: str
+class DocumentMetadata(BaseModel):
+    document_id: str
     uri: str
     metadata: Dict[str, str]
     attributes: Dict[str, str]
-    rawDocument: Optional[RawDocument] = None
+    raw_document: Optional[RawDocument] = None
     document: Optional[Document] = None
-    collectionId: Optional[str] = None
-    dataSource: Optional[DataSource] = None
+    collection_id: Optional[str] = None
+    # TODO: Fix this because fails at pydantic serialization
+    # data_source: Optional[DataSource] = None
     name: Optional[str] = None
-    mimeType: Optional[str] = None
+    mime_type: Optional[str] = None
     hash: Optional[str] = None
-    accessPolicies: Optional[List[ResourceAccessPolicy]] = None
+    # TODO: Fix this because fails at pydantic serialization
+    # access_policies: Optional[List[ResourceAccessPolicy]] = None
+
+    def to_dict(self):
+        return {
+            "document_id": self.document_id,
+            "uri": self.uri,
+            "metadata": self.metadata,
+            "attributes": self.attributes,
+            # TODO: Need to make sure that these also end up being serializable when implemented
+            # Assuming that RawDocument, Document, DataSource and ResourceAccessPolicy have to_dict function
+            "raw_document": self.raw_document.to_dict() if self.raw_document else None,
+            "document": self.document.to_dict() if self.document else None,
+            "collection_id": self.collection_id,
+            "data_source": self.data_source.to_dict() if self.data_source else None,
+            "name": self.name,
+            "mime_type": self.mime_type,
+            "hash": self.hash,
+            # Assuming that ResourceAccessPolicy has to_dict function
+            "access_policies": [ap.to_dict() for ap in self.access_policies]
+            if self.access_policies
+            else None,
+        }
 
 
 # # Example usage:
