@@ -26,11 +26,11 @@ class RawDocument(ABC):
     collection_id: Optional[str]
 
     @abstractmethod
-    def get_content() -> str:
+    def get_content(self) -> str | None:
         return "Not Implemented"
 
     @abstractmethod
-    def get_chunked_content() -> list[RawDocumentChunk]:
+    def get_chunked_content(self) -> list[RawDocumentChunk]:
         return []
 
 
