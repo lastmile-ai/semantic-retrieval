@@ -4,7 +4,7 @@ from typing import List, Optional, Union
 from semantic_retrieval.access_control.resource_access_policy import (
     ResourceAccessPolicy,
 )
-from semantic_retrieval.document.document import Document, RawDocument
+from semantic_retrieval.document.document import Document
 
 from semantic_retrieval.access_control.access_identity import AccessIdentity
 

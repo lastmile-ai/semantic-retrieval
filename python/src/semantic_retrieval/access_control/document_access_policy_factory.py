@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Awaitable, List
+from typing import List
 from semantic_retrieval.access_control.resource_access_policy import (
     ResourceAccessPolicy,
 )
