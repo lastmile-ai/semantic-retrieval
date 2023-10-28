@@ -35,12 +35,11 @@ async function main() {
   const identity = new AdvisorIdentity("client_a"); // TODO: Make this dynamic via script param
   accessPassport.register(identity);
 
-  // const retriever = new FinancialReportDocumentRetriever({
-  //   accessPassport,
-  //   documentRetriever,
-  //   portfolioRetriever,
-  //   metadataDB,
-  // });
+  const retriever = new FinancialReportDocumentRetriever({
+    documentRetriever,
+    portfolioRetriever,
+    metadataDB,
+  });
 
   // const generator = new FinancialReportGenerator({
   //   model: new OpenAIChatModel(),
