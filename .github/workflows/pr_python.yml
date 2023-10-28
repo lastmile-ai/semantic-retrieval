@@ -1,4 +1,4 @@
-name: Pull request testing
+name: Python Pull request testing
 on:
   pull_request:
     branches: [main]
@@ -21,6 +21,10 @@ jobs:
       - name: Install lib
         run: |
           cd python && pip install -e .
+      - uses: jakebailey/pyright-action@v1
+        continue-on-error: true
+        with:
+          working-directory: "./python"
       - name: Run tests
         run: |
           cd python && pytest
