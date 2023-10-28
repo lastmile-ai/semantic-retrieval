@@ -1,5 +1,4 @@
 import asyncio
-import uuid
 
 from semantic_retrieval.ingestion.data_sources.fs.file_system import FileSystem
 from semantic_retrieval.document.metadata.in_memory_document_metadata_db import (
@@ -21,7 +20,10 @@ from semantic_retrieval.transformation.document.text.separator_text_chunker impo
     SeparatorTextChunker,
 )
 
-from semantic_retrieval.data_store.vector_dbs.pinecone_vector_db import PineconeVectorDB
+from semantic_retrieval.data_store.vector_dbs.pinecone_vector_db import (
+    PineconeVectorDB,
+    PineconeVectorDBConfig,
+)
 
 from semantic_retrieval.transformation.embeddings.openai_embeddings import OpenAIEmbeddings
 
@@ -52,21 +54,22 @@ async def main():
     transformedDocuments = await documentTransformer.transform_documents(parsedDocuments)
 
     # Generate a new namespace using UUID
-    namespace = str(uuid.uuid4())
+    namespace = "ns123"
     print(f"NAMESPACE: {namespace}")
 
     # Create a PineconeVectorDB instance and index the transformed documents
     pineconeVectorDB = PineconeVectorDB.from_documents(
         transformedDocuments,
-        {
-            "indexName": "test-financial-report-py",
-            "namespace": namespace,
-            "embeddings": OpenAIEmbeddings(),
-            "metadata_db": metadata_db,
-        },
+        PineconeVectorDBConfig(
+            embeddings=OpenAIEmbeddings(),
+            metadata_db=metadata_db,
+            index_name="test-financial-report-py",
+            namespace=namespace,
+        ),
     )
 
     # TODO: validate state of pineconeVectorDB
+    print(f"{pineconeVectorDB=}")
 
 
 if __name__ == "__main__":

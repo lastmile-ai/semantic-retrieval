@@ -11,10 +11,10 @@ import { v4 as uuid } from "uuid";
 dotenv.config();
 
 async function main() {
-  const fileSystem = new FileSystem("examples/example_data/financial_report");
+  const fileSystem = new FileSystem(
+    "examples/example_data/financial_report/10ks"
+  );
   const rawDocuments = await fileSystem.loadDocuments();
-
-  // TODO: This needs to be a metadata DB implementation that persists to disk
   const metadataDB = new InMemoryDocumentMetadataDB();
 
   const parsedDocuments = await MultiDocumentParser.parseDocuments(
@@ -34,12 +34,20 @@ async function main() {
   const namespace = uuid();
   console.log(`NAMESPACE: ${namespace}`);
 
-  return await PineconeVectorDB.fromDocuments(transformedDocuments, {
+  await PineconeVectorDB.fromDocuments(transformedDocuments, {
+    // Make sure this matches your Pinecone index name & it has 1536 dimensions for openai embeddings
     indexName: "test-financial-report",
     namespace,
     embeddings: new OpenAIEmbeddings(),
     metadataDB,
   });
+
+  // Persist metadataDB to disk for loading in the other scripts
+  await metadataDB.persist(
+    "examples/typescript/financial_report/metadataDB.json"
+  );
+
+  console.log("Ingestion complete");
 }
 
 main();

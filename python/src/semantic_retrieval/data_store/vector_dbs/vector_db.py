@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from typing import Dict, Any
 
 from semantic_retrieval.transformation.embeddings.embeddings import (
@@ -24,10 +25,10 @@ class VectorDBTextQuery(VectorDBBaseQuery):
     text: str
 
 
+@dataclass
 class VectorDBConfig:
-    def __init__(self, embeddings: EmbeddingsTransformer, metadata_db: DocumentMetadataDB):
-        self.embeddings = embeddings
-        self.metadata_db = metadata_db
+    embeddings: EmbeddingsTransformer
+    metadata_db: DocumentMetadataDB
 
 
 def isEmbeddingQuery(query):
@@ -38,11 +39,17 @@ def isTextQuery(query):
     return hasattr(query, "text")
 
 
-class VectorDB(VectorDBConfig, Traceable):
-    def __init__(self, embeddings: EmbeddingsTransformer, metadata_db: DocumentMetadataDB):
+class VectorDB(Traceable):
+    def __init__(
+        self,
+        embeddings: EmbeddingsTransformer,
+        metadata_db: DocumentMetadataDB,
+        vector_db_config: VectorDBConfig,
+    ):
         self.embeddings = embeddings
         self.metadata_db = metadata_db
         self.callback_manager = None
+        self.vector_db_config = vector_db_config
 
     @classmethod
     def fromDocuments(cls, documents, config):
