@@ -15,10 +15,22 @@ class AccessPassport(Traceable):
         self.access_identities = {}
         self.callback_manager = callback_manager
 
-    def register(self, access_identity):
-        # TODO
-        pass
+    def register(self, access_identity: AccessIdentity):
+        self.access_identities.update({access_identity.resource: access_identity})
 
-    def get_identity(self, resource):
-        # TODO
-        pass
+        if self.callback_manager:
+            event = RegisterAccessIdentityEvent(
+                name="onRegisterAccessIdentity", access_identity=access_identity
+            )
+            self.callback_manager.run_callbacks(event)
+
+    def get_identity(self, resource) -> AccessIdentity:
+        access_identity = self.access_identities.get(resource)
+
+        if self.callback_manager:
+            event = GetAccessIdentityEvent(
+                name="onGetAccessIdentity", access_identity=access_identity
+            )
+            self.callback_manager.run_callbacks(event)
+
+        return access_identity
