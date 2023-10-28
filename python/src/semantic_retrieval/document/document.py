@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from pydantic.dataclasses import dataclass
+from pydantic import BaseModel
 
 from semantic_retrieval.common.base import Attributable
 from semantic_retrieval.common.storage import BlobIdentifier
@@ -44,8 +45,7 @@ class DocumentFragmentType(Enum):
     QUOTE = "quote"
 
 
-@dataclass
-class DocumentFragment(Attributable):
+class DocumentFragment(BaseModel, Attributable):
     fragment_id: str
     hash: Optional[str]
     blob_id: Optional[BlobIdentifier]
