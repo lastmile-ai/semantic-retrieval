@@ -7,6 +7,7 @@ import {
 
 export interface SeparatorTextChunkConfig extends TextChunkConfig {
   separator?: string;
+  stripNewlines?: boolean;
 }
 
 export type SeparatorTextChunkerParams = TextChunkTransformerParams &
@@ -18,16 +19,23 @@ export type SeparatorTextChunkerParams = TextChunkTransformerParams &
  */
 export class SeparatorTextChunker extends TextChunkTransformer {
   separator: string = " "; // e.g. words
+  stripNewlines = true;
 
   constructor(params?: SeparatorTextChunkerParams) {
     super(params);
     this.separator = params?.separator ?? this.separator;
+    this.stripNewlines =
+      params?.stripNewlines ?? (this.stripNewlines && this.separator !== "\n");
   }
 
   async chunkText(text: string): Promise<string[]> {
-    const subChunks = this.subChunkOnSeparator(text, this.separator);
+    let textToChunk = text;
+    if (this.stripNewlines) {
+      textToChunk = text.replace(/\n/g, " ");
+    }
+    const subChunks = this.subChunkOnSeparator(textToChunk, this.separator);
     const mergedChunks = await this.mergeSubChunks(subChunks, this.separator);
-    
+
     const event: ChunkTextEvent = {
       name: "onChunkText",
       chunks: mergedChunks,
