@@ -1,8 +1,9 @@
 # Don't rely on the generic type. Wrong annotation might be missed.
 # Use `Any` to signal that uncertainty explicitly.
 from typing import Any, TypeVar
-import numpy.typing as npt
 
+import numpy.typing as npt
+from pydantic import BaseModel
 
 # TODO: is this useful?
 NPA = npt.NDArray[Any]
@@ -18,3 +19,9 @@ R = TypeVar("R")
 
 # Canonical typevar for retriever query type
 Q = TypeVar("Q")
+
+
+class Record(BaseModel):
+    class Config:
+        strict = True
+        frozen = True
