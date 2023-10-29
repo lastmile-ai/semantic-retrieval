@@ -10,7 +10,7 @@ metadata_db = None  # TODO: Update to InMemoryMetadataDB once it is defined
 
 @pytest.mark.asyncio
 async def test_create_index():
-    file_system = FileSystem("./example_docs")
+    file_system = FileSystem("src/semantic_retrieval/examples/financial_report")
     raw_documents = file_system.load_documents()
 
     await MultiDocumentParser().parse_documents(
