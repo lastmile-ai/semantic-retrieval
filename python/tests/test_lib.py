@@ -1,11 +1,12 @@
 import pytest
+from semantic_retrieval.document.metadata.in_memory_document_metadata_db import InMemoryDocumentMetadataDB
 from semantic_retrieval.ingestion.data_sources.fs.file_system import FileSystem
 from semantic_retrieval.document_parsers.multi_document_parser import (
     MultiDocumentParser,
     ParserConfig,
 )
 
-metadata_db = None  # TODO: Update to InMemoryMetadataDB once it is defined
+metadata_db = InMemoryDocumentMetadataDB()
 
 
 @pytest.mark.asyncio
