@@ -54,7 +54,7 @@ from typing import Optional, Any, List
 @dataclass
 class LoadDocumentsSuccessEvent:
     name: str = "onLoadDocumentsSuccess"
-    rawDocuments: Optional[List[Any]] = None
+    raw_documents: Optional[List[Any]] = None
 
 
 @dataclass
