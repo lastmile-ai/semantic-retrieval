@@ -20,6 +20,9 @@ R = TypeVar("R")
 # Canonical typevar for retriever query type
 Q = TypeVar("Q")
 
+# Canonical typevar for params
+P = TypeVar("P")
+
 
 class Record(BaseModel):
     class Config:

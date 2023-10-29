@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from uuid import uuid4
 from hashlib import md5
-from typing import List, Optional
+from typing import Any, Callable, List, Optional
 
 from semantic_retrieval.document.metadata.document_metadata_db import DocumentMetadataDB
 
@@ -9,14 +9,15 @@ from semantic_retrieval.transformation.document.document_transformer import (
     BaseDocumentTransformer,
 )
 
-from semantic_retrieval.document.document import Document, RawDocument
+from semantic_retrieval.document.document import Document
+from semantic_retrieval.utils.callbacks import TransformDocumentEvent
 
 
 @dataclass
 class TextChunkConfig:
-    chunkSizeLimit: int
-    chunkOverlap: int
-    sizeFn: None
+    chunk_size_limit: int
+    chunk_overlap: int
+    size_fn: Callable[[Any], int]
 
 
 @dataclass
@@ -25,10 +26,17 @@ class TextChunkTransformerParams:
     text_chunk_config: TextChunkConfig
 
 
+async def _len(x: str) -> int:
+    return len(x)
+
+
 class TextChunkTransformer(BaseDocumentTransformer):
+    # TODO: finish impl
     def __init__(self, params: Optional[TextChunkTransformerParams] = None):
-        # TODO
         self.params = params
+        self.size_fn = _len
+        self.chunk_size_limit = 500
+        self.chunk_overlap = 100
 
     async def chunk_text(self, text: str) -> List[str]:
         raise NotImplementedError("This method must be implemented in a derived class")
@@ -55,7 +63,10 @@ class TextChunkTransformer(BaseDocumentTransformer):
         for original_fragment_data in original_fragments_data:
             original_fragment = original_fragment_data["content"]
 
-            for chunk in await self.chunk_text(original_fragment):
+            def id_(chunk: str) -> str:
+                return chunk
+
+            for chunk in await self.chunk_text(original_fragment):  # type: ignore [fixme]
                 current_fragment = {
                     "fragmentId": str(uuid4()),
                     "fragmentType": "text",
@@ -63,8 +74,8 @@ class TextChunkTransformer(BaseDocumentTransformer):
                     "metadata": original_fragment_data["metadata"],
                     "attributes": {},
                     "hash": md5(chunk.encode()).hexdigest(),
-                    "getContent": lambda chunk=chunk: chunk,
-                    "serialize": lambda chunk=chunk: chunk,
+                    "getContent": id_,
+                    "serialize": id_,
                 }
 
                 if fragment_count > 0:
@@ -74,7 +85,7 @@ class TextChunkTransformer(BaseDocumentTransformer):
                 transformed_fragments.append(current_fragment)
 
         transformed_document = {
-            **document,
+            **document,  # type: ignore [fixme]
             "documentId": document_id,
             "fragments": transformed_fragments,
         }
@@ -82,13 +93,13 @@ class TextChunkTransformer(BaseDocumentTransformer):
         event = TransformDocumentEvent(
             name="onTransformDocument",
             originalDocument=document,
-            transformedDocument=transformed_document,
+            transformedDocument=transformed_document,  # type: ignore [fixme]
         )
 
         if self.callback_manager:
-            self.callback_manager.run_callbacks(event)
+            await self.callback_manager.run_callbacks(event)
 
-        return transformed_document
+        return transformed_document  # type: ignore [fixme]
 
     def join_sub_chunks(self, sub_chunks: List[str], separator: str) -> Optional[str]:
         chunk = separator.join(sub_chunks).strip()
@@ -104,12 +115,12 @@ class TextChunkTransformer(BaseDocumentTransformer):
         for sub_chunk in sub_chunks:
             sub_chunk_size = await self.size_fn(sub_chunk)
 
-            if sub_chunk_size > self.chunkSizeLimit:
+            if sub_chunk_size > self.chunk_size_limit:
                 print(
-                    f"SubChunk size {sub_chunk_size} exceeds chunkSizeLimit of {self.chunkSizeLimit}"
+                    f"SubChunk size {sub_chunk_size} exceeds chunkSizeLimit of {self.chunk_size_limit}"
                 )
 
-            if current_chunk_size + chunk_separator_size + sub_chunk_size > self.chunkSizeLimit:
+            if current_chunk_size + chunk_separator_size + sub_chunk_size > self.chunk_size_limit:
                 chunk = self.join_sub_chunks(current_sub_chunks, separator)
                 if chunk is not None:
                     chunks.append(chunk)
@@ -134,13 +145,13 @@ class TextChunkTransformer(BaseDocumentTransformer):
                         prev_sub_chunks_overlap_size
                         + chunk_separator_size
                         + next_prev_sub_chunk_size
-                        > self.chunkOverlap
+                        > self.chunk_overlap
                     ) or (
                         prev_sub_chunks_overlap_size
                         + chunk_separator_size
                         + next_prev_sub_chunk_size
                         + sub_chunk_size
-                        > self.chunkSizeLimit
+                        > self.chunk_size_limit
                     ):
                         break
 
@@ -168,3 +179,6 @@ class TextChunkTransformer(BaseDocumentTransformer):
 
         if len(current_sub_chunks) > 0:
             chunk = self.join_sub_chunks(current_sub_chunks, separator)
+
+        # TODO is this correct?
+        return chunks

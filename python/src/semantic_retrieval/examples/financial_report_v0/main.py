@@ -2,16 +2,16 @@ import sys
 import numpy as np
 
 import semantic_retrieval.common.types as types
-
-
-from semantic_retrieval.examples.report_10k.ingest import (
+from semantic_retrieval.examples.financial_report_v0.ingest import (
     get_embedding,
     get_raw_data,
     simple_chunk,
 )
-from semantic_retrieval.examples.report_10k.query import generate_with_context, knn
+
 
 from pydantic.dataclasses import dataclass
+
+from semantic_retrieval.examples.financial_report_v0.query import generate_with_context, knn
 
 
 @dataclass
@@ -70,7 +70,7 @@ def main(argv: List[str]):
     stride = int(mcs / stride_ratio)
     assert stride > 0
 
-    chunked, embs = index_corpus(  # type: ignore
+    chunked, embs = index_corpus(  # type: ignore [fixme]
         corpus, SimpleChunkConfig(max_chunk_size=mcs, stride=stride)
     )
 
@@ -78,8 +78,8 @@ def main(argv: List[str]):
     for c in chunked[:5]:
         print(f"{c[:100]}")
 
-    queries: List[str] = list(argv[1].split(","))  # type: ignore
-    for query in queries:  # type: ignore
+    queries: List[str] = list(argv[1].split(","))  # type: ignore [fixme]
+    for query in queries:  # type: ignore [fixme]
         print(f"\n\n{query=}")
         top_k: List[str] = retrieve(query, chunked, embs)
 
