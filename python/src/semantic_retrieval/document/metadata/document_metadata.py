@@ -1,7 +1,8 @@
-from typing import Dict, Optional
+from typing import Dict, Optional, List
 
 # from dataclasses import dataclass
 from pydantic import BaseModel
+from semantic_retrieval.access_control.resource_access_policy import ResourceAccessPolicy
 
 from semantic_retrieval.document.document import Document, RawDocument
 
@@ -20,8 +21,7 @@ class DocumentMetadata(BaseModel):
     name: Optional[str] = None
     mime_type: Optional[str] = None
     hash: Optional[str] = None
-    # TODO: Fix this because fails at pydantic serialization
-    # access_policies: Optional[List[ResourceAccessPolicy]] = None
+    access_policies: Optional[List[ResourceAccessPolicy]] = None
 
 
 # # Example usage:

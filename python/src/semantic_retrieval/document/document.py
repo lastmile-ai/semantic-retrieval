@@ -79,3 +79,6 @@ class Document(Attributable):
 @dataclass
 class IngestedDocument(Document):
     raw_document: RawDocument
+
+    def serialize(self) -> str:
+        return "Not Implemented"

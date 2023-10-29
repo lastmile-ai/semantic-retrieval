@@ -10,10 +10,7 @@ from semantic_retrieval.access_control.access_identity import AccessIdentity
 
 
 class AlwaysAllowAccessPolicy(ResourceAccessPolicy):
-    def __init__(self):
-        self.policy = "AlwaysAllowAccessPolicy"
-        self.policyJSON = {}
-
+    policy: str = "always_allow"
     async def testDocumentReadPermission(
         self, document: Document, requestor: Optional[AccessIdentity] = None
     ) -> bool:
