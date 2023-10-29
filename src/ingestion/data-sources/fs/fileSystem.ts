@@ -14,11 +14,9 @@ import { Md5 } from "ts-md5";
 
 // the import from src/utils/callbacks.ts
 import {
+  Callback,
+  CallbackEvent,
   CallbackManager,
-  LoadDocumentsSuccessEvent,
-  DataSourceTestConnectionErrorEvent,
-  DataSourceTestConnectionSuccessEvent,
-  LoadDocumentsErrorEvent,
 } from "../../../utils/callbacks";
 
 type FileLoaderMap = {
@@ -110,17 +108,17 @@ export class FileSystem implements DataSource {
       // If stat succeeds, then the path exists.
       const out = 200;
 
-      const event: DataSourceTestConnectionSuccessEvent = {
+      const event: CallbackEvent = {
         name: "onDataSourceTestConnectionSuccess",
         code: out,
       };
       await this.callbackManager?.runCallbacks(event);
       return out;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       const out = 404;
 
-      const event: DataSourceTestConnectionErrorEvent = {
+      const event: CallbackEvent = {
         name: "onDataSourceTestConnectionError",
         code: out,
         error: err,
@@ -168,7 +166,7 @@ export class FileSystem implements DataSource {
     } else {
       const err = new Error(`${this.path} is neither a file nor a directory.`);
 
-      const event: LoadDocumentsErrorEvent = {
+      const event: CallbackEvent = {
         name: "onLoadDocumentsError",
         error: err,
       };
@@ -176,7 +174,7 @@ export class FileSystem implements DataSource {
       throw err;
     }
 
-    const event: LoadDocumentsSuccessEvent = {
+    const event: CallbackEvent = {
       name: "onLoadDocumentsSuccess",
       rawDocuments: rawDocuments,
     };
