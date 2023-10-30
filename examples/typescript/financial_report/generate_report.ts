@@ -6,6 +6,10 @@ import { CSVRetriever } from "../../../src/retrieval/csvRetriever";
 import { VectorDBDocumentRetriever } from "../../../src/retrieval/vector-DBs/vectorDBDocumentRetriever";
 import { OpenAIEmbeddings } from "../../../src/transformation/embeddings/openAIEmbeddings";
 import { AdvisorIdentity } from "./access_control/advisorIdentity";
+import {
+  FinancialReportDocumentRetriever,
+  PortfolioData,
+} from "./financialReportDocumentRetriever";
 
 async function main() {
   // Load the metadataDB persisted from ingest_data script
@@ -21,13 +25,13 @@ async function main() {
     metadataDB,
   });
 
-  const _documentRetriever = new VectorDBDocumentRetriever({
+  const documentRetriever = new VectorDBDocumentRetriever({
     vectorDB,
     metadataDB,
   });
 
   // TODO: Make this dynamic via script param
-  const _portfolioRetriever = new CSVRetriever(
+  const portfolioRetriever = new CSVRetriever<PortfolioData>(
     "examples/example_data/financial_report/portfolios/client_a_portfolio.csv"
   );
 
@@ -35,12 +39,11 @@ async function main() {
   const identity = new AdvisorIdentity("client_a"); // TODO: Make this dynamic via script param
   accessPassport.register(identity);
 
-  // const retriever = new FinancialReportDocumentRetriever({
-  //   accessPassport,
-  //   documentRetriever,
-  //   portfolioRetriever,
-  //   metadataDB,
-  // });
+  const _retriever = new FinancialReportDocumentRetriever({
+    documentRetriever,
+    portfolioRetriever,
+    metadataDB,
+  });
 
   // const generator = new FinancialReportGenerator({
   //   model: new OpenAIChatModel(),
