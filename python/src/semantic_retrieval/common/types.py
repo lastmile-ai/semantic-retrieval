@@ -3,7 +3,8 @@
 from typing import Any, TypeVar
 
 import numpy.typing as npt
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
+
 
 # TODO: is this useful?
 NPA = npt.NDArray[Any]
@@ -20,8 +21,13 @@ R = TypeVar("R")
 # Canonical typevar for retriever query type
 Q = TypeVar("Q")
 
+# Canonical typevar for params
+P = TypeVar("P")
+
 
 class Record(BaseModel):
-    class Config:
-        strict = True
-        frozen = True
+    model_config = ConfigDict(strict=True, frozen=True)
+
+    # class Config:
+    #     strict = True
+    #     frozen = True

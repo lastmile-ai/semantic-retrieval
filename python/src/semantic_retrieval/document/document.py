@@ -1,11 +1,12 @@
 from abc import ABC, abstractmethod
 from pydantic.dataclasses import dataclass
-from pydantic import BaseModel
 
 from semantic_retrieval.common.base import Attributable
 from semantic_retrieval.common.storage import BlobIdentifier
 from enum import Enum
 from typing import Any, Optional
+
+from semantic_retrieval.common.types import Record
 
 
 @dataclass
@@ -26,12 +27,12 @@ class RawDocument(ABC):
     collection_id: Optional[str]
 
     @abstractmethod
-    def get_content() -> str:
-        return "Not Implemented"
+    async def get_content() -> str:
+        pass
 
     @abstractmethod
-    def get_chunked_content() -> list[RawDocumentChunk]:
-        return []
+    async def get_chunked_content() -> list[RawDocumentChunk]:
+        pass
 
 
 class DocumentFragmentType(Enum):
@@ -45,7 +46,7 @@ class DocumentFragmentType(Enum):
     QUOTE = "quote"
 
 
-class DocumentFragment(BaseModel, Attributable):
+class DocumentFragment(Record, Attributable):
     fragment_id: str
     hash: Optional[str]
     blob_id: Optional[BlobIdentifier]
@@ -56,16 +57,15 @@ class DocumentFragment(BaseModel, Attributable):
     children: Optional[list["DocumentFragment"]]
 
     @abstractmethod
-    def get_content() -> str:
-        return "Not Implemented"
+    async def get_content() -> str:
+        pass
 
     @abstractmethod
     def serialize() -> str:
-        return "Not Implemented"
+        pass
 
 
-@dataclass
-class Document(Attributable):
+class Document(Record, Attributable):
     document_id: str
     collection_id: Optional[str]
 

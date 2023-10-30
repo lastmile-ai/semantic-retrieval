@@ -15,13 +15,19 @@ async def test_in_memory_db():
         DocumentMetadata(document_id="test", uri="blah", metadata={}, attributes={}),
     )
 
-    assert (await db.get_metadata("test")).document_id == "test"
+    result = await db.get_metadata("test")
+    assert result is not None
+    assert result.document_id == "test"
 
     # Want to write to file, read from file & also delete that file too (python has tmp files)
     test_file = tempfile.NamedTemporaryFile(delete=True)
-    db.persist(test_file.name)
+    persist_res = await db.persist(test_file.name)
+    print(f"{persist_res=}")
 
-    db2 = InMemoryDocumentMetadataDB.from_json_file(test_file.name)
-    assert (await db2.get_metadata("test")).document_id == "test"
+    db2 = await InMemoryDocumentMetadataDB.from_json_file(test_file.name)
+    result = await db2.get_metadata("test")
+    print(f"[29]{result=}")
+    assert result is not None
+    assert result.document_id == "test"
 
     # with open(test_file.name, 'r') as f:
