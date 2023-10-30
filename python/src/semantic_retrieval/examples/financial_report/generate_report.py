@@ -9,12 +9,16 @@ from semantic_retrieval.document.metadata.in_memory_document_metadata_db import 
     InMemoryDocumentMetadataDB,
 )
 
-from semantic_retrieval.examples.financial_report.access_control.identities import AdvisorIdentity
+from semantic_retrieval.examples.financial_report.access_control.identities import (
+    AdvisorIdentity,
+)
 from semantic_retrieval.retrieval.csv_retriever import CSVRetriever
 from semantic_retrieval.retrieval.vector_dbs.vector_db_document_retriever import (
     VectorDBDocumentRetriever,
 )
-from semantic_retrieval.retrieval.vector_dbs.vector_db_retriever import VectorDBRetrieverParams
+from semantic_retrieval.retrieval.vector_dbs.vector_db_retriever import (
+    VectorDBRetrieverParams,
+)
 
 from semantic_retrieval.transformation.embeddings.openai_embeddings import (
     OpenAIEmbeddings,
