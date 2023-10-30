@@ -1,5 +1,5 @@
-from dataclasses import dataclass
-from typing import Dict, Any
+from typing import Dict, Any, List
+from semantic_retrieval.common.types import Record
 
 from semantic_retrieval.transformation.embeddings.embeddings import (
     VectorEmbedding,
@@ -8,7 +8,7 @@ from semantic_retrieval.transformation.embeddings.embeddings import (
 
 from semantic_retrieval.document.metadata.document_metadata_db import DocumentMetadataDB
 
-from semantic_retrieval.utils.callbacks import Traceable, CallbackManager
+from semantic_retrieval.utils.callbacks import Traceable
 
 
 class VectorDBBaseQuery:
@@ -25,17 +25,19 @@ class VectorDBTextQuery(VectorDBBaseQuery):
     text: str
 
 
-@dataclass
-class VectorDBConfig:
+VectorDBQuery = VectorDBEmbeddingQuery | VectorDBTextQuery
+
+
+class VectorDBConfig(Record):
     embeddings: EmbeddingsTransformer
     metadata_db: DocumentMetadataDB
 
 
-def isEmbeddingQuery(query):
+def isEmbeddingQuery(query: VectorDBQuery):
     return hasattr(query, "embeddingVector")
 
 
-def isTextQuery(query):
+def isTextQuery(query: VectorDBQuery):
     return hasattr(query, "text")
 
 
@@ -52,11 +54,14 @@ class VectorDB(Traceable):
         self.vector_db_config = vector_db_config
 
     @classmethod
-    def fromDocuments(cls, documents, config):
-        raise Exception("VectorDB implementation missing override")
+    def fromDocuments(cls, documents, config) -> "VectorDB":  # type: ignore [fixme]
+        # TODO implement
+        pass
 
-    def addDocuments(self, documents):
-        raise Exception("VectorDB implementation missing override")
+    async def addDocuments(self, documents) -> None:  # type: ignore [fixme]
+        # TODO implement
+        pass
 
-    def query(self, query):
-        raise Exception("VectorDB implementation missing override")
+    async def query(self, query: VectorDBQuery) -> List[VectorEmbedding]:
+        # TODO implement
+        return []

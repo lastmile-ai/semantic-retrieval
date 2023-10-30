@@ -1,5 +1,4 @@
-from dataclasses import dataclass, field
-from typing import List, Optional
+from typing import List
 
 from semantic_retrieval.transformation.document.text.text_chunk_transformer import (
     TextChunkConfig,
@@ -7,32 +6,23 @@ from semantic_retrieval.transformation.document.text.text_chunk_transformer impo
     TextChunkTransformerParams,
 )
 
-from semantic_retrieval.utils.callbacks import CallbackManager, Traceable
 
-
-@dataclass
 class SeparatorTextChunkConfig(TextChunkConfig):
     separator: str = " "
 
 
-@dataclass
-class SeparatorTextChunkerParams:
-    text_chunk_transformer_params: TextChunkTransformerParams = field(
-        default_factory=TextChunkTransformerParams
-    )
-    separator_text_chunk_config: SeparatorTextChunkConfig = field(
-        default_factory=SeparatorTextChunkConfig
-    )
+class SeparatorTextChunkerParams(TextChunkTransformerParams):
+    separator_text_chunk_config: SeparatorTextChunkConfig
 
 
 class SeparatorTextChunker(TextChunkTransformer):
     separator: str = " "  # e.g. words
 
-    def __init__(self, params: Optional[SeparatorTextChunkerParams] = None):
+    def __init__(self, params: SeparatorTextChunkerParams):
         super().__init__(params)
         # TODO
         pass
 
     async def chunk_text(self, text: str) -> List[str]:
-        # TODO
-        pass
+        # TODO impl
+        return []
