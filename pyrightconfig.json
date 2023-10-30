@@ -1,0 +1,12 @@
+{
+  "typeCheckingMode": "strict",
+  "include": ["python"],
+  "exclude": [],
+  "ignore": [],
+  "venv": "semantic-retrieval",
+  "pythonVersion": "3.11",
+  "reportUnknownMemberType": false,
+  "reportUnknownVariableType": false,
+  "reportUnknownArgumentType": false,
+  "reportMissingTypeStubs": false
+}
