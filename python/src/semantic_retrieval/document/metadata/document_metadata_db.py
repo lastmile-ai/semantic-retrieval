@@ -1,5 +1,7 @@
-from typing import Any, Optional, List
+from typing import Any, List
 from abc import ABC, abstractmethod
+
+from result import Result
 
 from semantic_retrieval.common.types import Record
 from semantic_retrieval.document.metadata.document_metadata import DocumentMetadata
@@ -14,7 +16,7 @@ class DocumentMetadataQuery(Record):
 class DocumentMetadataDB(ABC):
     # TODO: saqadri - implement a Postgres implementation of this interface.
     @abstractmethod
-    async def get_metadata(self, document_id: str) -> Optional[DocumentMetadata]:
+    async def get_metadata(self, document_id: str) -> Result[DocumentMetadata, str]:
         pass
 
     @abstractmethod
