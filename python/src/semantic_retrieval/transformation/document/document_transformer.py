@@ -5,7 +5,7 @@ from semantic_retrieval.document.metadata.document_metadata_db import DocumentMe
 
 from semantic_retrieval.transformation.transformer import Transformer
 
-from semantic_retrieval.utils.callbacks import CallbackManager, Traceable, TransformDocumentsEvent
+from semantic_retrieval.utils.callbacks import CallbackManager, Traceable
 
 
 class DocumentTransformer(Transformer):
