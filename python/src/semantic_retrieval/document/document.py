@@ -1,16 +1,16 @@
 from abc import ABC, abstractmethod
 from pydantic.dataclasses import dataclass
+from result import Result
 
 from semantic_retrieval.common.base import Attributable
 from semantic_retrieval.common.storage import BlobIdentifier
 from enum import Enum
-from typing import Any, Optional
+from typing import Any, List, Optional
 
 from semantic_retrieval.common.types import Record
 
 
-@dataclass
-class RawDocumentChunk(ABC):
+class RawDocumentChunk(Record):
     content: str
     metadata: dict[Any, Any]
 
@@ -27,11 +27,11 @@ class RawDocument(ABC):
     collection_id: Optional[str]
 
     @abstractmethod
-    async def get_content() -> str:
+    async def get_content(self) -> Result[str, str]:
         pass
 
     @abstractmethod
-    async def get_chunked_content() -> list[RawDocumentChunk]:
+    async def get_chunked_content(self) -> List[RawDocumentChunk]:
         pass
 
 
