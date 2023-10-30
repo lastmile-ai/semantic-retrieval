@@ -26,6 +26,6 @@ def get_raw_data():
 def get_embedding(text: str, model: str = "text-embedding-ada-002") -> npt.ArrayLike:
     # print("get_emb")
     text = text.replace("\n", " ")
-    emb: npt.ArrayLike = openai.Embedding.create(input=[text], model=model)["data"][0]["embedding"]  # type: ignore
-    out: npt.ArrayLike = np.array(emb)  # type: ignore
+    emb: npt.ArrayLike = openai.Embedding.create(input=[text], model=model)["data"][0]["embedding"]  # type: ignore [fixme]
+    out: npt.ArrayLike = np.array(emb)  # type: ignore [fixme]
     return out

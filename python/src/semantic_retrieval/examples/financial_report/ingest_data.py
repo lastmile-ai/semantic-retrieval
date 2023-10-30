@@ -18,12 +18,14 @@ from semantic_retrieval.access_control.always_allow_document_access_policy_facto
 
 from semantic_retrieval.transformation.document.text.separator_text_chunker import (
     SeparatorTextChunker,
+    SeparatorTextChunkerParams,
 )
 
 from semantic_retrieval.data_store.vector_dbs.pinecone_vector_db import (
     PineconeVectorDB,
     PineconeVectorDBConfig,
 )
+from semantic_retrieval.transformation.document.text.text_chunk_transformer import TextChunkConfig
 
 from semantic_retrieval.transformation.embeddings.openai_embeddings import OpenAIEmbeddings
 
@@ -48,7 +50,15 @@ async def main():
     )
 
     # Initialize a document transformer
-    documentTransformer = SeparatorTextChunker()
+    # TODO set parameters better
+    documentTransformer = SeparatorTextChunker(
+        SeparatorTextChunkerParams(
+            metadata_db=metadata_db,
+            text_chunk_config=TextChunkConfig(
+                chunk_size_limit=500, chunk_overlap=100, size_fn=len
+            ),
+        )
+    )
 
     # Transform the parsed documents
     transformedDocuments = await documentTransformer.transform_documents(parsedDocuments)
