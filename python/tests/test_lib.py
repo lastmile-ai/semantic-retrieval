@@ -18,6 +18,8 @@ async def test_create_index():
     file_system = FileSystem(full_path)
     raw_documents = file_system.load_documents()
 
+    assert len(raw_documents) == 3
+
     await MultiDocumentParser().parse_documents(
         raw_documents,
         parser_config=ParserConfig(

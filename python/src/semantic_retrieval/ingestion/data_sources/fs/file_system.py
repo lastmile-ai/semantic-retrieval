@@ -123,7 +123,7 @@ class FileSystem(DataSource):
                 subdir_path = os.path.join(self.path, file)
                 if os.path.isdir(subdir_path):
                     subDir = FileSystem(subdir_path, collection_id)
-                    subDir.load_documents()
+                    raw_documents.extend(subDir.load_documents())
                 elif os.path.isfile(subdir_path):
                     raw_documents.append(self.load_file(subdir_path, collection_id))
         elif isfile:
