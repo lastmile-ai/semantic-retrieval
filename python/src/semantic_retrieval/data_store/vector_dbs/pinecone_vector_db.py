@@ -1,17 +1,16 @@
-from dataclasses import dataclass
 from typing import List, Optional
+from semantic_retrieval.common.types import Record
 
-from semantic_retrieval.data_store.vector_dbs.vector_db import VectorDB, VectorDBConfig
+from semantic_retrieval.data_store.vector_dbs.vector_db import (
+    VectorDB,
+    VectorDBConfig,
+    VectorDBQuery,
+)
 
 from semantic_retrieval.document.document import Document
+from semantic_retrieval.transformation.embeddings.embeddings import VectorEmbedding
 
 
-def getEnvVar(k):
-    # TODO
-    return "VALUE"
-
-
-@dataclass
 class PineconeVectorDBConfig(VectorDBConfig):
     index_name: str
     api_key: Optional[str] = None
@@ -20,24 +19,24 @@ class PineconeVectorDBConfig(VectorDBConfig):
 
 
 class PineconeVectorDB(VectorDB):
-    def __init__(self, config: VectorDBConfig):
+    def __init__(self, config: PineconeVectorDBConfig):
         # TODO
         pass
 
     @classmethod
-    def from_documents(cls, documents: List[Document], config: VectorDBConfig):
+    async def from_documents(cls, documents: List[Document], config: PineconeVectorDBConfig):
         instance = cls(config)
-        instance.add_documents(documents)
+        await instance.add_documents(documents)
         return instance
 
-    def sanitize_metadata(self, unsanitized_metadata):
+    def sanitize_metadata(self, unsanitized_metadata: Record):
         # TODO
         pass
 
-    def add_documents(self, documents):
-        # TODO
+    async def add_documents(self, documents: List[Document]):
+        # TODO impl
         pass
 
-    def query(self, query):
-        # TODO
-        pass
+    async def query(self, query: VectorDBQuery) -> List[VectorEmbedding]:  # type: ignore [fixme]
+        # TODO impl
+        return []

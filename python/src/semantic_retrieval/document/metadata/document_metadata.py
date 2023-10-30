@@ -1,17 +1,11 @@
-from typing import List, Dict, Optional
+from typing import Any, Dict, Optional
+from semantic_retrieval.common.types import Record
 
-# from dataclasses import dataclass
-from pydantic import BaseModel
 
 from semantic_retrieval.document.document import Document, RawDocument
-from semantic_retrieval.ingestion.data_sources.data_source import DataSource
-
-from semantic_retrieval.access_control.resource_access_policy import (
-    ResourceAccessPolicy,
-)
 
 
-class DocumentMetadata(BaseModel):
+class DocumentMetadata(Record):
     document_id: str
     uri: str
     metadata: Dict[str, str]
@@ -27,7 +21,7 @@ class DocumentMetadata(BaseModel):
     # TODO: Fix this because fails at pydantic serialization
     # access_policies: Optional[List[ResourceAccessPolicy]] = None
 
-    def to_dict(self):
+    def to_dict(self) -> Dict[str, Any]:
         return {
             "document_id": self.document_id,
             "uri": self.uri,
@@ -35,16 +29,16 @@ class DocumentMetadata(BaseModel):
             "attributes": self.attributes,
             # TODO: Need to make sure that these also end up being serializable when implemented
             # Assuming that RawDocument, Document, DataSource and ResourceAccessPolicy have to_dict function
-            "raw_document": self.raw_document.to_dict() if self.raw_document else None,
-            "document": self.document.to_dict() if self.document else None,
+            "raw_document": self.raw_document.to_dict() if self.raw_document else None,  # type: ignore [fixme]
+            "document": self.document.to_dict() if self.document else None,  # type: ignore [fixme]
             "collection_id": self.collection_id,
-            "data_source": self.data_source.to_dict() if self.data_source else None,
+            "data_source": self.data_source.to_dict() if self.data_source else None,  # type: ignore [fixme]
             "name": self.name,
             "mime_type": self.mime_type,
             "hash": self.hash,
             # Assuming that ResourceAccessPolicy has to_dict function
-            "access_policies": [ap.to_dict() for ap in self.access_policies]
-            if self.access_policies
+            "access_policies": [ap.to_dict() for ap in self.access_policies]  # type: ignore [fixme]
+            if self.access_policies  # type: ignore [fixme]
             else None,
         }
 

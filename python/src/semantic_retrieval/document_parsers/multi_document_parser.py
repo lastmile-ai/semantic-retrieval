@@ -17,6 +17,6 @@ class ParserConfig:
 class MultiDocumentParser(DocumentParser):
     async def parse_documents(
         self, documents: Sequence[RawDocument], parser_config: ParserConfig
-    ) -> Sequence[IngestedDocument]:
-        # TODO
+    ) -> Sequence[IngestedDocument]:  # type: ignore [fixme]
+        # TODO impl
         pass

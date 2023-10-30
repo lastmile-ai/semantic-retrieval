@@ -1,5 +1,5 @@
 from typing import List
-from semantic_retrieval.document.document import Document, RawDocument
+from semantic_retrieval.document.document import RawDocument
 from semantic_retrieval.access_control.policies.always_allow_access_policy import (
     AlwaysAllowAccessPolicy,
 )

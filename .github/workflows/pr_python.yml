@@ -22,7 +22,6 @@ jobs:
         run: |
           cd python && pip install -e .
       - uses: jakebailey/pyright-action@v1
-        continue-on-error: true
         with:
           working-directory: "./python"
       - name: Run tests
