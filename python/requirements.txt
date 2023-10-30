@@ -11,3 +11,4 @@ cchardet
 pandas
 chardet
 scikit-learn
+langchain==0.0.325
