@@ -1,4 +1,5 @@
 from typing import Any, Dict, List, Optional
+
 from semantic_retrieval.common.base import Attributable
 
 from semantic_retrieval.document.document import DocumentFragment, IngestedDocument, RawDocument
@@ -57,7 +58,8 @@ class BaseDocumentParser(DocumentParser):
         pass
 
     async def to_string(self, raw_document: RawDocument) -> str:
-        return await raw_document.get_content()
+        content = await raw_document.get_content()
+        return content.unwrap_or_else(str)
 
     async def serialize(self, raw_document: RawDocument) -> str:
         raise NotImplementedError("Method not implemented.")
