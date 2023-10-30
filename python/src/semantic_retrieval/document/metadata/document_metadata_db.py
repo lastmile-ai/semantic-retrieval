@@ -1,13 +1,13 @@
 from abc import abstractmethod, ABC
+from typing import Optional
 from semantic_retrieval.document.metadata.document_metadata import DocumentMetadata
-from typing import Awaitable
 
 
 class DocumentMetadataDB(ABC):
     @abstractmethod
-    async def get_metadata(self, documentId: str) -> DocumentMetadata:  # type: ignore
+    async def get_metadata(self, document_id: str) -> Optional[DocumentMetadata]:
         pass
 
     @abstractmethod
-    async def set_metadata(self, documentId: str, metadata: DocumentMetadata) -> None:  # type: ignore
+    async def set_metadata(self, document_id: str, metadata: DocumentMetadata) -> None:
         pass

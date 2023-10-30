@@ -1,10 +1,10 @@
-from typing import List, Dict, Any
+from typing import List
 
 from semantic_retrieval.common.base import Attributable
 
 from semantic_retrieval.transformation.transformer import Transformer
 
-from semantic_retrieval.common.json_types import JSONObject, JSONValue
+from semantic_retrieval.common.json_types import JSONObject
 
 from semantic_retrieval.document.document import Document, DocumentFragment
 
@@ -25,7 +25,7 @@ class EmbeddingsTransformer(Transformer):
     def __init__(self, dimensions: int):
         self.dimensions = dimensions
 
-    async def embed(self, text: str, metadata: JSONObject = None) -> VectorEmbedding:
+    async def embed(self, text: str, metadata: JSONObject) -> VectorEmbedding:  # type: ignore [fixme]
         pass
 
 
@@ -33,15 +33,15 @@ class DocumentEmbeddingsTransformer(EmbeddingsTransformer):
     def __init__(self, dimensions: int):
         super().__init__(dimensions)
 
-    async def embed(self, text: str, metadata: JSONObject = None) -> VectorEmbedding:
+    async def embed(self, text: str, metadata: JSONObject) -> VectorEmbedding:  # type: ignore [fixme]
         pass
 
     async def embedFragment(self, fragment: DocumentFragment) -> VectorEmbedding:
-        text = await fragment.getContent()
+        text = await fragment.get_content()
         metadata = {
-            **fragment.metadata,
-            "documentId": fragment.documentId,
-            "fragmentId": fragment.fragmentId,
+            **(fragment.metadata or {}),
+            "documentId": fragment.document_id,
+            "fragmentId": fragment.fragment_id,
         }
         return await self.embed(text, metadata)
 

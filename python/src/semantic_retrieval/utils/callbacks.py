@@ -1,50 +1,16 @@
 from dataclasses import dataclass
 from typing import Any, Awaitable, Callable, List, Sequence, Union
 
-
-# Define AccessIdentity
-class AccessIdentity:
-    pass
+from semantic_retrieval.access_control.access_identity import AccessIdentity
+from semantic_retrieval.data_store.vector_dbs.vector_db import VectorDBBaseQuery
+from semantic_retrieval.document.document import Document, DocumentFragment, IngestedDocument
+from semantic_retrieval.generator.completion_generator import LLMCompletionGeneratorParams
+from semantic_retrieval.generator.completion_models.completion_model import CompletionModelParams
+from semantic_retrieval.transformation.embeddings.embeddings import VectorEmbedding
 
 
 # Define assertUnreachable function
 def assertUnreachable(x: Any) -> None:
-    pass
-
-
-# Define VectorDBQuery
-class VectorDBQuery:
-    pass
-
-
-# Define document classes
-class IngestedDocument:
-    pass
-
-
-class RawDocument:
-    pass
-
-
-class Document:
-    pass
-
-
-class DocumentFragment:
-    pass
-
-
-# Define completion model classes
-class CompletionModelParams:
-    pass
-
-
-class LLMCompletionGeneratorParams:
-    pass
-
-
-# Define VectorEmbedding
-class VectorEmbedding:
     pass
 
 
@@ -92,8 +58,8 @@ class ParseErrorEvent:
 
 @dataclass
 class ParseSuccessEvent:
+    ingestedDocument: IngestedDocument
     name: str = "onParseSuccess"
-    ingestedDocument: IngestedDocument = IngestedDocument()
 
 
 @dataclass
@@ -105,9 +71,9 @@ class TransformDocumentsEvent:
 
 @dataclass
 class TransformDocumentEvent:
+    originalDocument: Document
+    transformedDocument: Document
     name: str = "onTransformDocument"
-    originalDocument: Document = Document()
-    transformedDocument: Document = Document()
 
 
 @dataclass
@@ -118,15 +84,15 @@ class ChunkTextEvent:
 
 @dataclass
 class RegisterAccessIdentityEvent:
+    identity: AccessIdentity
     name: str = "onRegisterAccessIdentity"
-    identity: AccessIdentity = AccessIdentity()
 
 
 @dataclass
 class GetAccessIdentityEvent:
+    identity: AccessIdentity
     name: str = "onGetAccessIdentity"
     resource: str = ""
-    identity: AccessIdentity = AccessIdentity()
 
 
 @dataclass
@@ -137,9 +103,9 @@ class AddDocumentsToVectorDBEvent:
 
 @dataclass
 class QueryVectorDBEvent:
+    query: VectorDBBaseQuery
+    vectorEmbeddings: Optional[List[VectorEmbedding]]
     name: str = "onQueryVectorDB"
-    query: VectorDBQuery = VectorDBQuery()
-    vectorEmbeddings: Optional[List[VectorEmbedding]] = None
 
 
 @dataclass
@@ -156,8 +122,8 @@ class RetrieverGetDocumentsForFragmentsEvent:
 
 @dataclass
 class RetrieverProcessDocumentsEvent:
+    documents: List[Document]
     name: str = "onRetrieverProcessDocuments"
-    documents: Optional[List[Document]] = None
 
 
 @dataclass
@@ -174,16 +140,16 @@ class GetFragmentsEvent:
 
 @dataclass
 class RunCompletionEvent:
-    name: str = "onRunCompletion"
-    params: CompletionModelParams = CompletionModelParams()
+    params: CompletionModelParams[Any]
     response: Any = None
+    name: str = "onRunCompletion"
 
 
 @dataclass
 class RunCompletionGenerationEvent:
+    params: LLMCompletionGeneratorParams[Any]
+    response: Any
     name: str = "onRunCompletionGeneration"
-    params: LLMCompletionGeneratorParams = LLMCompletionGeneratorParams()
-    response: Any = None
 
 
 @dataclass
@@ -234,7 +200,7 @@ class CallbackManager:
 
 # Define Traceable interface
 class Traceable:
-    callback_manager: CallbackManager = CallbackManager("", {})
+    callback_manager: Optional[CallbackManager] = None
 
 
 @dataclass

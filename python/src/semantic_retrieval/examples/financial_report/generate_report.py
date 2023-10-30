@@ -1,109 +1,94 @@
 import asyncio
-from dataclasses import dataclass
-from typing import Optional
-from semantic_retrieval.document.metadata.document_metadata_db import DocumentMetadataDB
+from semantic_retrieval.common.types import Record
+from semantic_retrieval.data_store.vector_dbs.pinecone_vector_db import (
+    PineconeVectorDB,
+    PineconeVectorDBConfig,
+)
 
 from semantic_retrieval.document.metadata.in_memory_document_metadata_db import (
     InMemoryDocumentMetadataDB,
 )
 
-from semantic_retrieval.data_store.vector_dbs.pinecone_vector_db import (
-    PineconeVectorDB,
-    PineconeVectorDBConfig,
+from semantic_retrieval.examples.financial_report.access_control.identities import AdvisorIdentity
+from semantic_retrieval.retrieval.csv_retriever import CSVRetriever
+from semantic_retrieval.retrieval.vector_dbs.vector_db_document_retriever import (
+    VectorDBDocumentRetriever,
 )
-from semantic_retrieval.generator.completion_generator import LLMCompletionGeneratorParams
-from semantic_retrieval.generator.completion_models.completion_model import (
-    CompletionModel,
-)
-from semantic_retrieval.generator.completion_models.openai.openai_chat_model import OpenAIChatModel
-from semantic_retrieval.prompts.prompt import IPrompt
-from semantic_retrieval.retrieval.retriever import BaseRetriever
+from semantic_retrieval.retrieval.vector_dbs.vector_db_retriever import VectorDBRetrieverParams
 
 from semantic_retrieval.transformation.embeddings.openai_embeddings import (
     OpenAIEmbeddings,
 )
 
 
-from semantic_retrieval.retrieval.document_retriever import DocumentRetriever
-
-from semantic_retrieval.generator.retrieval_augmented_generation.vector_db_rag_completion_generator import (
-    VectorDBRAGCompletionGenerator,
-)
-
 from semantic_retrieval.access_control.access_passport import AccessPassport
 
-from semantic_retrieval.access_control.access_identity import AccessIdentity
 
-from semantic_retrieval.prompts.prompt_template import PromptTemplate
-from semantic_retrieval.utils.callbacks import CallbackManager
-
-
-@dataclass
-class FinancialReportGeneratorParams(LLMCompletionGeneratorParams):
-    access_passport: AccessPassport
-    retriever: BaseRetriever
-    prompt: IPrompt
-
-
-@dataclass
-class FinancialReport:
+class FinancialReport(Record):
     pass
-
-
-class FinancialReportDocumentRetriever(DocumentRetriever):
-    def __init__(self, vector_db: PineconeVectorDB, metadata_db: DocumentMetadataDB):
-        super().__init__(metadata_db)
-
-    # TODO:
-    pass
-
-
-class FinancialReportGenerator(VectorDBRAGCompletionGenerator):
-    def __init__(self, model: CompletionModel, callback_manager: Optional[CallbackManager] = None):
-        super().__init__(model, callback_manager)
-        # TODO
-        pass
-
-    async def run(self, params: FinancialReportGeneratorParams) -> FinancialReport:
-        # TODO
-        return FinancialReport()
 
 
 async def main():
-    # TODO: This needs to be a metadata DB implementation that persists/loads from disk
-    metadata_db = InMemoryDocumentMetadataDB()
+    # TODO
+    pass
+
+    # Load the metadataDB persisted from ingest_data script
+    metadata_db = await InMemoryDocumentMetadataDB.from_json_file(
+        "examples/python/financial_report/metadata_db.json"
+    )
 
     vector_db = PineconeVectorDB(
         PineconeVectorDBConfig(
+            index_name="test-financial-report-py",
+            # TODO: Make this dynamic via script param
+            namespace="the_namespace",
             embeddings=OpenAIEmbeddings(),
             metadata_db=metadata_db,
-            index_name="test-financial-report-py",
-            namespace="ns123",
         )
     )
 
-    retriever = FinancialReportDocumentRetriever(vector_db=vector_db, metadata_db=metadata_db)
-    generator = FinancialReportGenerator(OpenAIChatModel())
+    _document_retriever = VectorDBDocumentRetriever(
+        VectorDBRetrieverParams(
+            vector_db=vector_db,
+            metadata_db=metadata_db,
+        )
+    )
+
+    # TODO: Make this dynamic via script param
+    _portfolio_retriever = CSVRetriever(
+        "examples/example_data/financial_report/portfolios/client_a_portfolio.csv"
+    )
 
     access_passport = AccessPassport()
+    identity = AdvisorIdentity("client_a")  # TODO: Make this dynamic via script param
+    access_passport.register(identity)
 
-    access_identity = AccessIdentity("id")
-    access_passport.register(access_identity)
+    # TODO
+    pass
 
-    data = "TODO"
+    # retriever = FinancialReportDocumentRetriever({
+    #   access_passport,
+    #   document_retriever,
+    #   portfolio_retriever,
+    #   metadata_db,
+    # })
 
-    prompt = PromptTemplate(
-        f"Use the following data to construct a financial report matching the following format ... {data}"
-    )
+    # generator = FinancialReportGenerator({
+    #   model: OpenAIChatModel(),
+    #   retriever,
+    # })
 
-    res = await generator.run(
-        FinancialReportGeneratorParams(
-            access_passport=access_passport, prompt=prompt, retriever=retriever
-        )
-    )
+    # prompt = PromptTemplate("Use the following data to construct a financial report matching the following format ... {data}")
 
+    #   res = await generator.run({
+    #     access_passport, # not necessary in this case, but include for example
+    #     prompt,
+    #     retriever,
+    #   })
+
+    # TODO: Save res to disk and/or print
     print("Report:\n")
-    print(res)
+    # print(res)
 
 
 if __name__ == "__main__":

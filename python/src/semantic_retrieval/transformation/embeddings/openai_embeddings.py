@@ -1,6 +1,7 @@
 from dataclasses import dataclass
-from typing import List, Optional, Any, Dict
+from typing import List, Optional
 from semantic_retrieval.common.json_types import JSONObject
+from semantic_retrieval.common.types import Record
 
 # from openai import OpenAI, EmbeddingsResponse
 
@@ -19,13 +20,14 @@ class OpenAIClientOptions:
 
 class OpenAI:
     # TODO: import
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs) -> None:  # type: ignore [fixme]
         pass
 
 
-def getEnvVar(key):
-    # TODO
-    return "THE_VAR_VALUE"
+class EmbedFragmentData(Record):
+    document_id: str
+    fragment_id: str
+    text: str
 
 
 @dataclass
@@ -44,14 +46,14 @@ class OpenAIEmbeddings(DocumentEmbeddingsTransformer):
         # TOD
         pass
 
-    def embed(self, text: str, metadata: Optional[JSONObject] = None) -> VectorEmbedding:
+    def embed(self, text: str, metadata: Optional[JSONObject] = None) -> VectorEmbedding:  # type: ignore [fixme]
         # TODO
         pass
 
-    async def transform_documents(self, documents: List[Document]) -> List[VectorEmbedding]:
+    async def transform_documents(self, documents: List[Document]) -> List[VectorEmbedding]:  # type: ignore [fixme]
         # TODO
         pass
 
-    async def create_embeddings(self, fragments: List[Dict]) -> List[VectorEmbedding]:
+    async def create_embeddings(self, fragments: List[EmbedFragmentData]) -> List[VectorEmbedding]:  # type: ignore [fixme]
         # TODO
         pass

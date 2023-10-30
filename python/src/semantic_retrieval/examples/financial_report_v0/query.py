@@ -7,13 +7,13 @@ import semantic_retrieval.common.types as types
 from .ingest import get_embedding
 
 
-from sklearn.metrics.pairwise import cosine_similarity  # type: ignore
+from sklearn.metrics.pairwise import cosine_similarity  # type: ignore [fixme]
 
 
 def knn(query: str, candidates: types.NPA, metric_name: str, k: int) -> List[int]:
     query_emb = np.expand_dims(get_embedding(query), axis=0)
     if metric_name == "cos_sim":
-        cos_sim = cosine_similarity(query_emb, candidates)  # type: ignore
+        cos_sim = cosine_similarity(query_emb, candidates)  # type: ignore [fixme]
         sim_array: types.NPA = np.squeeze(cos_sim)
         print(f"{sim_array.shape=}")
         # print(f"{sim_array=}")
@@ -42,7 +42,7 @@ def generate_with_context(query: str, chunks: List[str]) -> str:
         + "\n * ".join(chunks)
         + "QUESTION:\n",
     }
-    response = openai.ChatCompletion.create(  # type: ignore
+    response = openai.ChatCompletion.create(  # type: ignore [fixme]
         model="gpt-4",
         messages=[
             system,
@@ -50,4 +50,4 @@ def generate_with_context(query: str, chunks: List[str]) -> str:
         ],
     )
 
-    return response.choices[0]["message"]["content"]  # type: ignore
+    return response.choices[0]["message"]["content"]  # type: ignore [fixme]
