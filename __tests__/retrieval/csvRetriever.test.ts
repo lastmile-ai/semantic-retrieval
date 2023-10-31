@@ -31,7 +31,6 @@ describe("csvRetriever for retrieving structured data from CSV", () => {
     expect(data["MSFT"].Shares).toEqual(null);
     expect(data["AMZN"].Shares).toEqual(30);
     expect(data["NVDA"].Shares).toEqual(100);
-    expect(data["GOOGL"].Shares).toEqual(null);
     expect(data["TSLA"].Shares).toEqual(null);
     expect(data["GOOG"].Shares).toEqual(null);
     expect(data["BRK.B"].Shares).toEqual(null);

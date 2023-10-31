@@ -30,6 +30,8 @@ const DEFAULT_FILE_LOADERS: FileLoaderMap = {
   ".docx": (path: string) => new DocxFileLoader(path),
   ".pdf": (path: string) => new PDFFileLoader(path),
   ".txt": (path: string) => new TxtFileLoader(path),
+  // TODO: We should probably have a different loader for MD which loads sections delineated by headers, etc.
+  ".md": (path: string) => new TxtFileLoader(path),
 };
 
 /**
@@ -116,7 +118,7 @@ export class FileSystem implements DataSource {
       };
       await this.callbackManager?.runCallbacks(event);
       return out;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       const out = 404;
 
