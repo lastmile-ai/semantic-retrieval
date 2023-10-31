@@ -63,18 +63,22 @@ async def test_access_policies():
     assert always_deny_policy.policy == "always_deny"
     assert (
         await always_deny_policy.testDocumentReadPermission(
-            ingested_documents[0], AccessIdentity("abc")
+            ingested_documents[0], AccessIdentity(resource="abc")
         )
         == False
     )
-    assert await always_deny_policy.testPolicyPermission(AccessIdentity("abc")) == False
+    assert (
+        await always_deny_policy.testPolicyPermission(AccessIdentity(resource="abc"))
+        == False
+    )
 
     assert (
         await always_accept_policy.testDocumentReadPermission(
-            ingested_documents[0], AccessIdentity("abc")
+            ingested_documents[0], AccessIdentity(resource="abc")
         )
         == True
     )
     assert (
-        await always_accept_policy.testPolicyPermission(AccessIdentity("abc")) == True
+        await always_accept_policy.testPolicyPermission(AccessIdentity(resource="abc"))
+        == True
     )
