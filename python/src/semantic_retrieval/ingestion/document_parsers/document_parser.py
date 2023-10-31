@@ -2,13 +2,16 @@ from typing import Any, Dict, List, Optional
 
 from semantic_retrieval.common.base import Attributable
 
-from semantic_retrieval.document.document import DocumentFragment, IngestedDocument, RawDocument
+from semantic_retrieval.document.document import (
+    DocumentFragment,
+    IngestedDocument,
+    RawDocument,
+)
 from semantic_retrieval.utils.callbacks import CallbackManager, Traceable
 
 
 class DocumentParser(Attributable, Traceable):
-    def __init__(self):
-        self.mime_type_restriction: Optional[List[str]] = None
+    mime_type_restriction: Optional[List[str]] = None
 
     def parse(self, raw_document: RawDocument) -> IngestedDocument:  # type: ignore [fixme]
         # TODO impl

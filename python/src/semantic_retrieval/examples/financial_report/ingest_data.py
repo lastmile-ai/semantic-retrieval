@@ -34,6 +34,7 @@ from semantic_retrieval.transformation.document.text.text_chunk_transformer impo
 
 from semantic_retrieval.transformation.embeddings.openai_embeddings import (
     OpenAIEmbeddings,
+    OpenAIEmbeddingsConfig,
 )
 
 import argparse
@@ -96,7 +97,9 @@ async def run_ingest(config: Config):
         namespace=config.namespace,
     )
 
-    embeddings = OpenAIEmbeddings()
+    openaiembcfg = OpenAIEmbeddingsConfig(api_key_path_abs=config.openai_key_path_abs)
+
+    embeddings = OpenAIEmbeddings(openaiembcfg)
     pineconeVectorDB = await PineconeVectorDB.from_documents(
         transformedDocuments, pcvdbcfg, embeddings, metadata_db
     )

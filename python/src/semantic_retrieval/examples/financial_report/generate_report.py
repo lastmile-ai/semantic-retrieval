@@ -28,6 +28,7 @@ from semantic_retrieval.retrieval.vector_dbs.vector_db_document_retriever import
 
 from semantic_retrieval.transformation.embeddings.openai_embeddings import (
     OpenAIEmbeddings,
+    OpenAIEmbeddingsConfig,
 )
 
 
@@ -72,7 +73,11 @@ async def run_generate_report(config: Config):
                 # TODO: Make this dynamic via script param
                 namespace="the_namespace",
             )
-            embeddings = OpenAIEmbeddings()
+            openaiembcfg = OpenAIEmbeddingsConfig(
+                api_key_path_abs=config.openai_key_path_abs
+            )
+
+            embeddings = OpenAIEmbeddings(openaiembcfg)
             vector_db = PineconeVectorDB(
                 vdbcfg,
                 embeddings=embeddings,
