@@ -5,6 +5,10 @@ from semantic_retrieval.document_parsers.multi_document_parser import (
     MultiDocumentParser,
     ParserConfig,
 )
+from semantic_retrieval.transformation.embeddings.openai_embeddings import (
+    OpenAIEmbeddings,
+    OpenAIEmbeddingsConfig,
+)
 
 metadata_db = None  # TODO: Update to InMemoryMetadataDB once it is defined
 
@@ -29,3 +33,14 @@ async def test_create_index():
     # Then can start to write the actual implementation / split the work
 
     assert True
+
+
+@pytest.mark.asyncio
+async def test_openai_emb_query():
+    cfg = OpenAIEmbeddingsConfig(
+        api_key_path_abs="/Users/jonathan/keys/dev_OPENAI_API_KEY.txt"
+    )
+    e = OpenAIEmbeddings(cfg)
+    res = await e.embed("hello world")
+    dim = len(res.vector)
+    assert dim == 1536
