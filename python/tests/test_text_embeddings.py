@@ -1,4 +1,4 @@
-from typing import Any, Callable
+from typing import Any
 import pytest
 from semantic_retrieval.transformation.embeddings.embeddings import ModelHandle
 
@@ -13,8 +13,13 @@ class _MockResult:
         return {"data": [{"embedding": [0] * 1536}]}
 
 
+class _MockHandleCreator:
+    def create(self, *args, **kwargs):  # type: ignore
+        return _MockResult()
+
+
 class MockModelHandle(ModelHandle):
-    create: Callable[[Any], Any] = lambda *args, **kwargs: _MockResult()  # type: ignore
+    creator: Any = _MockHandleCreator()
 
 
 @pytest.mark.asyncio
@@ -23,6 +28,6 @@ async def test_openai_emb_query():
     e = OpenAIEmbeddings(cfg)
 
     model_handle = MockModelHandle()
-    res = await e.embed(model_handle, "hello world")
+    res = await e.embed("hello world", model_handle=model_handle)
     dim = len(res.vector)
     assert dim == 1536
