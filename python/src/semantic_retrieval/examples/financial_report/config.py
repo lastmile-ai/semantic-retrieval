@@ -19,11 +19,20 @@ class Config(Record):
     # Local paths
     # TODO: double check this: data_root is relative to cwd.
     data_root: str = "examples/example_data/financial_report"
-    metadata_db_path: str = "artifacts/metadata_db_py.json"
-    portfolio_csv_path: str = "portfolios/client_a_portfolio.csv"
+    metadata_db_path: str = "artifacts/metadata_db_py_v2.json"
+    portfolio_csv_dir: str = "portfolios"
 
     # Misc
     client_name: str = "client_a"
+    top_k: int = 10
+    overfetch_factor: float = 5.0
+
+    # make sure this is correct!
+    chunk_size_limit: int = 500
+
+    # assume 8k (GPT4) and leave room for the instruction and
+    # generated output
+    retrieved_context_limit: int = 4000
 
 
 def add_parser_argument(parser, field_name, field):  # type: ignore
