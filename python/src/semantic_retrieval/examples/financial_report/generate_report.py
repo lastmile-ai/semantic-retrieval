@@ -1,7 +1,9 @@
+import argparse
 import asyncio
 import os
 import sys
 from typing import List
+from dotenv import load_dotenv
 
 from result import Err, Ok
 from semantic_retrieval.common.types import Record
@@ -20,7 +22,7 @@ from semantic_retrieval.document.metadata.in_memory_document_metadata_db import 
 from semantic_retrieval.examples.financial_report.access_control.identities import (
     AdvisorIdentity,
 )
-from semantic_retrieval.examples.financial_report.config import Config
+from semantic_retrieval.examples.financial_report.config import Config, argparsify
 from semantic_retrieval.retrieval.csv_retriever import CSVRetriever
 from semantic_retrieval.retrieval.vector_dbs.vector_db_document_retriever import (
     VectorDBDocumentRetriever,
@@ -28,14 +30,13 @@ from semantic_retrieval.retrieval.vector_dbs.vector_db_document_retriever import
 
 from semantic_retrieval.transformation.embeddings.openai_embeddings import (
     OpenAIEmbeddings,
+    OpenAIEmbeddingsConfig,
 )
 
 
 from semantic_retrieval.access_control.access_passport import AccessPassport
 
-import argparse
-
-from semantic_retrieval.utils.configs.configs import remove_nones
+from semantic_retrieval.utils.configs.configs import combine_dicts, remove_nones
 
 
 class FinancialReport(Record):
@@ -52,11 +53,33 @@ def resolve_path(data_root: str, path: str) -> str:
 
 
 async def main(argv: List[str]):
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--data-root", type=str)
+    load_dotenv()
+
+    parser = argparsify(Config)
     args = parser.parse_args(argv[1:])
-    args_resolved = Config(**remove_nones(vars(args)))
-    return await run_generate_report(args_resolved)
+
+    config = get_config(args)
+
+    return await run_generate_report(config)
+
+
+def get_config(args: argparse.Namespace):
+    # TODO combine stuff cleaner
+    args_resolved = combine_dicts(
+        [
+            remove_nones(d)
+            for d in [
+                vars(args),
+                dict(
+                    openai_key=os.getenv("OPENAI_API_KEY"),
+                    pinecone_key=os.getenv("PINECONE_API_KEY"),
+                ),
+            ]
+        ]
+    )
+    # print(args_resolved)
+
+    return Config(**args_resolved)
 
 
 async def run_generate_report(config: Config):
@@ -65,14 +88,18 @@ async def run_generate_report(config: Config):
     res_metadata_db = await InMemoryDocumentMetadataDB.from_json_file(metadata_path)
 
     match res_metadata_db:
+        case Err(msg):
+            print(f"Error loading metadataDB: {msg}")
+            return -1
         case Ok(metadata_db):
             print(f"{metadata_db.metadata=}")
             vdbcfg = PineconeVectorDBConfig(
-                index_name="test-financial-report-py",
-                # TODO: Make this dynamic via script param
-                namespace="the_namespace",
+                index_name=config.index_name,
+                namespace=config.namespace,
             )
-            embeddings = OpenAIEmbeddings()
+            openaiembcfg = OpenAIEmbeddingsConfig(api_key=config.openai_key)
+
+            embeddings = OpenAIEmbeddings(openaiembcfg)
             vector_db = PineconeVectorDB(
                 vdbcfg,
                 embeddings=embeddings,
@@ -91,15 +118,12 @@ async def run_generate_report(config: Config):
                 metadata_db=metadata_db,
             )
 
-            # TODO: Make this dynamic via script param
             _portfolio_retriever = CSVRetriever(
-                "examples/example_data/financial_report/portfolios/client_a_portfolio.csv"
+                resolve_path(config.data_root, config.portfolio_csv_path)
             )
 
             access_passport = AccessPassport()
-            identity = AdvisorIdentity(
-                "client_a"
-            )  # TODO: Make this dynamic via script param
+            identity = AdvisorIdentity(client=config.client_name)
             access_passport.register(identity)
 
             # retriever = FinancialReportDocumentRetriever({
@@ -125,9 +149,6 @@ async def run_generate_report(config: Config):
             # TODO: Save res to disk and/or print
             print("Report:\n")
             # print(res)
-        case Err(msg):
-            print(f"Error loading metadataDB: {msg}")
-            return -1
 
 
 if __name__ == "__main__":
