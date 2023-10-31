@@ -50,7 +50,10 @@ class PineconeVectorDB(VectorDB):
         pass
 
     async def add_documents(self, documents: List[Document]):
-        # TODO impl
+        
+        # Suyog to write this & also need to update fn signature
+
+
         pass
 
     async def query(self, query: VectorDBQuery) -> List[VectorEmbedding]:  # type: ignore [fixme]
