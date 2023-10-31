@@ -42,7 +42,7 @@ class DocumentMetadata(Record):
 
 # # Example usage:
 # metadata = DocumentMetadata(
-#     documentId="12345",
+#     document_id="12345",
 #     uri="https://example.com/document",
 #     metadata={"key1": "value1", "key2": "value2"},
 #     attributes={"attr1": "attr_value1"},
