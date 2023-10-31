@@ -19,6 +19,8 @@ import hashlib
 import uuid
 import mimetypes
 
+from semantic_retrieval.utils.configs.configs import remove_nones
+
 
 # TODO: (suyog) I dislike this quite a bit, but following typescript for now - same with the FileSystemRawDocument implementation of RawDocument
 def csv_loader_func(path: str) -> CSVLoader:
@@ -47,15 +49,6 @@ DEFAULT_FILE_LOADERS: dict[str, Callable[[str], BaseLoader]] = {
 
 class FileSystemRawDocument(RawDocument):
     file_loaders: dict[str, Callable[[str], BaseLoader]] = DEFAULT_FILE_LOADERS
-
-    def __init__(
-        self,
-        file_loaders: Optional[dict[str, Callable[[str], BaseLoader]]] = None,
-        **kwargs: Any,
-    ):
-        super().__init__(**kwargs)
-        if file_loaders is not None:
-            self.file_loaders = file_loaders
 
     async def get_content(self) -> Result[str, str]:
         # Get file loader w/ filePath (which is self.uri) & load_chunked_content
@@ -102,17 +95,21 @@ class FileSystem(DataSource):
         # TODO: This should be done outside of python
         hash = hashlib.md5(open(path, "rb").read()).hexdigest()
 
-        return FileSystemRawDocument(
-            file_loaders=self.file_loaders,
-            uri=path,
-            data_source=self,
-            name=file_name,
-            mime_type=mimetypes.guess_type(path)[0],
-            hash=hash,
-            blob_id=None,
-            document_id=str(uuid.uuid4()),
-            collection_id=collection_id,
+        fsrd_args = remove_nones(
+            dict(
+                file_loaders=self.file_loaders,
+                uri=path,
+                data_source=self,
+                name=file_name,
+                mime_type=mimetypes.guess_type(path)[0],
+                hash=hash,
+                blob_id=None,
+                document_id=str(uuid.uuid4()),
+                collection_id=collection_id,
+            )
         )
+
+        return FileSystemRawDocument(**fsrd_args)
 
     def load_documents(
         self, filters: Optional[Any] = None, limit: Optional[int] = None

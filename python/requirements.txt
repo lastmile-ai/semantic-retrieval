@@ -13,3 +13,4 @@ chardet
 scikit-learn
 result
 langchain==0.0.325
+tiktoken
