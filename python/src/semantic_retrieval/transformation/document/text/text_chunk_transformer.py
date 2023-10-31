@@ -69,7 +69,7 @@ class TextChunkTransformer(BaseDocumentTransformer):
                 current_fragment = {
                     "fragmentId": str(uuid4()),
                     "fragmentType": "text",
-                    "documentId": document_id,
+                    "document_id": document_id,
                     "metadata": original_fragment_data["metadata"],
                     "attributes": {},
                     "hash": md5(chunk.encode()).hexdigest(),
@@ -85,7 +85,7 @@ class TextChunkTransformer(BaseDocumentTransformer):
 
         transformed_document = {
             **document,  # type: ignore [fixme]
-            "documentId": document_id,
+            "document_id": document_id,
             "fragments": transformed_fragments,
         }
 
