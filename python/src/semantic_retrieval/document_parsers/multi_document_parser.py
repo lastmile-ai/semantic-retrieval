@@ -11,7 +11,9 @@ class ParserConfig:
     access_control_policy_factory: Optional[
         Any
     ]  # TODO: Add type for access control policy factory in followup diff
-    parser_registry: Optional[Any] = None  # TODO: Add type for parser registry in followup diff
+    parser_registry: Optional[
+        Any
+    ] = None  # TODO: Add type for parser registry in followup diff
 
 
 class MultiDocumentParser(DocumentParser):
