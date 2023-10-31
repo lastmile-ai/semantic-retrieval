@@ -33,6 +33,9 @@ class Config(Record):
     # assume 8k (GPT4) and leave room for the instruction and
     # generated output
     retrieved_context_limit: int = 4000
+    retrieval_query: str = "overall cash flow"
+    structure_prompt: str = "Numbered list"
+    data_extraction_prompt: str = "data_extraction_prompt"
 
 
 def add_parser_argument(parser, field_name, field):  # type: ignore
