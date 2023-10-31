@@ -95,6 +95,8 @@ async def run_ingest(config: Config):
     pcvdbcfg = PineconeVectorDBConfig(
         index_name=config.index_name,
         namespace=config.namespace,
+        api_key=config.pinecone_key,
+        environment=config.pinecone_environment,
     )
 
     openaiembcfg = OpenAIEmbeddingsConfig(api_key=config.openai_key)
