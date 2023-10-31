@@ -20,7 +20,7 @@ from semantic_retrieval.document.metadata.in_memory_document_metadata_db import 
 from semantic_retrieval.examples.financial_report.access_control.identities import (
     AdvisorIdentity,
 )
-from semantic_retrieval.examples.financial_report.config import Config
+from semantic_retrieval.examples.financial_report.config import Config, argparsify
 from semantic_retrieval.retrieval.csv_retriever import CSVRetriever
 from semantic_retrieval.retrieval.vector_dbs.vector_db_document_retriever import (
     VectorDBDocumentRetriever,
@@ -33,8 +33,6 @@ from semantic_retrieval.transformation.embeddings.openai_embeddings import (
 
 
 from semantic_retrieval.access_control.access_passport import AccessPassport
-
-import argparse
 
 from semantic_retrieval.utils.configs.configs import remove_nones
 
@@ -53,8 +51,7 @@ def resolve_path(data_root: str, path: str) -> str:
 
 
 async def main(argv: List[str]):
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--data-root", type=str)
+    parser = argparsify(Config)
     args = parser.parse_args(argv[1:])
     args_resolved = Config(**remove_nones(vars(args)))
     return await run_generate_report(args_resolved)
@@ -66,12 +63,14 @@ async def run_generate_report(config: Config):
     res_metadata_db = await InMemoryDocumentMetadataDB.from_json_file(metadata_path)
 
     match res_metadata_db:
+        case Err(msg):
+            print(f"Error loading metadataDB: {msg}")
+            return -1
         case Ok(metadata_db):
             print(f"{metadata_db.metadata=}")
             vdbcfg = PineconeVectorDBConfig(
-                index_name="test-financial-report-py",
-                # TODO: Make this dynamic via script param
-                namespace="the_namespace",
+                index_name=config.index_name,
+                namespace=config.namespace,
             )
             openaiembcfg = OpenAIEmbeddingsConfig(
                 api_key_path_abs=config.openai_key_path_abs
@@ -96,15 +95,12 @@ async def run_generate_report(config: Config):
                 metadata_db=metadata_db,
             )
 
-            # TODO: Make this dynamic via script param
             _portfolio_retriever = CSVRetriever(
-                "examples/example_data/financial_report/portfolios/client_a_portfolio.csv"
+                resolve_path(config.data_root, config.portfolio_csv_path)
             )
 
             access_passport = AccessPassport()
-            identity = AdvisorIdentity(
-                "client_a"
-            )  # TODO: Make this dynamic via script param
+            identity = AdvisorIdentity(client=config.client_name)
             access_passport.register(identity)
 
             # retriever = FinancialReportDocumentRetriever({
@@ -130,9 +126,6 @@ async def run_generate_report(config: Config):
             # TODO: Save res to disk and/or print
             print("Report:\n")
             # print(res)
-        case Err(msg):
-            print(f"Error loading metadataDB: {msg}")
-            return -1
 
 
 if __name__ == "__main__":
