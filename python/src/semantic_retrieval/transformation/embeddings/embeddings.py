@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 from semantic_retrieval.common.base import Attributable
 
@@ -26,7 +26,10 @@ class VectorEmbedding(Attributable):
 
 
 class ModelHandle(ABC):
-    create: Callable[[Any], Any] = lambda *args, **kwargs: "result"  # type: ignore
+    # e.g. openai.Embedding
+    creator: Any
+    # Contains a :
+    # create: Callable[[Any], Any] = lambda *args, **kwargs: "result"  # type: ignore
 
 
 class EmbeddingsTransformer(Transformer):
@@ -34,7 +37,12 @@ class EmbeddingsTransformer(Transformer):
         self.dimensions = dimensions
 
     @abstractmethod
-    async def embed(self, model_handle: ModelHandle, text: str, metadata: JSONObject) -> VectorEmbedding:  # type: ignore [fixme]
+    async def embed(
+        self,
+        text: str,
+        model_handle: Optional[ModelHandle],
+        metadata: Optional[JSONObject] = None,
+    ) -> VectorEmbedding:
         pass
 
 
@@ -52,7 +60,7 @@ class DocumentEmbeddingsTransformer(EmbeddingsTransformer):
             "fragmentId": fragment.fragment_id,
         }
 
-        return await self.embed(model_handle, text, metadata)
+        return await self.embed(text, model_handle=model_handle, metadata=metadata)
 
     async def embedDocument(
         self, model_handle: ModelHandle, document: Document
