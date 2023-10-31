@@ -17,14 +17,15 @@ class RawDocumentChunk(Record):
 
 @dataclass
 class RawDocument(ABC):
-    url: str
-    data_source: Any  # TODO: Update this to DataSource type when it is defined
+    uri: str
+    # data_source: Any  # TODO: Update this to DataSource type when it is defined
     name: str
     mime_type: str
-    hash: Optional[str]
-    blob_id: Optional[BlobIdentifier]
     document_id: str
     collection_id: Optional[str]
+
+    hash: Optional[str]
+    blob_id: Optional[BlobIdentifier] = None
 
     @abstractmethod
     async def get_content(self) -> Result[str, str]:
@@ -49,26 +50,25 @@ class DocumentFragmentType(Enum):
 class DocumentFragment(Record, Attributable):
     fragment_id: str
     hash: Optional[str]
-    blob_id: Optional[BlobIdentifier]
     fragment_type: DocumentFragmentType
     document_id: str
-    previous_fragment: Optional["DocumentFragment"]
-    next_fragment: Optional["DocumentFragment"]
-    children: Optional[list["DocumentFragment"]]
+    previous_fragment: Optional["DocumentFragment"] = None
+    next_fragment: Optional["DocumentFragment"] = None
+    children: Optional[list["DocumentFragment"]] = None
+    blob_id: Optional[BlobIdentifier] = None
 
     @abstractmethod
-    async def get_content() -> str:
+    async def get_content(self) -> str:
         pass
 
     @abstractmethod
-    def serialize() -> str:
+    def serialize(self) -> str:
         pass
 
 
 class Document(Record, Attributable):
     document_id: str
     collection_id: Optional[str]
-
     fragments: list[DocumentFragment]
 
     @abstractmethod
@@ -76,6 +76,11 @@ class Document(Record, Attributable):
         pass
 
 
-@dataclass
 class IngestedDocument(Document):
     raw_document: RawDocument
+    # Pydantic & pylance issues w/ not being able to use Attributable fields
+    metadata: Optional[dict[Any, Any]]
+    attributes: Optional[dict[Any, Any]]
+
+    def serialize(self) -> str:
+        return "Not Implemented"

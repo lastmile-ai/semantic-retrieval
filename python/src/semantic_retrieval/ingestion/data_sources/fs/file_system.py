@@ -40,6 +40,7 @@ def docx_loader_func(path: str) -> Docx2txtLoader:
 DEFAULT_FILE_LOADERS: dict[str, Callable[[str], BaseLoader]] = {
     ".csv": csv_loader_func,
     ".txt": txt_loader_func,
+    ".py": txt_loader_func,
     ".pdf": pdf_loader_func,
     ".docx": docx_loader_func,
 }
@@ -59,11 +60,11 @@ class FileSystemRawDocument(RawDocument):
 
     async def get_content(self) -> Result[str, str]:
         # Get file loader w/ filePath (which is self.uri) & load_chunked_content
-        _, file_extension = os.path.splitext(self.url)
+        _, file_extension = os.path.splitext(self.uri)
 
         if file_extension in self.file_loaders:
             file_loader = self.file_loaders[file_extension]
-            loader = file_loader(self.url)
+            loader = file_loader(self.uri)
             return Ok(loader.load()[0].page_content)
         else:
             return Err(f"File extension {file_extension} not supported")
@@ -104,7 +105,7 @@ class FileSystem(DataSource):
 
         return FileSystemRawDocument(
             file_loaders=self.file_loaders,
-            url=path,
+            uri=path,
             data_source=self,
             name=file_name,
             mime_type=mimetypes.guess_type(path)[0],
