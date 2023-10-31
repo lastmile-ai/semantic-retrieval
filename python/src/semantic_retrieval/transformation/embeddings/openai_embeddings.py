@@ -1,5 +1,5 @@
 import os
-from typing import Any, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional
 import openai
 
 from tiktoken import encoding_for_model
@@ -27,6 +27,10 @@ class OpenAIEmbeddingsConfig(Record):
     api_key: Optional[str] = None
 
 
+class OpenAIEmbeddingsHandle(ModelHandle):
+    creator: Callable[[Any], Any] = openai.Embedding
+
+
 DEFAULT_MODEL = "text-embedding-ada-002"
 
 MODEL_DIMENSIONS = {
@@ -52,10 +56,12 @@ class OpenAIEmbeddings(DocumentEmbeddingsTransformer):
 
     async def embed(
         self,
-        model_handle: ModelHandle,
         text: str,
+        model_handle: Optional[ModelHandle] = None,
         metadata: Optional[JSONObject] = None,
     ) -> VectorEmbedding:
+        if not model_handle:
+            model_handle = OpenAIEmbeddingsHandle()
         encoding = encoding_for_model(self.model)
         text_encoding = encoding.encode(text)
 
@@ -68,8 +74,8 @@ class OpenAIEmbeddings(DocumentEmbeddingsTransformer):
         # TODO wat
         # encoding.free()
 
-        embedding_res: Dict[Any, Any] = model_handle.create(input=[text], model=self.model).to_dict_recursive()  # type: ignore [fixme]
-
+        embedding_res: Dict[Any, Any] = model_handle.creator.create(input=[text], model=self.model).to_dict_recursive()  # type: ignore
+        print(f"{embedding_res.keys()=}")
         # TODO: include usage, metadata
         return VectorEmbedding(
             vector=embedding_res["data"][0]["embedding"],

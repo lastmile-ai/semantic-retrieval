@@ -13,12 +13,12 @@ from semantic_retrieval.utils.callbacks import Traceable
 
 class VectorDBBaseQuery(Record):
     mode: str
-    metadataFilter: Dict[str, Any]
+    metadata_filter: Dict[str, Any]
     topK: int
 
 
 class VectorDBEmbeddingQuery(VectorDBBaseQuery):
-    embeddingVector: VectorEmbedding
+    embedding_vector: VectorEmbedding
 
 
 class VectorDBTextQuery(VectorDBBaseQuery):
@@ -32,8 +32,8 @@ class VectorDBConfig(Record):
     pass
 
 
-def isEmbeddingQuery(query: VectorDBQuery):
-    return hasattr(query, "embeddingVector")
+def is_embedding_query(query: VectorDBQuery):
+    return hasattr(query, "embedding_vector")
 
 
 def isTextQuery(query: VectorDBQuery):

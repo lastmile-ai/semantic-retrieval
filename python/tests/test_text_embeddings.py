@@ -23,6 +23,6 @@ async def test_openai_emb_query():
     e = OpenAIEmbeddings(cfg)
 
     model_handle = MockModelHandle()
-    res = await e.embed(model_handle, "hello world")
+    res = await e.embed("hello world", model_handle=model_handle)
     dim = len(res.vector)
     assert dim == 1536
