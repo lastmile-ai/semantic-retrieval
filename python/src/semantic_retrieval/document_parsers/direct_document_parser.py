@@ -1,26 +1,12 @@
 import uuid
-from semantic_retrieval.common.types import Record
 from semantic_retrieval.document.document import (
-    DocumentFragment,
+    DirectDocumentFragment,
     DocumentFragmentType,
     IngestedDocument,
     RawDocument,
 )
 from semantic_retrieval.document_parsers.document_parser import DocumentParser
-from typing import List, Any, Optional
-
-
-# TODO (suyog): Same issue as with RawDocument when converting from Typescript that happened in FileSystem
-class DirectDocumentFragment(DocumentFragment, Record):
-    content: str
-    metadata: Optional[dict[Any, Any]]
-    attributes: Optional[dict[Any, Any]]
-
-    async def get_content(self) -> str:
-        return self.content
-
-    def serialize(self) -> str:
-        return self.content
+from typing import List
 
 
 class DirectDocumentParser(DocumentParser):
@@ -31,7 +17,7 @@ class DirectDocumentParser(DocumentParser):
         document_id = document.document_id
 
         # Only make one fragment with the entire contents of the document for now
-        fragments: List[DocumentFragment] = [
+        fragments: List[DirectDocumentFragment] = [
             DirectDocumentFragment(
                 fragment_id=str(uuid.uuid4()),
                 fragment_type=DocumentFragmentType.TEXT,
