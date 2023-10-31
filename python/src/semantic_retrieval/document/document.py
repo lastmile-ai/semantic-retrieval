@@ -58,18 +58,17 @@ class DocumentFragment(Record, Attributable):
     blob_id: Optional[BlobIdentifier] = None
 
     @abstractmethod
-    async def get_content() -> str:
+    async def get_content(self) -> str:
         pass
 
     @abstractmethod
-    def serialize() -> str:
+    def serialize(self) -> str:
         pass
 
 
 class Document(Record, Attributable):
     document_id: str
     collection_id: Optional[str]
-
     fragments: list[DocumentFragment]
 
     @abstractmethod
@@ -77,6 +76,11 @@ class Document(Record, Attributable):
         pass
 
 
-@dataclass
 class IngestedDocument(Document):
     raw_document: RawDocument
+    # Pydantic & pylance issues w/ not being able to use Attributable fields
+    metadata: Optional[dict[Any, Any]]
+    attributes: Optional[dict[Any, Any]]
+
+    def serialize(self) -> str:
+        return "Not Implemented"

@@ -1,23 +1,18 @@
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 import json
-from typing import Optional, List, Union
-from semantic_retrieval.common.json_types import JSONObject
+from typing import Optional, List, Union, Any
+
+from pydantic import BaseModel
 
 from semantic_retrieval.document.document import Document
 from semantic_retrieval.access_control.access_identity import AccessIdentity
 
 
 # Access policy for a resource
-class ResourceAccessPolicy(ABC):
-    def __init__(
-        self,
-        policy: str,
-        resource: Optional[str] = None,
-        policyJSON: Optional[JSONObject] = None,
-    ):
-        self.policy = policy
-        self.resource = resource
-        self.policyJSON = policyJSON
+class ResourceAccessPolicy(BaseModel):
+    policy: str
+    resource: Optional[str] = None
+    policyJSON: Optional[Any] = None
 
     @abstractmethod
     async def testDocumentReadPermission(
