@@ -44,6 +44,7 @@ DEFAULT_FILE_LOADERS: dict[str, Callable[[str], BaseLoader]] = {
     ".txt": txt_loader_func,
     ".json": txt_loader_func,
     ".py": txt_loader_func,
+    ".md": txt_loader_func,
     ".pdf": pdf_loader_func,
     ".docx": docx_loader_func,
 }
