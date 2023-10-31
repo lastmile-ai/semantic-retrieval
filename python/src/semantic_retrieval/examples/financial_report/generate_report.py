@@ -114,7 +114,7 @@ async def run_generate_report(config: Config):
                     mode="text", metadata_filter={}, topK=10, text="cash flow"
                 )
             )
-            # print(f"{query_res=}")
+            print(f"{query_res=}")
 
             _document_retriever = VectorDBDocumentRetriever(
                 vector_db=vector_db,

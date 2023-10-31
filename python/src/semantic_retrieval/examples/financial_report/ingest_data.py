@@ -1,5 +1,6 @@
 import asyncio
 import sys
+import os
 from typing import List
 from semantic_retrieval.examples.financial_report.config import Config
 
@@ -95,6 +96,8 @@ async def run_ingest(config: Config):
     pcvdbcfg = PineconeVectorDBConfig(
         index_name=config.index_name,
         namespace=config.namespace,
+        api_key=os.getenv("PINECONE_API_KEY", ""),
+        environment="us-west1-gcp",
     )
 
     openaiembcfg = OpenAIEmbeddingsConfig(api_key=config.openai_key)

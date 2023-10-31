@@ -74,7 +74,9 @@ class OpenAIEmbeddings(DocumentEmbeddingsTransformer):
         # TODO wat
         # encoding.free()
 
-        embedding_res: Dict[Any, Any] = model_handle.creator.create(input=[text], model=self.model).to_dict_recursive()  # type: ignore
+        embedding_res: Dict[Any, Any] = model_handle.creator(
+            input=[text], model=self.model  # type: ignore
+        ).to_dict_recursive()
         print(f"{embedding_res.keys()=}")
         # TODO: include usage, metadata
         return VectorEmbedding(
