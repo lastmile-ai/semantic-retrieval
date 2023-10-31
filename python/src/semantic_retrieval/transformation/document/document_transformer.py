@@ -24,6 +24,7 @@ class BaseDocumentTransformer(DocumentTransformer, Traceable):
     async def transform_document(self, document: Document) -> Document:
         raise NotImplementedError("This method must be implemented in a derived class")
 
-    async def transform_documents(self, documents: Sequence[Document]) -> List[Document]:
-        # TODO
-        return []
+    async def transform_documents(
+        self, documents: Sequence[Document]
+    ) -> List[Document]:
+        return [await self.transform_document(document) for document in documents]
