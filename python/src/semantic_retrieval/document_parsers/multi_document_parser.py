@@ -34,7 +34,7 @@ class MultiDocumentParser(DocumentParser):
             ).unwrap()  # TODO: Handle error case with unwrap
 
             if parser_config.metadata_db is not None:
-                access_policies = None
+                access_policies = []
                 if parser_config.access_control_policy_factory:
                     access_policies = await parser_config.access_control_policy_factory.get_access_policies(
                         document
