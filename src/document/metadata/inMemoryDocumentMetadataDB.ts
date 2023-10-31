@@ -69,10 +69,11 @@ export class InMemoryDocumentMetadataDB implements DocumentMetadataDB {
   }
 
   static async fromJSONFile(
-    filePath: string
+    filePath: string,
+    deserializer?: (key: string, value: unknown) => unknown
   ): Promise<InMemoryDocumentMetadataDB> {
     const json = await (await fs.readFile(filePath)).toString();
-    const map = JSON.parse(json);
+    const map = JSON.parse(json, deserializer);
     return new InMemoryDocumentMetadataDB(map);
   }
 }
