@@ -11,7 +11,7 @@ from semantic_retrieval.document.metadata.document_metadata_db import DocumentMe
 from semantic_retrieval.utils.callbacks import Traceable
 
 
-class VectorDBBaseQuery:
+class VectorDBBaseQuery(Record):
     mode: str
     metadataFilter: Dict[str, Any]
     topK: int
@@ -29,8 +29,7 @@ VectorDBQuery = VectorDBEmbeddingQuery | VectorDBTextQuery
 
 
 class VectorDBConfig(Record):
-    embeddings: EmbeddingsTransformer
-    metadata_db: DocumentMetadataDB
+    pass
 
 
 def isEmbeddingQuery(query: VectorDBQuery):
