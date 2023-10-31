@@ -1,53 +1,47 @@
 import uuid
-from semantic_retrieval.common.types import Record
+from result import Err, Ok, Result
 from semantic_retrieval.document.document import (
-    DocumentFragment,
+    DirectDocumentFragment,
     DocumentFragmentType,
     IngestedDocument,
     RawDocument,
 )
 from semantic_retrieval.document_parsers.document_parser import DocumentParser
-from typing import List, Any, Optional
-
-
-# TODO (suyog): Same issue as with RawDocument when converting from Typescript that happened in FileSystem
-class DirectDocumentFragment(DocumentFragment, Record):
-    content: str
-    metadata: Optional[dict[Any, Any]]
-    attributes: Optional[dict[Any, Any]]
-
-    async def get_content(self) -> str:
-        return self.content
-
-    def serialize(self) -> str:
-        return self.content
+from typing import List
 
 
 class DirectDocumentParser(DocumentParser):
-    async def parse(self, document: RawDocument) -> IngestedDocument:
+    async def parse(self, document: RawDocument) -> Result[IngestedDocument, str]:
         # Not using chunked content
         content = (await document.get_content()).unwrap()
 
-        document_id = document.document_id
+        content_result = await document.get_content()
+        match content_result:
+            case Ok(content):
+                document_id = document.document_id
 
-        # Only make one fragment with the entire contents of the document for now
-        fragments: List[DocumentFragment] = [
-            DirectDocumentFragment(
-                fragment_id=str(uuid.uuid4()),
-                fragment_type=DocumentFragmentType.TEXT,
-                document_id=document_id,
-                content=content,
-                hash=None,
-                metadata={},
-                attributes={},
-            )
-        ]
+                # Only make one fragment with the entire contents of the document for now
+                fragments: List[DirectDocumentFragment] = [
+                    DirectDocumentFragment(
+                        fragment_id=str(uuid.uuid4()),
+                        fragment_type=DocumentFragmentType.TEXT,
+                        document_id=document_id,
+                        content=content,
+                        hash=None,
+                        metadata={},
+                        attributes={},
+                    )
+                ]
 
-        return IngestedDocument(
-            raw_document=document,
-            document_id=document_id,
-            collection_id=document.collection_id,
-            fragments=fragments,
-            metadata={},
-            attributes={},
-        )
+                return Ok(
+                    IngestedDocument(
+                        raw_document=document,
+                        document_id=document_id,
+                        collection_id=document.collection_id,
+                        fragments=fragments,
+                        metadata={},
+                        attributes={},
+                    )
+                )
+            case Err(err):
+                return Err(err)

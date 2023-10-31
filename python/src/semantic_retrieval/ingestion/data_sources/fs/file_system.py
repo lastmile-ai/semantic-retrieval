@@ -42,6 +42,7 @@ def docx_loader_func(path: str) -> Docx2txtLoader:
 DEFAULT_FILE_LOADERS: dict[str, Callable[[str], BaseLoader]] = {
     ".csv": csv_loader_func,
     ".txt": txt_loader_func,
+    ".json": txt_loader_func,
     ".py": txt_loader_func,
     ".pdf": pdf_loader_func,
     ".docx": docx_loader_func,
@@ -130,7 +131,7 @@ class FileSystem(DataSource):
                 subdir_path = os.path.join(self.path, file)
                 if os.path.isdir(subdir_path):
                     subDir = FileSystem(subdir_path, collection_id)
-                    subDir.load_documents()
+                    raw_documents.extend(subDir.load_documents())
                 elif os.path.isfile(subdir_path):
                     raw_documents.append(self.load_file(subdir_path, collection_id))
         elif isfile:
