@@ -50,7 +50,7 @@ async def test_access_policies():
     always_accept_policy = AlwaysAllowAccessPolicy()
 
     # Get ingested documents to be able to test the policies - TODO: This should either be helper or mocked
-    file_system = FileSystem("src/semantic_retrieval/examples/financial_report")
+    file_system = FileSystem("examples/example_data/financial_report")
     raw_documents = file_system.load_documents()
 
     ingested_documents = await MultiDocumentParser().parse_documents(

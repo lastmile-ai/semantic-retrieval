@@ -26,4 +26,4 @@ jobs:
           working-directory: "./python"
       - name: Run tests
         run: |
-          cd python && pytest
+          pytest
