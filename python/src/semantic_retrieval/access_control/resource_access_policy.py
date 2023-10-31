@@ -2,14 +2,14 @@ from abc import abstractmethod
 import json
 from typing import Optional, List, Union, Any
 
-from pydantic import BaseModel
+from semantic_retrieval.common.types import Record
 
 from semantic_retrieval.document.document import Document
 from semantic_retrieval.access_control.access_identity import AccessIdentity
 
 
 # Access policy for a resource
-class ResourceAccessPolicy(BaseModel):
+class ResourceAccessPolicy(Record):
     policy: str
     resource: Optional[str] = None
     policyJSON: Optional[Any] = None
