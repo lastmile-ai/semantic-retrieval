@@ -205,13 +205,15 @@ export class PineconeVectorDB extends VectorDB {
       const text = (metadata.text as string | undefined) ?? "";
       delete metadata["attributes"];
       delete metadata["text"];
+
+      if (match.score) {
+        metadata["retrievalScore"] = match.score;
+      }
+
       return {
         vector: match.values,
         text,
-        metadata: {
-          ...metadata,
-          retrievalScore: match.score,
-        },
+        metadata,
         attributes,
       };
     });
