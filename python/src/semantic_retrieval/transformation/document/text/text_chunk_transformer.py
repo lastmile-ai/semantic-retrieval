@@ -9,7 +9,11 @@ from semantic_retrieval.transformation.document.document_transformer import (
     BaseDocumentTransformer,
 )
 
-from semantic_retrieval.document.document import Document
+from semantic_retrieval.document.document import (
+    Document,
+    DocumentFragmentType,
+    TransformedDocument,
+)
 
 
 @dataclass
@@ -67,27 +71,34 @@ class TextChunkTransformer(BaseDocumentTransformer):
 
             for chunk in await self.chunk_text(original_fragment):  # type: ignore [fixme]
                 current_fragment = {
-                    "fragmentId": str(uuid4()),
-                    "fragmentType": "text",
-                    "documentId": document_id,
+                    "fragment_id": str(uuid4()),
+                    "fragment_type": DocumentFragmentType.TEXT,
+                    "document_id": document_id,
                     "metadata": original_fragment_data["metadata"],
                     "attributes": {},
                     "hash": md5(chunk.encode()).hexdigest(),
+                    "content": original_fragment_data["content"],
                     "getContent": id_,
                     "serialize": id_,
                 }
 
+                # TODO: Unsure if this is working correctly
                 if fragment_count > 0:
-                    transformed_fragments[fragment_count - 1]["nextFragment"] = current_fragment
+                    transformed_fragments[fragment_count - 1][
+                        "nextFragment"
+                    ] = current_fragment
 
                 fragment_count += 1
                 transformed_fragments.append(current_fragment)
 
-        transformed_document = {
-            **document,  # type: ignore [fixme]
-            "documentId": document_id,
-            "fragments": transformed_fragments,
-        }
+        transformed_document = TransformedDocument(
+            raw_document=document,  # type: ignore [fixme] - this should be RawDocument
+            document_id=document_id,
+            fragments=transformed_fragments,
+            collection_id=document.collection_id,
+            metadata={},
+            attributes={},
+        )
 
         # TODO: callback
         # event = TransformDocumentEvent(
@@ -99,13 +110,15 @@ class TextChunkTransformer(BaseDocumentTransformer):
         # if self.callback_manager:
         #     await self.callback_manager.run_callbacks(event)
 
-        return transformed_document  # type: ignore [fixme]
+        return transformed_document
 
     def join_sub_chunks(self, sub_chunks: List[str], separator: str) -> Optional[str]:
         chunk = separator.join(sub_chunks).strip()
         return chunk if chunk != "" else None
 
-    async def merge_sub_chunks(self, sub_chunks: List[str], separator: str) -> List[str]:
+    async def merge_sub_chunks(
+        self, sub_chunks: List[str], separator: str
+    ) -> List[str]:
         chunks = []
         prev_sub_chunks = []
         current_sub_chunks = []
@@ -120,7 +133,10 @@ class TextChunkTransformer(BaseDocumentTransformer):
                     f"SubChunk size {sub_chunk_size} exceeds chunkSizeLimit of {self.chunk_size_limit}"
                 )
 
-            if current_chunk_size + chunk_separator_size + sub_chunk_size > self.chunk_size_limit:
+            if (
+                current_chunk_size + chunk_separator_size + sub_chunk_size
+                > self.chunk_size_limit
+            ):
                 chunk = self.join_sub_chunks(current_sub_chunks, separator)
                 if chunk is not None:
                     chunks.append(chunk)
@@ -164,7 +180,9 @@ class TextChunkTransformer(BaseDocumentTransformer):
 
                 while num_prev_sub_chunks_overlap > 0:
                     current_sub_chunks.append(
-                        prev_sub_chunks[num_total_prev_sub_chunks - num_prev_sub_chunks_overlap]
+                        prev_sub_chunks[
+                            num_total_prev_sub_chunks - num_prev_sub_chunks_overlap
+                        ]
                     )
                     num_prev_sub_chunks_overlap -= 1
 
