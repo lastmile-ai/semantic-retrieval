@@ -40,6 +40,7 @@ def docx_loader_func(path: str) -> Docx2txtLoader:
 DEFAULT_FILE_LOADERS: dict[str, Callable[[str], BaseLoader]] = {
     ".csv": csv_loader_func,
     ".txt": txt_loader_func,
+    ".py": txt_loader_func,
     ".pdf": pdf_loader_func,
     ".docx": docx_loader_func,
 }
