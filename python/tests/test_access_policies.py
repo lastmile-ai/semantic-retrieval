@@ -19,7 +19,7 @@ class AlwaysDenyPolicy(ResourceAccessPolicy):
 
 def test_access_passport():
     access_passport = AccessPassport()
-    access_passport.register(AccessIdentity("test-resource"))
+    access_passport.register(AccessIdentity(resource="test-resource"))
 
     def get_resource(ai: AccessIdentity) -> str:
         return ai.resource
