@@ -50,8 +50,8 @@ class DocumentEmbeddingsTransformer(EmbeddingsTransformer):
     def __init__(self, dimensions: int):
         super().__init__(dimensions)
 
-    async def embedFragment(
-        self, model_handle: ModelHandle, fragment: DocumentFragment
+    async def embed_fragment(
+        self, fragment: DocumentFragment, model_handle: Optional[ModelHandle]
     ) -> VectorEmbedding:
         text = await fragment.get_content()
         metadata = {
@@ -62,18 +62,21 @@ class DocumentEmbeddingsTransformer(EmbeddingsTransformer):
 
         return await self.embed(text, model_handle=model_handle, metadata=metadata)
 
-    async def embedDocument(
-        self, model_handle: ModelHandle, document: Document
+    async def embed_document(
+        self, document: Document, model_handle: Optional[ModelHandle]
     ) -> List[VectorEmbedding]:
         embeddings = []
         for fragment in document.fragments:
-            embeddings.append(await self.embedFragment(model_handle, fragment))
+            embeddings.append(await self.embed_fragment(fragment, model_handle))
         return embeddings
 
-    async def transformDocuments(
-        self, model_handle: ModelHandle, documents: List[Document]
+    @abstractmethod
+    async def transform_documents(
+        self,
+        documents: List[Document],
+        model_handle: Optional[ModelHandle] = None,
     ) -> List[VectorEmbedding]:
         embeddings = []
         for document in documents:
-            embeddings.extend(await self.embedDocument(model_handle, document))
+            embeddings.extend(await self.embed_document(document, model_handle))
         return embeddings

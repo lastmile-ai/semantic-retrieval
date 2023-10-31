@@ -17,6 +17,36 @@ from semantic_retrieval.transformation.embeddings.embeddings import (
     VectorEmbedding,
 )
 
+# from semantic_retrieval.transformation.embeddings.openai_embeddings import (
+#     OpenAIEmbeddings,
+#     OpenAIEmbeddingsConfig,
+# )
+# from typing import Any
+
+# import itertools
+
+
+# This is directly from pinecone's documentation: https://docs.pinecone.io/docs/insert-data#batching-upserts
+# def chunks(
+#     iterable: List[Any], batch_size: int = 100
+# ) -> Generator[List[Tuple[Any, Any]], Any, None]:
+#     """A helper function to break an iterable into chunks of size batch_size."""
+#     it = iter(iterable)
+#     chunk = tuple(itertools.islice(it, batch_size))
+#     while chunk:
+#         yield chunk  # type: ignore
+#         chunk = tuple(itertools.islice(it, batch_size))
+# def chunks(lst: List[Any], batch_size: int = 100):
+#     """Yield successive n-sized chunks from lst."""
+#     for i in range(0, len(lst), batch_size):
+#         yield (f"Chunk {i // batch_size + 1}", lst[i : i + batch_size])
+# def chunks(lst: List[Any], batch_size: int = 100):
+#     """Yield successive n-sized chunks from lst return as list."""
+#     result: List[Any] = []
+#     for i in range(0, len(lst), batch_size):
+#         result.append((f"Chunk {i // batch_size + 1}", lst[i : i + batch_size]))
+#     return result
+
 
 class PineconeVectorDBConfig(VectorDBConfig):
     index_name: str
@@ -52,8 +82,51 @@ class PineconeVectorDB(VectorDB):
         # TODO
         pass
 
-    async def add_documents(self, documents: List[Document]):
-        # TODO impl
+    async def add_documents(
+        self,
+        documents: List[Document],
+    ):
+        pinecone.init(api_key=self.config.api_key, environment=self.config.environment)
+        index = pinecone.Index(self.config.index_name)
+
+        # self.embeddings has embeddings model
+        # self.metadata_db has metadata db
+
+        # Get namespace from collection_id
+        # Need to create OpenAIEmbeddings from chunks here too - which is currently in generate_report like this:
+
+        # TODO: This config should be optional?
+        embedding_creator = self.embeddings
+
+        embeddings_list = await embedding_creator.transform_documents(documents)
+        vector_embeddings_list = [embedding.vector for embedding in embeddings_list]
+
+        for idx, vectors_chunk in enumerate(vector_embeddings_list):
+            index.upsert(namespace=self.config.namespace, vectors=[(f"vec{idx}", vectors_chunk)])  # type: ignore
+
+        # for idx_vectors_chunk in chunks(vector_embeddings_list, batch_size=100):
+        #     index.upsert(namespace=self.config.namespace, vectors=idx_vectors_chunk)
+
+        # Use this for batching to pinecone
+        # https://docs.pinecone.io/docs/insert-data#batching-upserts
+
+        # OpenAIEmbeddings is doing things slowly though - will want to run batches by implementing transform_documents
+        # instead of using embed directly (batching speeds up quite a bit)
+        # Also pinecone upsert should also be using batching of X amount like in data_ingestion
+
+        # Example on upsert from pinecone docs
+        # upsert_response = index.upsert(
+        #     namespace="example-namespace",
+        #     vectors=[
+        #         (
+        #             "vec1",  # Vector ID
+        #             [0.1, 0.2, 0.3, 0.4],  # Dense vector values
+        #             {"genre": "drama"},  # Vector metadata
+        #         ),
+        #         ("vec2", [0.2, 0.3, 0.4, 0.5], {"genre": "action"}),
+        #     ],
+        # )
+
         pass
 
     async def query(self, query: VectorDBQuery) -> List[VectorEmbedding]:

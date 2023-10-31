@@ -90,9 +90,65 @@ class OpenAIEmbeddings(DocumentEmbeddingsTransformer):
         )
 
     async def transform_documents(self, documents: List[Document]) -> List[VectorEmbedding]:  # type: ignore [fixme]
-        # TODO
-        pass
+        # Use this to batch create embeddings with openai - https://platform.openai.com/docs/api-reference/embeddings/create
+        # Just pass an array for input instead of a single string
+
+        # Get all fragments into a list and batch create embeddings - issue is keeping the metadata in attrbutes from the original document
+
+        # Use fragments from transformed documents to create embeddings, can use createEmbeddings as a helper here
+        # Also see openAIEmbeddings.ts
+        embeddings = []
+        for document in documents:
+            fragments = document.fragments
+            for fragment in fragments:
+                # Instead of batching, just create embeddings for each fragment right now, batching can be done as optimization
+                # Need to essentially count tokens & add to array
+                content = await fragment.get_content()
+                vec_embeddings = await self.create_embeddings(
+                    [
+                        EmbedFragmentData(
+                            document_id=fragment.document_id,
+                            fragment_id=fragment.fragment_id,
+                            text=content,
+                        )
+                    ]
+                )
+
+                embeddings.extend(vec_embeddings)
+
+        # Then it should do the batch logic kinda like this: https://github.com/run-llama/llama_index/blob/408923fafbcefdabfd76c8fa609b570fe80b1b2f/llama_index/embeddings/base.py#L231
+        return embeddings
 
     async def create_embeddings(self, fragments: List[EmbedFragmentData]) -> List[VectorEmbedding]:  # type: ignore [fixme]
-        # TODO
-        pass
+        model_handle = OpenAIEmbeddingsHandle()
+
+        input = [fragment.text for fragment in fragments]
+
+        # TODO: This is very slow... need to batch this, especially since this is a synchronous call
+        embeddings = model_handle.creator.create(input=input, model=self.model)  # type: ignore
+
+        vector_embeddings: List[VectorEmbedding] = []
+        # print(embeddings["data"])
+
+        # This is currently returning an object & not a list of objects
+        # Probably because I'm only using one fragment & not batching properly just yet
+
+        for idx, embedding in enumerate(embeddings["data"]):
+            # from pprint import pprint
+            # import json
+
+            # pprint(json.dumps(embedding))
+            vector_embeddings.append(
+                VectorEmbedding(
+                    vector=embedding["embedding"],
+                    text=fragments[idx].text,
+                    attributes={},
+                    metadata={
+                        "document_id": fragments[idx].document_id,
+                        "fragment_id": fragments[idx].fragment_id,
+                        "model": self.model,
+                    },
+                )
+            )
+
+        return vector_embeddings
