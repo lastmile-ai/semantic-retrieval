@@ -12,15 +12,8 @@ class Role(Enum):
 class FinancialReportIdentity(AccessIdentity):
     resource: str = "financial_data"
     role: Role
-    client: Optional[str]
 
 
 class AdvisorIdentity(FinancialReportIdentity):
-    resource = "financial_data"
     role: Role = Role.USER
-    client = None
-
-    def __init__(self, client: str) -> None:
-        self.client = client
-        # TODO
-        pass
+    client: Optional[str] = None
