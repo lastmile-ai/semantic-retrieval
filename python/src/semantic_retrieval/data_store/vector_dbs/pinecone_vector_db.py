@@ -45,15 +45,44 @@ class PineconeVectorDB(VectorDB):
         metadata_db: DocumentMetadataDB,
     ):
         instance = cls(config, embeddings, metadata_db)
-        await instance.add_documents(documents)
+        await instance.add_documents(documents, embeddings, metadata_db)
         return instance
 
     def sanitize_metadata(self, unsanitized_metadata: Record):
         # TODO
         pass
 
-    async def add_documents(self, documents: List[Document]):
-        # TODO impl
+    async def add_documents(
+        self,
+        documents: List[Document],
+        embeddings: DocumentEmbeddingsTransformer,
+        metadata_db: DocumentMetadataDB,
+    ):
+        # Suyog to write this & also need to update fn signature
+
+        pinecone.init(api_key=self.config.api_key, environment=self.config.environment)
+        pinecone.Index(self.config.index_name)
+
+        # Get namespace from collection_id
+        # Need to create OpenAIEmbeddings from chunks here too - which is currently in generate_report like this:
+
+        # openaiembcfg = OpenAIEmbeddingsConfig(api_key=config.openai_key)
+
+        # embeddings = OpenAIEmbeddings(openaiembcfg)
+
+        # Example on upsert from pinecone docs
+        # upsert_response = index.upsert(
+        #     namespace="example-namespace",
+        #     vectors=[
+        #         (
+        #             "vec1",  # Vector ID
+        #             [0.1, 0.2, 0.3, 0.4],  # Dense vector values
+        #             {"genre": "drama"},  # Vector metadata
+        #         ),
+        #         ("vec2", [0.2, 0.3, 0.4, 0.5], {"genre": "action"}),
+        #     ],
+        # )
+
         pass
 
     async def query(self, query: VectorDBQuery) -> List[VectorEmbedding]:
