@@ -90,8 +90,24 @@ class OpenAIEmbeddings(DocumentEmbeddingsTransformer):
         )
 
     async def transform_documents(self, documents: List[Document]) -> List[VectorEmbedding]:  # type: ignore [fixme]
-        # TODO
-        pass
+        # Use this to batch create embeddings with openai - https://platform.openai.com/docs/api-reference/embeddings/create
+        # Just pass an array for input instead of a single string
+
+        # Get all fragments into a list and batch create embeddings - issue is keeping the metadata in attrbutes from the original document
+
+        # Use fragments from transformed documents to create embeddings, can use createEmbeddings as a helper here
+        # Also see openAIEmbeddings.ts
+        for document in documents:
+            fragments = document.fragments
+            for fragment in fragments:
+                _content = await fragment.get_content()
+                # fragment.document_id
+                # fragment.fragment_id
+                pass
+
+        # Then it should do the batch logic kinda like this: https://github.com/run-llama/llama_index/blob/408923fafbcefdabfd76c8fa609b570fe80b1b2f/llama_index/embeddings/base.py#L231
+
+        return []
 
     async def create_embeddings(self, fragments: List[EmbedFragmentData]) -> List[VectorEmbedding]:  # type: ignore [fixme]
         # TODO
