@@ -17,14 +17,15 @@ class RawDocumentChunk(Record):
 
 @dataclass
 class RawDocument(ABC):
-    url: str
-    data_source: Any  # TODO: Update this to DataSource type when it is defined
+    uri: str
+    # data_source: Any  # TODO: Update this to DataSource type when it is defined
     name: str
     mime_type: str
-    hash: Optional[str]
-    blob_id: Optional[BlobIdentifier]
     document_id: str
     collection_id: Optional[str]
+
+    hash: Optional[str]
+    blob_id: Optional[BlobIdentifier] = None
 
     @abstractmethod
     async def get_content(self) -> Result[str, str]:
@@ -49,12 +50,12 @@ class DocumentFragmentType(Enum):
 class DocumentFragment(Record, Attributable):
     fragment_id: str
     hash: Optional[str]
-    blob_id: Optional[BlobIdentifier]
     fragment_type: DocumentFragmentType
     document_id: str
-    previous_fragment: Optional["DocumentFragment"]
-    next_fragment: Optional["DocumentFragment"]
-    children: Optional[list["DocumentFragment"]]
+    previous_fragment: Optional["DocumentFragment"] = None
+    next_fragment: Optional["DocumentFragment"] = None
+    children: Optional[list["DocumentFragment"]] = None
+    blob_id: Optional[BlobIdentifier] = None
 
     @abstractmethod
     async def get_content() -> str:
