@@ -2,16 +2,13 @@ from typing import Any, Dict, Optional
 from semantic_retrieval.common.types import Record
 
 
-from semantic_retrieval.document.document import Document, RawDocument
-
-
 class DocumentMetadata(Record):
     document_id: str
     uri: str
     metadata: Dict[str, str]
     attributes: Dict[str, str]
-    raw_document: Optional[RawDocument] = None
-    document: Optional[Document] = None
+    # raw_document: Optional[RawDocument] = None
+    # document: Optional[Document] = None
     collection_id: Optional[str] = None
     # TODO: Fix this because fails at pydantic serialization
     # data_source: Optional[DataSource] = None
@@ -45,7 +42,7 @@ class DocumentMetadata(Record):
 
 # # Example usage:
 # metadata = DocumentMetadata(
-#     documentId="12345",
+#     document_id="12345",
 #     uri="https://example.com/document",
 #     metadata={"key1": "value1", "key2": "value2"},
 #     attributes={"attr1": "attr_value1"},

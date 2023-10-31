@@ -6,13 +6,20 @@ from semantic_retrieval.document.document import RawDocument, RawDocumentChunk
 
 
 from langchain.document_loaders.base import BaseLoader
-from langchain.document_loaders import TextLoader, CSVLoader, PyPDFLoader, Docx2txtLoader
+from langchain.document_loaders import (
+    TextLoader,
+    CSVLoader,
+    PyPDFLoader,
+    Docx2txtLoader,
+)
 
 from semantic_retrieval.utils.callbacks import CallbackManager
 import os
 import hashlib
 import uuid
 import mimetypes
+
+from semantic_retrieval.utils.configs.configs import remove_nones
 
 
 # TODO: (suyog) I dislike this quite a bit, but following typescript for now - same with the FileSystemRawDocument implementation of RawDocument
@@ -43,20 +50,13 @@ DEFAULT_FILE_LOADERS: dict[str, Callable[[str], BaseLoader]] = {
 class FileSystemRawDocument(RawDocument):
     file_loaders: dict[str, Callable[[str], BaseLoader]] = DEFAULT_FILE_LOADERS
 
-    def __init__(
-        self, file_loaders: Optional[dict[str, Callable[[str], BaseLoader]]] = None, **kwargs: Any
-    ):
-        super().__init__(**kwargs)
-        if file_loaders is not None:
-            self.file_loaders = file_loaders
-
     async def get_content(self) -> Result[str, str]:
         # Get file loader w/ filePath (which is self.uri) & load_chunked_content
-        _, file_extension = os.path.splitext(self.url)
+        _, file_extension = os.path.splitext(self.uri)
 
         if file_extension in self.file_loaders:
             file_loader = self.file_loaders[file_extension]
-            loader = file_loader(self.url)
+            loader = file_loader(self.uri)
             return Ok(loader.load()[0].page_content)
         else:
             return Err(f"File extension {file_extension} not supported")
@@ -95,17 +95,21 @@ class FileSystem(DataSource):
         # TODO: This should be done outside of python
         hash = hashlib.md5(open(path, "rb").read()).hexdigest()
 
-        return FileSystemRawDocument(
-            file_loaders=self.file_loaders,
-            url=path,
-            data_source=self,
-            name=file_name,
-            mime_type=mimetypes.guess_type(path)[0],
-            hash=hash,
-            blob_id=None,
-            document_id=str(uuid.uuid4()),
-            collection_id=collection_id,
+        fsrd_args = remove_nones(
+            dict(
+                file_loaders=self.file_loaders,
+                uri=path,
+                data_source=self,
+                name=file_name,
+                mime_type=mimetypes.guess_type(path)[0],
+                hash=hash,
+                blob_id=None,
+                document_id=str(uuid.uuid4()),
+                collection_id=collection_id,
+            )
         )
+
+        return FileSystemRawDocument(**fsrd_args)
 
     def load_documents(
         self, filters: Optional[Any] = None, limit: Optional[int] = None
@@ -118,7 +122,9 @@ class FileSystem(DataSource):
 
         if isdir:
             files = [f for f in os.listdir(self.path)]
-            collection_id = self.collection_id if self.collection_id else str(uuid.uuid4())
+            collection_id = (
+                self.collection_id if self.collection_id else str(uuid.uuid4())
+            )
             for file in files:
                 subdir_path = os.path.join(self.path, file)
                 if os.path.isdir(subdir_path):
@@ -127,7 +133,9 @@ class FileSystem(DataSource):
                 elif os.path.isfile(subdir_path):
                     raw_documents.append(self.load_file(subdir_path, collection_id))
         elif isfile:
-            collection_id = self.collection_id if self.collection_id else str(uuid.uuid4())
+            collection_id = (
+                self.collection_id if self.collection_id else str(uuid.uuid4())
+            )
             raw_documents.append(self.load_file(self.path, collection_id))
         else:
             message = f"{self.path} is neither a file nor a directory."

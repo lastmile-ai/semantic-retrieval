@@ -1,8 +1,7 @@
-from abc import ABC, abstractmethod
-from pydantic.dataclasses import dataclass
+from abc import abstractmethod
 from result import Result
-
 from semantic_retrieval.common.base import Attributable
+
 from semantic_retrieval.common.storage import BlobIdentifier
 from enum import Enum
 from typing import Any, List, Optional
@@ -15,16 +14,15 @@ class RawDocumentChunk(Record):
     metadata: dict[Any, Any]
 
 
-@dataclass
-class RawDocument(ABC):
-    url: str
-    data_source: Any  # TODO: Update this to DataSource type when it is defined
+class RawDocument(Record):
+    uri: str
+    # data_source: Any  # TODO: Update this to DataSource type when it is defined
     name: str
-    mime_type: str
-    hash: Optional[str]
-    blob_id: Optional[BlobIdentifier]
     document_id: str
+    hash: Optional[str]
     collection_id: Optional[str]
+    mime_type: str = "unknown"
+    blob_id: Optional[BlobIdentifier] = None
 
     @abstractmethod
     async def get_content(self) -> Result[str, str]:
@@ -46,15 +44,15 @@ class DocumentFragmentType(Enum):
     QUOTE = "quote"
 
 
-class DocumentFragment(Record, Attributable):
+class DocumentFragment(Attributable):
     fragment_id: str
     hash: Optional[str]
-    blob_id: Optional[BlobIdentifier]
     fragment_type: DocumentFragmentType
     document_id: str
-    previous_fragment: Optional["DocumentFragment"]
-    next_fragment: Optional["DocumentFragment"]
-    children: Optional[list["DocumentFragment"]]
+    previous_fragment: Optional["DocumentFragment"] = None
+    next_fragment: Optional["DocumentFragment"] = None
+    children: Optional[list["DocumentFragment"]] = None
+    blob_id: Optional[BlobIdentifier] = None
 
     @abstractmethod
     async def get_content() -> str:
@@ -65,7 +63,7 @@ class DocumentFragment(Record, Attributable):
         pass
 
 
-class Document(Record, Attributable):
+class Document(Record):
     document_id: str
     collection_id: Optional[str]
 
@@ -76,6 +74,5 @@ class Document(Record, Attributable):
         pass
 
 
-@dataclass
 class IngestedDocument(Document):
     raw_document: RawDocument
