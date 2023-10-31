@@ -14,7 +14,7 @@ class _MockResult:
 
 
 class MockModelHandle(ModelHandle):
-    create: Callable[[Any], Any] = lambda *args, **kwargs: _MockResult()  # type: ignore
+    creator: Callable[[Any], Any] = lambda *args, **kwargs: _MockResult()  # type: ignore
 
 
 @pytest.mark.asyncio
