@@ -13,7 +13,7 @@ from semantic_retrieval.ingestion.document_parsers.document_parser import Docume
 
 @dataclass
 class ParserConfig:
-    metadata_db: DocumentMetadataDB | None
+    metadata_db: Optional[DocumentMetadataDB]
     access_control_policy_factory: Optional[
         DocumentAccessPolicyFactory
     ]  # TODO: Add type for access control policy factory in followup diff
@@ -29,10 +29,12 @@ class MultiDocumentParser(DocumentParser):
         ingested_documents = []
         for document in documents:
             parser = parser_registry.get_parser(document.mime_type)
-            ingested_document = await parser.parse(document)
+            ingested_document = (
+                await parser.parse(document)
+            ).unwrap()  # TODO: Handle error case with unwrap
 
             if parser_config.metadata_db is not None:
-                access_policies = None
+                access_policies = []
                 if parser_config.access_control_policy_factory:
                     access_policies = await parser_config.access_control_policy_factory.get_access_policies(
                         document

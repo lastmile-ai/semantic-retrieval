@@ -20,7 +20,7 @@ class DocumentMetadata(Record):
     name: Optional[str] = None
     mime_type: Optional[str] = None
     hash: Optional[str] = None
-    access_policies: Optional[List[ResourceAccessPolicy]] = None
+    access_policies: List[ResourceAccessPolicy] = []
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -40,7 +40,7 @@ class DocumentMetadata(Record):
             # Assuming that ResourceAccessPolicy has to_dict function
             "access_policies": [ap.model_dump_json() for ap in self.access_policies]
             if self.access_policies
-            else None,
+            else [],
         }
 
 
