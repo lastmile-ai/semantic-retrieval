@@ -18,6 +18,10 @@ from semantic_retrieval.document.metadata.in_memory_document_metadata_db import 
 from semantic_retrieval.examples.financial_report.config import Config, argparsify
 from semantic_retrieval.examples.financial_report.financial_report_document_retriever import (
     FinancialReportDocumentRetriever,
+    PortfolioData,
+)
+from semantic_retrieval.examples.financial_report.financial_report_generator import (
+    FinancialReportGenerator,
 )
 from semantic_retrieval.retrieval.csv_retriever import CSVRetriever
 
@@ -83,7 +87,7 @@ async def run_generate_report(config: Config):
             return -1
         case Ok(metadata_db):
             # print(f"{metadata_db.metadata=}")
-            print(f"len(metadata)={len(metadata_db.metadata)}")
+            # print(f"len(metadata)={len(metadata_db.metadata)}")
 
             openaiembcfg = OpenAIEmbeddingsConfig(api_key=config.openai_key)
 
@@ -102,8 +106,9 @@ async def run_generate_report(config: Config):
                 resolve_path(config.data_root, portfolio_csv_path)
             )
 
-            p = await portfolio_retriever.retrieve_data(None)  # type: ignore [fixme]
-            print(f"{p=}")
+            portfolio: PortfolioData = await portfolio_retriever.retrieve_data(None)  # type: ignore [fixme]
+            print(f"{portfolio=}")
+
             # access_passport = AccessPassport()
             # identity = AdvisorIdentity(client=config.client_name)
             # access_passport.register(identity)
@@ -112,37 +117,35 @@ async def run_generate_report(config: Config):
                 #   access_passport,
                 vector_db_config=pcvdbcfg,
                 embeddings_config=openaiembcfg,
-                portfolio_retriever=portfolio_retriever,
+                portfolio=portfolio,  # type: ignore [fixme]
                 metadata_db=metadata_db,
             )
 
-            retrieved_data = await retriever.retrieve_data(
-                query="Artificial iIntelligence in the industry",
+            generator = FinancialReportGenerator()
+
+            retrieval_query = config.retrieval_query
+
+            system_prompt = (
+                "INSTRUCTIONS:\n"
+                "You are a helpful assistant. "
+                "Rearrange the context to answer the question. "
+                "Output your response following the requested structure. "
+                "Do not include Any words that do not appear in the context. "
+            )
+            res = await generator.run(
+                portfolio,
+                system_prompt,
+                retrieval_query,
+                structure_prompt="Numbered List",
+                data_extraction_prompt=config.data_extraction_prompt,
                 top_k=config.top_k,
                 overfetch_factor=config.overfetch_factor,
+                retriever=retriever,
             )
-
-            print(f"{len(retrieved_data)=}")
-            for rd in retrieved_data:
-                print(rd.company)
-                print(len(rd.details))
-
-            # generator = FinancialReportGenerator({
-            #   model: OpenAIChatModel(),
-            #   retriever,
-            # })
-
-            # prompt = PromptTemplate("Use the following data to construct a financial report matching the following format ... {data}")
-
-            #   res = await generator.run({
-            #     access_passport, # not necessary in this case, but include for example
-            #     prompt,
-            #     retriever,
-            #   })
 
             # TODO: Save res to disk and/or print
             print("Report:\n")
-            # print(res)
+            print(res)
 
 
 if __name__ == "__main__":
