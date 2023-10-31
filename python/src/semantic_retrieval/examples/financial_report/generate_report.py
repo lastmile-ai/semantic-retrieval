@@ -96,7 +96,10 @@ async def run_generate_report(config: Config):
             vdbcfg = PineconeVectorDBConfig(
                 index_name=config.index_name,
                 namespace=config.namespace,
+                api_key=config.pinecone_key,
+                environment=config.pinecone_environment,
             )
+
             openaiembcfg = OpenAIEmbeddingsConfig(api_key=config.openai_key)
 
             embeddings = OpenAIEmbeddings(openaiembcfg)
@@ -108,10 +111,10 @@ async def run_generate_report(config: Config):
 
             query_res = await vector_db.query(
                 VectorDBTextQuery(
-                    mode="text", metadataFilter={}, topK=10, text="cash flow"
+                    mode="text", metadata_filter={}, topK=10, text="cash flow"
                 )
             )
-            print(f"{query_res=}")
+            # print(f"{query_res=}")
 
             _document_retriever = VectorDBDocumentRetriever(
                 vector_db=vector_db,

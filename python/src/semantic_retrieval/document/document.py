@@ -55,19 +55,31 @@ class DocumentFragment(Attributable):
     blob_id: Optional[BlobIdentifier] = None
 
     @abstractmethod
-    async def get_content() -> str:
+    async def get_content(self) -> str:
         pass
 
     @abstractmethod
-    def serialize() -> str:
+    def serialize(self) -> str:
         pass
 
 
-class Document(Record):
+# TODO (suyog): Same issue as with RawDocument when converting from Typescript that happened in FileSystem
+class DirectDocumentFragment(DocumentFragment, Record):
+    content: str
+    metadata: Optional[dict[Any, Any]]
+    attributes: Optional[dict[Any, Any]]
+
+    async def get_content(self) -> str:
+        return self.content
+
+    def serialize(self) -> str:
+        return self.content
+
+
+class Document(Attributable, Record):
     document_id: str
     collection_id: Optional[str]
-
-    fragments: list[DocumentFragment]
+    fragments: List[DirectDocumentFragment]
 
     @abstractmethod
     def serialize(self) -> str:
@@ -76,3 +88,19 @@ class Document(Record):
 
 class IngestedDocument(Document):
     raw_document: RawDocument
+    # Pydantic & pylance issues w/ not being able to use Attributable fields
+    metadata: Optional[dict[Any, Any]]
+    attributes: Optional[dict[Any, Any]]
+
+    def serialize(self) -> str:
+        return "Not Implemented"
+
+
+class TransformedDocument(Document):
+    document: Document
+    # Pydantic & pylance issues w/ not being able to use Attributable fields
+    metadata: Optional[dict[Any, Any]]
+    attributes: Optional[dict[Any, Any]]
+
+    def serialize(self) -> str:
+        return "Not Implemented"

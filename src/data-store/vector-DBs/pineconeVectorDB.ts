@@ -42,7 +42,7 @@ export class PineconeVectorDB extends VectorDB {
 
   constructor(config: PineconeVectorDBConfig) {
     super(config.embeddings, config.metadataDB);
-
+    q;
     const apiKey = config?.apiKey ?? getEnvVar("PINECONE_API_KEY");
     if (!apiKey) {
       throw new Error("No Pinecone API key found for PineconeVectorDB");

@@ -1,5 +1,10 @@
-from typing import Any, Dict, Optional
 from semantic_retrieval.common.types import Record
+from typing import Dict, Optional, List, Any
+
+# from dataclasses import dataclass
+from semantic_retrieval.access_control.resource_access_policy import (
+    ResourceAccessPolicy,
+)
 
 
 class DocumentMetadata(Record):
@@ -15,8 +20,7 @@ class DocumentMetadata(Record):
     name: Optional[str] = None
     mime_type: Optional[str] = None
     hash: Optional[str] = None
-    # TODO: Fix this because fails at pydantic serialization
-    # access_policies: Optional[List[ResourceAccessPolicy]] = None
+    access_policies: List[ResourceAccessPolicy] = []
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -34,9 +38,9 @@ class DocumentMetadata(Record):
             "mime_type": self.mime_type,
             "hash": self.hash,
             # Assuming that ResourceAccessPolicy has to_dict function
-            "access_policies": [ap.to_dict() for ap in self.access_policies]  # type: ignore [fixme]
-            if self.access_policies  # type: ignore [fixme]
-            else None,
+            "access_policies": [ap.model_dump_json() for ap in self.access_policies]
+            if self.access_policies
+            else [],
         }
 
 
