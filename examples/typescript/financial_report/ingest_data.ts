@@ -30,6 +30,11 @@ async function main() {
   const transformedDocuments =
     await documentTransformer.transformDocuments(parsedDocuments);
 
+  // Persist metadataDB to disk for loading in the other scripts
+  await metadataDB.persist(
+    "examples/typescript/financial_report/metadataDB.json"
+  );
+
   // Use a new namespace for each run so that we can easily change which data to use
   const namespace = uuid();
   console.log(`NAMESPACE: ${namespace}`);
@@ -41,11 +46,6 @@ async function main() {
     embeddings: new OpenAIEmbeddings(),
     metadataDB,
   });
-
-  // Persist metadataDB to disk for loading in the other scripts
-  await metadataDB.persist(
-    "examples/typescript/financial_report/metadataDB.json"
-  );
 
   console.log("Ingestion complete");
 }

@@ -31,9 +31,27 @@ export abstract class BaseDocumentTransformer
   abstract transformDocument(document: Document): Promise<Document>;
 
   async transformDocuments(documents: Document[]): Promise<Document[]> {
-    const transformPromises = documents.map((document) =>
-      this.transformDocument(document)
-    );
+    const transformPromises = documents.map(async (document) => {
+      const transformedDocument = await this.transformDocument(document);
+      const originalDocumentMetadata =
+        await this.documentMetadataDB?.getMetadata(document.documentId);
+      await this.documentMetadataDB?.setMetadata(
+        transformedDocument.documentId,
+        {
+          ...originalDocumentMetadata,
+          documentId: transformedDocument.documentId,
+          document: transformedDocument,
+          uri: originalDocumentMetadata?.uri ?? transformedDocument.documentId,
+          metadata: {
+            ...originalDocumentMetadata?.metadata,
+            transformer: this.constructor.name,
+            originalDocumentId: document.documentId,
+          },
+        }
+      );
+      return transformedDocument;
+    });
+
     const transformedDocuments = (await Promise.all(transformPromises)).flat();
 
     const event: TranformDocumentsEvent = {
