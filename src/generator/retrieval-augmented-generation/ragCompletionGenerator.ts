@@ -2,13 +2,11 @@ import { AccessPassport } from "../../access-control/accessPassport";
 import { PromptTemplate } from "../../prompts/prompt-templates/promptTemplate";
 import { Document } from "../../document/document";
 import { DocumentRetriever } from "../../retrieval/documentRetriever";
-import {
-  LLMCompletionGeneratorParams,
-  LLMCompletionGenerator,
-} from "../completionGenerator";
+import { LLMCompletionGenerator } from "../completionGenerator";
+import { CompletionModelParams } from "../completion-models/completionModel";
 
 export interface RAGCompletionGeneratorParams<P, Q>
-  extends LLMCompletionGeneratorParams<P> {
+  extends CompletionModelParams<P> {
   retriever: DocumentRetriever<Document[], Q>;
   accessPassport?: AccessPassport;
   ragPromptTemplate?: PromptTemplate;
@@ -26,7 +24,7 @@ export abstract class RAGCompletionGenerator<
   Q,
   R,
   T extends RAGCompletionGeneratorParams<P, Q>,
-> extends LLMCompletionGenerator<P, R> {
+> extends LLMCompletionGenerator<P, R, T, R> {
   /**
    * Construct the query for the underlying retriever using the given parameters
    * @param params The parameters to use for constructing the query

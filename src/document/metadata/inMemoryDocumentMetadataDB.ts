@@ -1,7 +1,7 @@
 import { DocumentMetadata } from "./documentMetadata";
 import {
   DocumentMetadataDB,
-  DocumentMetadataQuery,
+  DocumentMetadataDBQuery,
 } from "./documentMetadataDB";
 import fs from "fs/promises";
 
@@ -25,16 +25,32 @@ export class InMemoryDocumentMetadataDB implements DocumentMetadataDB {
     this.metadata[documentId] = metadata;
   }
 
-  async queryDocumentIds(query: DocumentMetadataQuery): Promise<string[]> {
+  async queryDocumentIds(query: DocumentMetadataDBQuery): Promise<string[]> {
     return Object.keys(this.metadata).filter((documentId) => {
       const metadata = this.metadata[documentId];
-      const metadataValue = metadata.metadata?.[query.metadataKey];
-      if (!metadataValue) return false;
 
-      if (query.matchType === "exact") {
-        return metadataValue === query.metadataValue;
-      } else {
-        return metadataValue.includes(query.metadataValue);
+      switch (query.type) {
+        case "metadata": {
+          const metadataValue = metadata.metadata?.[query.metadataKey];
+          if (!metadataValue) return false;
+
+          if (query.matchType === "exact") {
+            return metadataValue === query.metadataValue;
+          } else {
+            return metadataValue.includes(query.metadataValue);
+          }
+        }
+
+        case "string_field": {
+          const fieldValue = metadata[query.fieldName];
+          if (!fieldValue) return false;
+
+          if (query.matchType === "exact") {
+            return fieldValue === query.fieldValue;
+          } else {
+            return fieldValue.includes(query.fieldValue);
+          }
+        }
       }
     });
   }
@@ -53,10 +69,11 @@ export class InMemoryDocumentMetadataDB implements DocumentMetadataDB {
   }
 
   static async fromJSONFile(
-    filePath: string
+    filePath: string,
+    deserializer?: (key: string, value: unknown) => unknown
   ): Promise<InMemoryDocumentMetadataDB> {
     const json = await (await fs.readFile(filePath)).toString();
-    const map = JSON.parse(json);
+    const map = JSON.parse(json, deserializer);
     return new InMemoryDocumentMetadataDB(map);
   }
 }
