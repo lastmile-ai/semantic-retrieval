@@ -73,7 +73,9 @@ async function main() {
   const generator = new FinancialReportGenerator();
 
   const report = await generator.run({
-    prompt: "Recovery from the COVID-19 pandemic",
+    prompt: "overall cash flow",
+    structure:
+      "Paragraphs delineated by heading containing company name and symbol",
     accessPassport,
     retriever,
   });

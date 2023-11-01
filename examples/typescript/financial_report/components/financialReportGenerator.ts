@@ -11,10 +11,10 @@ interface FinancialReportGeneratorParams
   extends CompletionModelParams<ChatCompletionCreateParams> {
   accessPassport: AccessPassport;
   retriever: FinancialReportDocumentRetriever;
+  structure: string;
 }
 
-const PROMPT_TEMPLATE =
-  "For each pair of company and details in the following list, generate a brief paragraph with company heading summarizing the details with respect to topic {{topic}}: {{companyDetails}}";
+const PROMPT_TEMPLATE = "STRUCTURE: {{structure}}; CONTEXT: {{companyDetails}}";
 
 export class FinancialReportGenerator<P, R> extends LLMCompletionGenerator<
   ChatCompletionCreateParams,
@@ -38,12 +38,25 @@ export class FinancialReportGenerator<P, R> extends LLMCompletionGenerator<
     });
 
     const completionPrompt = new PromptTemplate(PROMPT_TEMPLATE, {
-      topic: detailsPrompt,
+      //topic: detailsPrompt,
       companyDetails: JSON.stringify(companyDetails, null, 2),
+      structure: params.structure,
     });
 
     const response = await this.model.run({
       ...modelParams,
+      completionParams: {
+        messages: [
+          {
+            content:
+              "INSTRUCTIONS: You are a helpful assistant. Rearrange the context to answer the question. " +
+              "Output your response following the requested structure. Do not include any words that do not appear in the context.",
+            role: "system",
+          },
+        ],
+        model: "gpt-3.5-turbo-16k",
+        stream: false,
+      },
       prompt: completionPrompt,
     });
 
