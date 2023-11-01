@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { AccessIdentity } from "../access-control/accessIdentity";
+import { ResourceAccessPolicy } from "../access-control/resourceAccessPolicy";
 import { assertUnreachable } from "../common/core";
 import { VectorDBQuery } from "../data-store/vector-DBs/vectorDB";
 import type {
@@ -86,6 +87,12 @@ export type QueryVectorDBEvent = {
   vectorEmbeddings: VectorEmbedding[];
 };
 
+export type RetrievedFragmentPolicyCheckFailedEvent = {
+  name: "onRetrievedFragmentPolicyCheckFailed";
+  fragment: DocumentFragment;
+  policy: ResourceAccessPolicy;
+};
+
 export type RetrieverFilterAccessibleFragmentsEvent = {
   name: "onRetrieverFilterAccessibleFragments";
   fragments: DocumentFragment[];
@@ -111,8 +118,13 @@ export type GetFragmentsEvent = {
   fragments: DocumentFragment[];
 };
 
-export type RunCompletionEvent = {
-  name: "onRunCompletion";
+export type RunCompletionRequestEvent = {
+  name: "onRunCompletionRequest";
+  params: CompletionModelParams<any>;
+};
+
+export type RunCompletionResponseEvent = {
+  name: "onRunCompletionResponse";
   params: CompletionModelParams<any>;
   response: any;
 };
@@ -145,12 +157,14 @@ type CallbackEvent =
   | GetAccessIdentityEvent
   | AddDocumentsToVectorDBEvent
   | QueryVectorDBEvent
+  | RetrievedFragmentPolicyCheckFailedEvent
   | RetrieverFilterAccessibleFragmentsEvent
   | RetrieverGetDocumentsForFragmentsEvent
   | RetrieverProcessDocumentsEvent
   | RetrieveDataEvent
   | GetFragmentsEvent
-  | RunCompletionEvent
+  | RunCompletionRequestEvent
+  | RunCompletionResponseEvent
   | RunCompletionGenerationEvent<any>
   | GetRAGCompletionRetrievalQueryEvent;
 
@@ -174,12 +188,14 @@ interface CallbackMapping {
   onGetAccessIdentity?: Callback<GetAccessIdentityEvent>[];
   onAddDocumentToVectorDB?: Callback<AddDocumentsToVectorDBEvent>[];
   onQueryVectorDB?: Callback<QueryVectorDBEvent>[];
+  onRetrievedFragmentPolicyCheckFailed?: Callback<RetrievedFragmentPolicyCheckFailedEvent>[];
   onRetrieverFilterAccessibleFragments?: Callback<RetrieverFilterAccessibleFragmentsEvent>[];
   onRetrieverGetDocumentsForFragments?: Callback<RetrieverGetDocumentsForFragmentsEvent>[];
   onRetrieverProcessDocuments?: Callback<RetrieverProcessDocumentsEvent>[];
   onRetrieveData?: Callback<RetrieveDataEvent>[];
   onGetFragments?: Callback<GetFragmentsEvent>[];
-  onRunCompletion?: Callback<RunCompletionEvent>[];
+  onRunCompletionRequest?: Callback<RunCompletionRequestEvent>[];
+  onRunCompletionResponse?: Callback<RunCompletionResponseEvent>[];
   onRunCompletionGeneration?: Callback<RunCompletionGenerationEvent<any>>[];
   onGetRAGCompletionRetrievalQuery?: Callback<GetRAGCompletionRetrievalQueryEvent>[];
 }
@@ -283,6 +299,12 @@ class CallbackManager {
           this.callbacks.onQueryVectorDB,
           DEFAULT_CALLBACKS.onQueryVectorDB
         );
+      case "onRetrievedFragmentPolicyCheckFailed":
+        return await this.callback_helper(
+          event,
+          this.callbacks.onRetrievedFragmentPolicyCheckFailed,
+          DEFAULT_CALLBACKS.onRetrievedFragmentPolicyCheckFailed
+        );
       case "onRetrieverFilterAccessibleFragments":
         return await this.callback_helper(
           event,
@@ -313,11 +335,17 @@ class CallbackManager {
           this.callbacks.onGetFragments,
           DEFAULT_CALLBACKS.onGetFragments
         );
-      case "onRunCompletion":
+      case "onRunCompletionRequest":
         return await this.callback_helper(
           event,
-          this.callbacks.onRunCompletion,
-          DEFAULT_CALLBACKS.onRunCompletion
+          this.callbacks.onRunCompletionRequest,
+          DEFAULT_CALLBACKS.onRunCompletionRequest
+        );
+      case "onRunCompletionResponse":
+        return await this.callback_helper(
+          event,
+          this.callbacks.onRunCompletionResponse,
+          DEFAULT_CALLBACKS.onRunCompletionResponse
         );
       case "onRunCompletionGeneration":
         return await this.callback_helper(

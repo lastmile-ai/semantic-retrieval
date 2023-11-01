@@ -7,11 +7,13 @@ import {
 } from "openai/resources/chat/completions";
 import { type ClientOptions as OpenAIClientOptions, OpenAI } from "openai";
 import { CompletionModel, CompletionModelParams } from "../completionModel";
+import { CallbackManager } from "../../../utils/callbacks";
 
 export type OpenAIChatModelParams =
   CompletionModelParams<ChatCompletionCreateParams>;
 
 export interface OpenAIChatModelConfig extends OpenAIClientOptions {
+  callbackManager?: CallbackManager;
   defaultModel?: string;
 }
 
@@ -23,7 +25,7 @@ export class OpenAIChatModel extends CompletionModel<
   private defaultModel = "gpt-3.5-turbo";
 
   constructor(config?: OpenAIChatModelConfig) {
-    super();
+    super(config?.callbackManager);
 
     const apiKey = config?.apiKey ?? getEnvVar("OPENAI_API_KEY");
     if (!apiKey) {
@@ -65,12 +67,28 @@ export class OpenAIChatModel extends CompletionModel<
       messages: await this.constructMessages(params),
     };
 
+    await this.callbackManager?.runCallbacks({
+      name: "onRunCompletionRequest",
+      params: {
+        ...params,
+        completionParams: refinedCompletionParams,
+      },
+    });
+
     if (completionParams?.stream) {
       throw new Error("Streamed completions not implemented yet");
     } else {
-      return (await this.client.chat.completions.create(
+      const response = (await this.client.chat.completions.create(
         refinedCompletionParams
       )) as ChatCompletion;
+
+      await this.callbackManager?.runCallbacks({
+        name: "onRunCompletionResponse",
+        params,
+        response,
+      });
+
+      return response;
     }
   }
 }

@@ -23,7 +23,7 @@ export class FinancialReportGenerator<P, R> extends LLMCompletionGenerator<
   string
 > {
   constructor(callbackManager?: CallbackManager) {
-    super(new OpenAIChatModel(), callbackManager);
+    super(new OpenAIChatModel({ callbackManager }), callbackManager);
   }
 
   async run(params: FinancialReportGeneratorParams): Promise<string> {
