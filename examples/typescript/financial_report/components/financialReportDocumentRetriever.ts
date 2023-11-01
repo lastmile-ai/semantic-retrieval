@@ -24,10 +24,15 @@ export interface PortfolioData extends JSONObject {
   [Company: string]: { Shares: number | null };
 }
 
+export interface CompanyProfiles extends JSONObject {
+  [Company: string]: { Profile: string };
+}
+
 export type FinancialReportDocumentRetrieverConfig = {
   metadataDB: DocumentMetadataDB;
   documentRetriever: DocumentRetriever<Document[], VectorDBTextQuery>;
   portfolioRetriever: CSVRetriever<PortfolioData>;
+  companyProfilesRetriever: CSVRetriever<CompanyProfiles>;
   callbackManager?: CallbackManager;
 };
 
@@ -37,6 +42,7 @@ export class FinancialReportDocumentRetriever
 {
   documentRetriever: DocumentRetriever<Document[], VectorDBTextQuery>;
   portfolioRetriever: CSVRetriever<PortfolioData>;
+  companyProfilesRetriever: CSVRetriever<CompanyProfiles>;
   metadataDB: DocumentMetadataDB;
 
   constructor(config: FinancialReportDocumentRetrieverConfig) {
@@ -44,6 +50,7 @@ export class FinancialReportDocumentRetriever
     this.metadataDB = config.metadataDB;
     this.documentRetriever = config.documentRetriever;
     this.portfolioRetriever = config.portfolioRetriever;
+    this.companyProfilesRetriever = config.companyProfilesRetriever;
   }
 
   // For each of the companies with owned shares in the Portfolio, retrieve embedded documents
@@ -97,6 +104,10 @@ export class FinancialReportDocumentRetriever
       })
     );
 
+    const companyProfiles = await this.companyProfilesRetriever.retrieveData({
+      query: { primaryKeyColumn: "Company" },
+    });
+
     const data = await Promise.all(
       reportDocuments.map(async (report) => {
         const fragmentContentPromises: Promise<string>[] = [];
@@ -113,6 +124,7 @@ export class FinancialReportDocumentRetriever
 
         return {
           company: report.company,
+          profile: companyProfiles[report.company].Profile,
           details,
         };
       })
