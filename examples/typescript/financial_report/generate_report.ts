@@ -22,6 +22,15 @@ import fs from "fs/promises";
 import { FinancialReportGenerator } from "./components/financialReportGenerator";
 import { SecretReportAccessPolicy } from "./components/access_control/secretReportAccessPolicy";
 import { AccessIdentity } from "../../../src/access-control/accessIdentity";
+import {
+  CallbackManager,
+  RetrieveDataEvent,
+  RetrieverProcessDocumentsEvent,
+  RunCompletionGenerationEvent,
+  RunCompletionRequestEvent,
+  RunCompletionResponseEvent,
+} from "../../../src/utils/callbacks";
+import { v4 as uuid } from "uuid";
 
 dotenv.config();
 
@@ -57,11 +66,13 @@ program.option(
   "ea4bcf44-e0f3-46ff-bf66-5b1f9e7502df" // default pinecone namespace from 'good' ingest_data run
 );
 
+program.option("-v, --verbose", "specify whether to print verbose logs", false);
+
 program.parse(process.argv);
 
 async function main() {
   const options = program.opts();
-  const { indexName, namespace, clientId, accessIdentity } =
+  const { indexName, namespace, clientId, accessIdentity, verboseLogging } =
     getOptions(options);
 
   // Load the metadataDB persisted from ingest_data script
@@ -87,6 +98,8 @@ async function main() {
     }
   );
 
+  const callbackManager = getLoggingCallbackManager(verboseLogging);
+
   const vectorDB = await new PineconeVectorDB({
     indexName,
     namespace,
@@ -97,6 +110,7 @@ async function main() {
   const documentRetriever = new VectorDBDocumentRetriever({
     vectorDB,
     metadataDB,
+    callbackManager,
   });
 
   const portfolioRetriever = new CSVRetriever<PortfolioData>(
@@ -110,9 +124,10 @@ async function main() {
     documentRetriever,
     portfolioRetriever,
     metadataDB,
+    callbackManager,
   });
 
-  const generator = new FinancialReportGenerator();
+  const generator = new FinancialReportGenerator(callbackManager);
 
   console.log("Generating report...");
   const report = await generator.run({
@@ -121,10 +136,52 @@ async function main() {
     retriever,
   });
 
+  console.log("Writing report to disk...");
   await fs.writeFile("examples/typescript/financial_report/report.txt", report);
   console.log(
     "Report written to examples/typescript/financial_report/report.txt"
   );
+}
+
+function getLoggingCallbackManager(verboseLogging: boolean) {
+  return new CallbackManager(`generate-report-${uuid()}`, {
+    onRetrieveData: [
+      async (event: RetrieveDataEvent) => {
+        if (verboseLogging) {
+          console.log("Retrieved data: ", event.data);
+        } else {
+          console.log("Retrieved data");
+        }
+      },
+    ],
+    onRunCompletionGeneration: [
+      async (event: RunCompletionGenerationEvent<any>) => {
+        if (verboseLogging) {
+          console.log("Generated completion: ", event.response);
+        } else {
+          console.log("Generated completion");
+        }
+      },
+    ],
+    onRunCompletionRequest: [
+      async (event: RunCompletionRequestEvent) => {
+        if (verboseLogging) {
+          console.log("Performing completion request: ", event.params);
+        } else {
+          console.log("Performing completion request");
+        }
+      },
+    ],
+    onRunCompletionResponse: [
+      async (event: RunCompletionResponseEvent) => {
+        if (verboseLogging) {
+          console.log("Received completion response: ", event.response);
+        } else {
+          console.log("Received completion response");
+        }
+      },
+    ],
+  });
 }
 
 function getOptions(options: OptionValues) {
@@ -133,6 +190,7 @@ function getOptions(options: OptionValues) {
     pinecone_namespace: namespace,
     client_id: clientId,
     role,
+    verbose,
   } = options;
 
   if (typeof indexName !== "string") {
@@ -177,6 +235,7 @@ function getOptions(options: OptionValues) {
     namespace,
     clientId,
     accessIdentity,
+    verboseLogging: verbose !== false,
   };
 }
 

@@ -8,7 +8,10 @@ import {
   BaseRetriever,
   BaseRetrieverQueryParams,
 } from "../../../../src/retrieval/retriever";
-import { CallbackManager } from "../../../../src/utils/callbacks";
+import {
+  CallbackManager,
+  RetrieveDataEvent,
+} from "../../../../src/utils/callbacks";
 
 export type FinancialReportData = {
   company: string;
@@ -94,7 +97,7 @@ export class FinancialReportDocumentRetriever
       })
     );
 
-    return await Promise.all(
+    const data = await Promise.all(
       reportDocuments.map(async (report) => {
         const fragmentContentPromises: Promise<string>[] = [];
 
@@ -114,5 +117,14 @@ export class FinancialReportDocumentRetriever
         };
       })
     );
+
+    const event: RetrieveDataEvent = {
+      name: "onRetrieveData",
+      data,
+    };
+
+    await this.callbackManager?.runCallbacks(event);
+
+    return data;
   }
 }
