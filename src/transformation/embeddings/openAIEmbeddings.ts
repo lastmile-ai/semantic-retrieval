@@ -188,17 +188,24 @@ export class OpenAIEmbeddings extends DocumentEmbeddingsTransformer {
       // usage can't be typed as JSONObject since its keys are static in the interface
       usage = metadataUsage as unknown as JSONObject;
     }
-    return data.map((embedding, idx) => ({
-      vector: embedding.embedding,
-      text: fragments[idx].text,
-      metadata: {
+
+    return data.map((embedding, idx) => {
+      const embeddingMetadata: JSONObject = {
         ...metadata,
         fragmentId: fragments[idx].fragmentId,
         documentId: fragments[idx].documentId,
         model: this.model,
-        usage,
-      },
-      attributes: {},
-    }));
+      };
+
+      if (usage) {
+        embeddingMetadata["usage"] = usage;
+      }
+
+      return {
+        vector: embedding.embedding,
+        text: fragments[idx].text,
+        metadata: embeddingMetadata,
+      };
+    });
   }
 }
