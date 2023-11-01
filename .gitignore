@@ -8,4 +8,6 @@ __pycache__/
 .pytest_cache/
 semantic_retrieval.egg-info
 .DS_Store
+.virtual_documents
+.ipynb_checkpoints
 **scratch**
