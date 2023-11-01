@@ -37,6 +37,8 @@ class Config(Record):
     structure_prompt: str = "Numbered list"
     data_extraction_prompt: str = "data_extraction_prompt"
 
+    log_level: str = "WARNING"
+
 
 def add_parser_argument(parser, field_name, field):  # type: ignore
     field_name = field_name.replace("_", "-")
