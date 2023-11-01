@@ -4,7 +4,7 @@ import { InMemoryDocumentMetadataDB } from "../../../src/document/metadata/inMem
 import { CSVRetriever } from "../../../src/retrieval/csvRetriever";
 import { VectorDBDocumentRetriever } from "../../../src/retrieval/vector-DBs/vectorDBDocumentRetriever";
 import { OpenAIEmbeddings } from "../../../src/transformation/embeddings/openAIEmbeddings";
-import { AdvisorIdentity } from "./access_control/advisorIdentity";
+import { AdvisorIdentity } from "./components/access_control/advisorIdentity";
 import {
   FinancialReportDocumentRetriever,
   PortfolioData,
