@@ -225,12 +225,14 @@ describe("Callbacks", () => {
   });
 
   test("RAG Completion Generator and Completion Model", async () => {
-    const onRunCompletion = jest.fn();
+    const onRunCompletionRequest = jest.fn();
+    const onRunCompletionResponse = jest.fn();
     const onGetRAGCompletionRetrievalQuery = jest.fn();
     const onRunCompletionGeneration = jest.fn();
 
     const callbacks: CallbackMapping = {
-      onRunCompletion: [onRunCompletion],
+      onRunCompletionRequest: [onRunCompletionRequest],
+      onRunCompletionResponse: [onRunCompletionResponse],
       onGetRAGCompletionRetrievalQuery: [onGetRAGCompletionRetrievalQuery],
       onRunCompletionGeneration: [onRunCompletionGeneration],
     };
@@ -251,7 +253,8 @@ describe("Callbacks", () => {
       }),
     });
 
-    expect(onRunCompletion).toHaveBeenCalled();
+    expect(onRunCompletionRequest).toHaveBeenCalled();
+    expect(onRunCompletionResponse).toHaveBeenCalled();
     expect(onGetRAGCompletionRetrievalQuery).toHaveBeenCalled();
     expect(onRunCompletionGeneration).toHaveBeenCalled();
   });
