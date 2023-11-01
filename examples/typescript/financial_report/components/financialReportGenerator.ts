@@ -14,7 +14,7 @@ interface FinancialReportGeneratorParams
 }
 
 const PROMPT_TEMPLATE =
-  "For each pair of company and details in the following list, generate a brief paragraph with company heading summarizing the details with respect to topic {{topic}}: {{companyDetails}}";
+  "For each group of company, profile and details in the following list, generate a brief paragraph with company value as the heading, the company profile as the first section and then summarize the given details with respect to topic {{topic}}: {{companyDetails}}";
 
 export class FinancialReportGenerator<P, R> extends LLMCompletionGenerator<
   ChatCompletionCreateParams,

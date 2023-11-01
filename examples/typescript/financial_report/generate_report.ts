@@ -12,6 +12,7 @@ import { OpenAIEmbeddings } from "../../../src/transformation/embeddings/openAIE
 import { AdvisorIdentity } from "./components/access_control/advisorIdentity";
 import { AdminIdentity } from "./components/access_control/adminIdentity";
 import {
+  CompanyProfiles,
   FinancialReportDocumentRetriever,
   PortfolioData,
 } from "./components/financialReportDocumentRetriever";
@@ -117,12 +118,17 @@ async function main() {
     `examples/example_data/financial_report/portfolios/${clientId}_portfolio.csv`
   );
 
+  const companyProfilesRetriever = new CSVRetriever<CompanyProfiles>(
+    "examples/example_data/financial_report/company_profiles.csv"
+  );
+
   const accessPassport = new AccessPassport();
   accessPassport.register(accessIdentity);
 
   const retriever = new FinancialReportDocumentRetriever({
     documentRetriever,
     portfolioRetriever,
+    companyProfilesRetriever,
     metadataDB,
     callbackManager,
   });
