@@ -19,7 +19,6 @@ from semantic_retrieval.transformation.embeddings.embeddings import (
 
 import semantic_retrieval.examples.financial_report.financial_report_generator as frg
 
-
 class PineconeVectorDBConfig(VectorDBConfig):
     index_name: str
     api_key: str
