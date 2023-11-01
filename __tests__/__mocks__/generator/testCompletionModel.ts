@@ -21,12 +21,17 @@ export class TestCompletionModel extends CompletionModel<
   async run(
     params: TestCompletionModelParams
   ): Promise<TestCompletionResponse> {
+    await this.callbackManager?.runCallbacks({
+      name: "onRunCompletionRequest",
+      params,
+    });
+
     const response = {
       completion: "test completion",
     };
 
     await this.callbackManager?.runCallbacks({
-      name: "onRunCompletion",
+      name: "onRunCompletionResponse",
       params,
       response,
     });
