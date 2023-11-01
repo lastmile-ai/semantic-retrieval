@@ -67,8 +67,6 @@ class FinancialReportDocumentRetriever:
 
         knn = await self.vector_db.query(vdbq)
 
-        # print(f"{len(knn)=}")
-
         def _get_doc_id(result: VectorEmbedding) -> str:
             if result.metadata is None:
                 return ""
