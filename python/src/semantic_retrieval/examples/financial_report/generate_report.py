@@ -6,6 +6,7 @@ import sys
 from typing import List
 
 from semantic_retrieval.common.core import LOGGER_FMT
+from semantic_retrieval.examples.financial_report.access_control.identities import AdvisorIdentity
 
 import semantic_retrieval.examples.financial_report.financial_report_generator as frg
 from result import Err, Ok
@@ -34,6 +35,8 @@ from semantic_retrieval.transformation.embeddings.openai_embeddings import (
     OpenAIEmbeddingsConfig,
 )
 
+import semantic_retrieval.examples.financial_report.financial_report_document_retriever as frdr
+
 logger = logging.getLogger(__name__)
 logging.basicConfig(format=LOGGER_FMT)
 
@@ -43,7 +46,7 @@ class FinancialReport(Record):
 
 
 async def main(argv: List[str]):
-    loggers = [logger, frg.logger]
+    loggers = [logger, frg.logger, frdr.logger]
 
     args = set_up_script(argv, loggers)
     config = get_config(args)
@@ -83,12 +86,13 @@ async def run_generate_report(config: Config):
             portfolio: PortfolioData = await portfolio_retriever.retrieve_data(None)  # type: ignore [fixme]
             logger.info("\nPortfolio:\n" + json.dumps(portfolio, indent=2))
 
-            # access_passport = AccessPassport()
-            # identity = AdvisorIdentity(client=config.client_name)
-            # access_passport.register(identity)
+            viewer_identity = AdvisorIdentity(client="client_a")
+
+
 
             retriever = FinancialReportDocumentRetriever(
-                #   access_passport,
+                viewer_identity,
+                config.client_name,
                 vector_db_config=pcvdbcfg,
                 embeddings_config=openaiembcfg,
                 portfolio=portfolio,  # type: ignore [fixme]

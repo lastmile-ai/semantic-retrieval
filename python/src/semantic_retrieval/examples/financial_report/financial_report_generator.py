@@ -26,12 +26,17 @@ class FinancialReportGenerator:
         overfetch_factor: float,
         retriever: FinancialReportDocumentRetriever,
     ):
-        retrieved_data = await retriever.retrieve_data(
+        res_retrieved_data = await retriever.retrieve_data(
             portfolio=portfolio,
             query=retrieval_query,
             top_k=top_k,
             overfetch_factor=overfetch_factor,
         )
+
+        if res_retrieved_data.is_err():
+            raise Exception(res_retrieved_data.err())
+        
+        retrieved_data  = res_retrieved_data.unwrap()
 
         retrieved_data_processed = process_retrieved_data(portfolio, retrieved_data)
 
