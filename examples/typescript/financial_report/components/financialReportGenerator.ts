@@ -1,11 +1,11 @@
-import { AccessPassport } from "../../../src/access-control/accessPassport";
-import { CompletionModelParams } from "../../../src/generator/completion-models/completionModel";
-import { LLMCompletionGenerator } from "../../../src/generator/completionGenerator";
+import { AccessPassport } from "../../../../src/access-control/accessPassport";
+import { CompletionModelParams } from "../../../../src/generator/completion-models/completionModel";
+import { LLMCompletionGenerator } from "../../../../src/generator/completionGenerator";
 import { FinancialReportDocumentRetriever } from "./financialReportDocumentRetriever";
-import { PromptTemplate } from "../../../src/prompts/prompt-templates/promptTemplate";
-import { OpenAIChatModel } from "../../../src/generator/completion-models/openai/openAIChatModel";
+import { PromptTemplate } from "../../../../src/prompts/prompt-templates/promptTemplate";
+import { OpenAIChatModel } from "../../../../src/generator/completion-models/openai/openAIChatModel";
 import { ChatCompletion, ChatCompletionCreateParams } from "openai/resources";
-import { CallbackManager } from "../../../src/utils/callbacks";
+import { CallbackManager } from "../../../../src/utils/callbacks";
 
 interface FinancialReportGeneratorParams
   extends CompletionModelParams<ChatCompletionCreateParams> {
