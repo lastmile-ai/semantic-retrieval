@@ -1,7 +1,13 @@
 # from typing import Any, Dict, TypeVar
 import argparse
-from typing import Type
+import json
+import logging
+import os
+from typing import List, Type
+
+from dotenv import load_dotenv
 from semantic_retrieval.common.types import Record
+from semantic_retrieval.utils.configs.configs import combine_dicts, remove_nones
 
 
 class Config(Record):
@@ -39,6 +45,16 @@ class Config(Record):
 
     log_level: str = "WARNING"
 
+    # Eval
+    sample_output_path: str = "ticker_numerical_output_net_income_client_a.txt"
+    ticker_eval_ground_truth_path: str = "ticker_numerical_eval_gt.csv"
+
+    def __repr__(self) -> str:
+        return json.dumps(self.model_dump(), indent=2)
+
+    def __str__(self) -> str:
+        return self.__repr__()
+
 
 def add_parser_argument(parser, field_name, field):  # type: ignore
     field_name = field_name.replace("_", "-")
@@ -55,3 +71,54 @@ def argparsify(r: Record | Type[Record]):
     parser = argparse.ArgumentParser()
     add_parser_arguments(parser, r.model_fields)
     return parser
+
+
+def get_config(args: argparse.Namespace):
+    # TODO combine stuff cleaner
+    args_resolved = combine_dicts(
+        [
+            remove_nones(d)
+            for d in [
+                vars(args),
+                dict(
+                    openai_key=os.getenv("OPENAI_API_KEY"),
+                    pinecone_key=os.getenv("PINECONE_API_KEY"),
+                ),
+            ]
+        ]
+    )
+    return Config(**args_resolved)
+
+
+def set_up_script(argv: List[str], loggers: List[logging.Logger]):
+    load_dotenv()
+
+    parser = argparsify(Config)
+    args = parser.parse_args(argv[1:])
+
+    config = get_config(args)
+
+    set_log_level(config.log_level, loggers)
+
+    return args
+
+
+def set_log_level(log_level: int | str, loggers: List[logging.Logger]):
+    ll: int = -1
+    match log_level:
+        case int():
+            ll = int(log_level)
+        case str():
+            ll = getattr(logging, log_level.upper())
+
+    for logger_ in loggers:
+        logger_.setLevel(ll)
+
+
+def resolve_path(data_root: str, path: str) -> str:
+    """
+    data_root is relative to csv
+    path is relative to data_root
+    """
+
+    return os.path.join(os.getcwd(), data_root, path)

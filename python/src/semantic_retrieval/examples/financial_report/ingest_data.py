@@ -1,7 +1,14 @@
 import asyncio
+import logging
 import sys
 from typing import List
-from semantic_retrieval.examples.financial_report.config import Config
+
+from semantic_retrieval.common.core import LOGGER_FMT
+from semantic_retrieval.examples.financial_report.config import (
+    Config,
+    get_config,
+    set_up_script,
+)
 
 from semantic_retrieval.ingestion.data_sources.fs.file_system import FileSystem
 from semantic_retrieval.document.metadata.in_memory_document_metadata_db import (
@@ -37,21 +44,23 @@ from semantic_retrieval.transformation.embeddings.openai_embeddings import (
     OpenAIEmbeddingsConfig,
 )
 
-import argparse
 
-from semantic_retrieval.utils.configs.configs import remove_nones
+logger = logging.getLogger(__name__)
+logging.basicConfig(format=LOGGER_FMT)
 
 
 async def main(argv: List[str]):
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--data-root", type=str)
-    args = parser.parse_args(argv[1:])
-    args_resolved = Config(**remove_nones(vars(args)))
-    return await run_ingest(args_resolved)
+    loggers = [logger]
+
+    args = set_up_script(argv, loggers)
+    config = get_config(args)
+    logger.debug("CONFIG:\n")
+    logger.debug(str(config))
+
+    return await run_ingest(config)
 
 
 async def run_ingest(config: Config):
-    print(f"{config=}")
     # Create a new FileSystem instance
     fileSystem = FileSystem(config.data_root)
 
