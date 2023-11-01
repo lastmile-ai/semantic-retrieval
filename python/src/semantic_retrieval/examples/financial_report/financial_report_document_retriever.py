@@ -1,7 +1,9 @@
+import logging
 import re
 from typing import Dict, List, NewType
 
 from result import Err, Ok, Result
+from semantic_retrieval.common.core import LOGGER_FMT
 from semantic_retrieval.common.types import Record
 from semantic_retrieval.data_store.vector_dbs.pinecone_vector_db import (
     PineconeVectorDB,
@@ -10,12 +12,17 @@ from semantic_retrieval.data_store.vector_dbs.pinecone_vector_db import (
 from semantic_retrieval.data_store.vector_dbs.vector_db import VectorDBTextQuery
 from semantic_retrieval.document.metadata.document_metadata import DocumentMetadata
 from semantic_retrieval.document.metadata.document_metadata_db import DocumentMetadataDB
+from semantic_retrieval.examples.financial_report.access_control.identities import AdvisorIdentity, ClientIdentity, FinancialReportIdentity
 from semantic_retrieval.retrieval.csv_retriever import CSVRetriever
 from semantic_retrieval.transformation.embeddings.embeddings import VectorEmbedding
 from semantic_retrieval.transformation.embeddings.openai_embeddings import (
     OpenAIEmbeddings,
     OpenAIEmbeddingsConfig,
 )
+
+
+logger = logging.getLogger(__name__)
+logging.basicConfig(format=LOGGER_FMT)
 
 
 class FinancialReportData(Record):
@@ -26,6 +33,14 @@ class FinancialReportData(Record):
 PortfolioData = NewType("PortfolioData", Dict[str, int])
 
 
+def validate_access(viewer_identity: FinancialReportIdentity, client_name: str) -> bool:
+    match viewer_identity:
+        case AdvisorIdentity(client=client):
+            return client == client_name
+        case ClientIdentity(name=name):
+            return name == client_name
+        
+
 class FinancialReportDocumentRetriever:
     vector_db: PineconeVectorDB
     portfolio_retriever: CSVRetriever[PortfolioData]
@@ -33,7 +48,8 @@ class FinancialReportDocumentRetriever:
 
     def __init__(
         self,
-        # access_passport: AccessPassport,
+        viewer_identity: FinancialReportIdentity,
+        client_name: str,
         vector_db_config: PineconeVectorDBConfig,
         embeddings_config: OpenAIEmbeddingsConfig,
         portfolio: CSVRetriever[PortfolioData],
@@ -48,6 +64,8 @@ class FinancialReportDocumentRetriever:
         )
         self.portfolio = portfolio
         self.metadata_db = metadata_db
+        self.viewer_identity = viewer_identity
+        self.client_name = client_name
 
     async def retrieve_data(
         self,
@@ -56,7 +74,13 @@ class FinancialReportDocumentRetriever:
         # TODO pull this stuff out into a Record
         top_k: int,
         overfetch_factor: float = 1.0,
-    ) -> List[FinancialReportData]:
+    ) -> Result[List[FinancialReportData], str]:
+        if not validate_access(self.viewer_identity, self.client_name):
+            return Err(f"access denied {self.client_name=}, Role={self.viewer_identity}")
+        else:
+            logger.info(f"\nAccess granted for {self.client_name}, Role={self.viewer_identity}")    
+
+
         vdbq = VectorDBTextQuery(
             mode="text",
             topK=int(overfetch_factor * top_k),
@@ -111,7 +135,7 @@ class FinancialReportDocumentRetriever:
                                 case Ok(f_data):
                                     out.append(f_data)
 
-        return out
+        return Ok(out)
 
 
 def _uri_extract_ticker(uri: str):
