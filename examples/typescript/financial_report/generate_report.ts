@@ -1,7 +1,6 @@
 import { AccessPassport } from "../../../src/access-control/accessPassport";
 import { PineconeVectorDB } from "../../../src/data-store/vector-DBs/pineconeVectorDB";
 import { InMemoryDocumentMetadataDB } from "../../../src/document/metadata/inMemoryDocumentMetadataDB";
-import { OpenAIChatModel } from "../../../src/generator/completion-models/openai/openAIChatModel";
 import { CSVRetriever } from "../../../src/retrieval/csvRetriever";
 import { VectorDBDocumentRetriever } from "../../../src/retrieval/vector-DBs/vectorDBDocumentRetriever";
 import { OpenAIEmbeddings } from "../../../src/transformation/embeddings/openAIEmbeddings";
@@ -9,12 +8,12 @@ import { AdvisorIdentity } from "./access_control/advisorIdentity";
 import {
   FinancialReportDocumentRetriever,
   PortfolioData,
-} from "./financialReportDocumentRetriever";
+} from "./components/financialReportDocumentRetriever";
 import dotenv from "dotenv";
 import { ResourceAccessPolicy } from "../../../src/access-control/resourceAccessPolicy";
 import { AlwaysAllowAccessPolicy } from "../../../src/access-control/policies/alwaysAllowAccessPolicy";
 import fs from "fs/promises";
-import { FinancialReportGenerator } from "./financialReportGenerator";
+import { FinancialReportGenerator } from "./components/financialReportGenerator";
 
 dotenv.config();
 
@@ -71,7 +70,7 @@ async function main() {
   const generator = new FinancialReportGenerator();
 
   const report = await generator.run({
-    prompt: "Recovery from the COVIDE-19 pandemic",
+    prompt: "Recovery from the COVID-19 pandemic",
     accessPassport, // not necessary in this case, but include for example
     retriever,
   });
