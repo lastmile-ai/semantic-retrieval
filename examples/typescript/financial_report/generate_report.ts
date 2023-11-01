@@ -25,6 +25,7 @@ import { AccessIdentity } from "../../../src/access-control/accessIdentity";
 import {
   CallbackManager,
   RetrieveDataEvent,
+  RetrievedFragmentPolicyCheckFailedEvent,
   RetrieverProcessDocumentsEvent,
   RunCompletionGenerationEvent,
   RunCompletionRequestEvent,
@@ -179,6 +180,15 @@ function getLoggingCallbackManager(verboseLogging: boolean) {
         } else {
           console.log("Received completion response");
         }
+      },
+    ],
+    onRetrievedFragmentPolicyCheckFailed: [
+      async (event: RetrievedFragmentPolicyCheckFailedEvent) => {
+        console.log("Fragment policy check failed: ", {
+          fragmentId: event.fragment.fragmentId,
+          documentId: event.fragment.documentId,
+          policy: event.policy.policy,
+        });
       },
     ],
   });

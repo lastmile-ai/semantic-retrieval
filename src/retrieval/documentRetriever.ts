@@ -62,19 +62,27 @@ export abstract class DocumentRetriever<R, Q> extends BaseRetriever<R, Q> {
         // If there is no metadata for the document, assume that the document is accessible
         if (metadata && metadata.accessPolicies && metadata.document) {
           const policyChecks = await Promise.all(
-            metadata.accessPolicies.map(
-              async (policy) =>
-                await policy.testDocumentReadPermission(
-                  metadata.document!,
-                  policy.resource
-                    ? accessPassport?.getIdentity(policy.resource)
-                    : undefined
-                )
-            )
+            metadata.accessPolicies.map(async (policy) => ({
+              policy,
+              passed: await policy.testDocumentReadPermission(
+                metadata.document!,
+                policy.resource
+                  ? accessPassport?.getIdentity(policy.resource)
+                  : undefined
+              ),
+            }))
           );
 
-          if (policyChecks.some((check) => check === false)) {
-            return null;
+          for (const check of policyChecks) {
+            if (!check.passed) {
+              await this.callbackManager?.runCallbacks({
+                name: "onRetrievedFragmentPolicyCheckFailed",
+                fragment,
+                policy: check.policy,
+              });
+
+              return null;
+            }
           }
         }
 
@@ -90,7 +98,8 @@ export abstract class DocumentRetriever<R, Q> extends BaseRetriever<R, Q> {
       name: "onRetrieverFilterAccessibleFragments",
       fragments: filteredFragments,
     };
-    this.callbackManager?.runCallbacks(event);
+
+    await this.callbackManager?.runCallbacks(event);
 
     return filteredFragments;
   }

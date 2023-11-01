@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { AccessIdentity } from "../access-control/accessIdentity";
+import { ResourceAccessPolicy } from "../access-control/resourceAccessPolicy";
 import { assertUnreachable } from "../common/core";
 import { VectorDBQuery } from "../data-store/vector-DBs/vectorDB";
 import type {
@@ -86,6 +87,12 @@ export type QueryVectorDBEvent = {
   vectorEmbeddings: VectorEmbedding[];
 };
 
+export type RetrievedFragmentPolicyCheckFailedEvent = {
+  name: "onRetrievedFragmentPolicyCheckFailed";
+  fragment: DocumentFragment;
+  policy: ResourceAccessPolicy;
+};
+
 export type RetrieverFilterAccessibleFragmentsEvent = {
   name: "onRetrieverFilterAccessibleFragments";
   fragments: DocumentFragment[];
@@ -150,6 +157,7 @@ type CallbackEvent =
   | GetAccessIdentityEvent
   | AddDocumentsToVectorDBEvent
   | QueryVectorDBEvent
+  | RetrievedFragmentPolicyCheckFailedEvent
   | RetrieverFilterAccessibleFragmentsEvent
   | RetrieverGetDocumentsForFragmentsEvent
   | RetrieverProcessDocumentsEvent
@@ -180,6 +188,7 @@ interface CallbackMapping {
   onGetAccessIdentity?: Callback<GetAccessIdentityEvent>[];
   onAddDocumentToVectorDB?: Callback<AddDocumentsToVectorDBEvent>[];
   onQueryVectorDB?: Callback<QueryVectorDBEvent>[];
+  onRetrievedFragmentPolicyCheckFailed?: Callback<RetrievedFragmentPolicyCheckFailedEvent>[];
   onRetrieverFilterAccessibleFragments?: Callback<RetrieverFilterAccessibleFragmentsEvent>[];
   onRetrieverGetDocumentsForFragments?: Callback<RetrieverGetDocumentsForFragmentsEvent>[];
   onRetrieverProcessDocuments?: Callback<RetrieverProcessDocumentsEvent>[];
@@ -289,6 +298,12 @@ class CallbackManager {
           event,
           this.callbacks.onQueryVectorDB,
           DEFAULT_CALLBACKS.onQueryVectorDB
+        );
+      case "onRetrievedFragmentPolicyCheckFailed":
+        return await this.callback_helper(
+          event,
+          this.callbacks.onRetrievedFragmentPolicyCheckFailed,
+          DEFAULT_CALLBACKS.onRetrievedFragmentPolicyCheckFailed
         );
       case "onRetrieverFilterAccessibleFragments":
         return await this.callback_helper(
