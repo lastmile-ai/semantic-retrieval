@@ -1,20 +1,22 @@
 import argparse
 import asyncio
+import json
+import logging
 import os
 import sys
 from typing import List
-from dotenv import load_dotenv
+from semantic_retrieval.common.core import LOGGER_FMT
 
+import semantic_retrieval.examples.financial_report.financial_report_generator as frg
+from dotenv import load_dotenv
 from result import Err, Ok
 from semantic_retrieval.common.types import Record
 from semantic_retrieval.data_store.vector_dbs.pinecone_vector_db import (
     PineconeVectorDBConfig,
 )
-
 from semantic_retrieval.document.metadata.in_memory_document_metadata_db import (
     InMemoryDocumentMetadataDB,
 )
-
 from semantic_retrieval.examples.financial_report.config import Config, argparsify
 from semantic_retrieval.examples.financial_report.financial_report_document_retriever import (
     FinancialReportDocumentRetriever,
@@ -24,13 +26,13 @@ from semantic_retrieval.examples.financial_report.financial_report_generator imp
     FinancialReportGenerator,
 )
 from semantic_retrieval.retrieval.csv_retriever import CSVRetriever
-
 from semantic_retrieval.transformation.embeddings.openai_embeddings import (
     OpenAIEmbeddingsConfig,
 )
-
-
 from semantic_retrieval.utils.configs.configs import combine_dicts, remove_nones
+
+logger = logging.getLogger(__name__)
+logging.basicConfig(format=LOGGER_FMT)
 
 
 class FinancialReport(Record):
@@ -74,8 +76,20 @@ def get_config(args: argparse.Namespace):
     return Config(**args_resolved)
 
 
+def set_log_level(log_level: int | str):
+    ll: int = -1
+    match log_level:
+        case int():
+            ll = int(log_level)
+        case str():
+            ll = getattr(logging, log_level.upper())
+
+    for logger_ in [logger, frg.logger]:
+        logger_.setLevel(ll)
+
+
 async def run_generate_report(config: Config):
-    # Load the metadataDB persisted from ingest_data script
+    set_log_level(config.log_level)
     metadata_path = resolve_path(config.data_root, config.metadata_db_path)
     res_metadata_db = await InMemoryDocumentMetadataDB.from_json_file(metadata_path)
 
@@ -93,6 +107,7 @@ async def run_generate_report(config: Config):
                 environment=config.pinecone_environment,
             )
 
+            logger.info(f"Client name: {config.client_name}")
             portfolio_csv_name = f"{config.client_name}_portfolio.csv"
             portfolio_csv_path = os.path.join(
                 config.portfolio_csv_dir, portfolio_csv_name
@@ -102,7 +117,7 @@ async def run_generate_report(config: Config):
             )
 
             portfolio: PortfolioData = await portfolio_retriever.retrieve_data(None)  # type: ignore [fixme]
-            print(f"{portfolio=}")
+            logger.info("\nPortfolio:\n" + json.dumps(portfolio, indent=2))
 
             # access_passport = AccessPassport()
             # identity = AdvisorIdentity(client=config.client_name)
@@ -131,7 +146,7 @@ async def run_generate_report(config: Config):
                 portfolio,
                 system_prompt,
                 retrieval_query,
-                structure_prompt="Numbered List",
+                structure_prompt=config.structure_prompt,
                 data_extraction_prompt=config.data_extraction_prompt,
                 top_k=config.top_k,
                 overfetch_factor=config.overfetch_factor,
