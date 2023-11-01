@@ -1,3 +1,8 @@
+#!/usr/bin/env ts-node
+// Description: Script to generate a report for financial advisor clients. Run this after ingest_data.ts
+// Usage Example: npx ts-node examples/typescript/financial_report/generate_report.ts -r advisor -c client_a -p my-index -n my-namespace
+
+import { OptionValues, program } from "commander";
 import { AccessPassport } from "../../../src/access-control/accessPassport";
 import { PineconeVectorDB } from "../../../src/data-store/vector-DBs/pineconeVectorDB";
 import { InMemoryDocumentMetadataDB } from "../../../src/document/metadata/inMemoryDocumentMetadataDB";
@@ -5,6 +10,7 @@ import { CSVRetriever } from "../../../src/retrieval/csvRetriever";
 import { VectorDBDocumentRetriever } from "../../../src/retrieval/vector-DBs/vectorDBDocumentRetriever";
 import { OpenAIEmbeddings } from "../../../src/transformation/embeddings/openAIEmbeddings";
 import { AdvisorIdentity } from "./components/access_control/advisorIdentity";
+import { AdminIdentity } from "./components/access_control/adminIdentity";
 import {
   FinancialReportDocumentRetriever,
   PortfolioData,
@@ -14,10 +20,50 @@ import { ResourceAccessPolicy } from "../../../src/access-control/resourceAccess
 import { AlwaysAllowAccessPolicy } from "../../../src/access-control/policies/alwaysAllowAccessPolicy";
 import fs from "fs/promises";
 import { FinancialReportGenerator } from "./components/financialReportGenerator";
+import { SecretReportAccessPolicy } from "./components/access_control/secretReportAccessPolicy";
+import { AccessIdentity } from "../../../src/access-control/accessIdentity";
 
 dotenv.config();
 
+program
+  .name("generate_report")
+  .description(
+    "Script to generate a report for financial advisor clients. Run this after ingest_data.ts"
+  );
+
+program.option(
+  "-r, --role [ROLE]",
+  "specify the user role to generate a report for (admin or advisor)",
+  "advisor"
+);
+
+program.option(
+  "-c, --client_id [CLIENT_ID]",
+  "specify the client id to generate a report for",
+  "client_a"
+);
+
+program.option(
+  "-p, --pinecone_index [PINECONE_INDEX]",
+  // Make sure this matches your Pinecone index name & it has 1536 dimensions for openai embeddings
+  "specify the name of the pinecone index to ingest the documents into",
+  "test-financial-report" // default pinecone index name
+);
+
+program.option(
+  "-n, --pinecone_namespace [PINECONE_NAMESPACE]",
+  // Make sure this matches the namespace created from ingest_data script
+  "specify the namespace in the pinecone index containing document embeddings",
+  "ea4bcf44-e0f3-46ff-bf66-5b1f9e7502df" // default pinecone namespace from 'good' ingest_data run
+);
+
+program.parse(process.argv);
+
 async function main() {
+  const options = program.opts();
+  const { indexName, namespace, clientId, accessIdentity } =
+    getOptions(options);
+
   // Load the metadataDB persisted from ingest_data script
   const metadataDB = await InMemoryDocumentMetadataDB.fromJSONFile(
     "examples/typescript/financial_report/metadataDB.json",
@@ -26,12 +72,14 @@ async function main() {
         // deserialize access policies to their instances
         return (value as ResourceAccessPolicy[]).map(
           (policy: ResourceAccessPolicy) => {
-            if (policy.policy === "AlwaysAllowAccessPolicy") {
-              return new AlwaysAllowAccessPolicy();
+            switch (policy.policy) {
+              case "AlwaysAllowAccessPolicy":
+                return new AlwaysAllowAccessPolicy();
+              case "SecretReportAccessPolicy":
+                return new SecretReportAccessPolicy();
+              default:
+                return policy;
             }
-            return policy;
-            // TODO: Handle other policies for demo. Could also try to dynamically import from
-            // policies dir based on name, or have static mapping of policy => class constructor
           }
         );
       }
@@ -40,9 +88,8 @@ async function main() {
   );
 
   const vectorDB = await new PineconeVectorDB({
-    indexName: "test-financial-report",
-    // TODO: Make this dynamic via script param
-    namespace: "ea4bcf44-e0f3-46ff-bf66-5b1f9e7502df",
+    indexName,
+    namespace,
     embeddings: new OpenAIEmbeddings(),
     metadataDB,
   });
@@ -52,14 +99,12 @@ async function main() {
     metadataDB,
   });
 
-  // TODO: Make this dynamic via script param
   const portfolioRetriever = new CSVRetriever<PortfolioData>(
-    "examples/example_data/financial_report/portfolios/client_a_portfolio.csv"
+    `examples/example_data/financial_report/portfolios/${clientId}_portfolio.csv`
   );
 
   const accessPassport = new AccessPassport();
-  // const identity = new AdvisorIdentity("client_a"); // TODO: Make this dynamic via script param
-  // accessPassport.register(identity);
+  accessPassport.register(accessIdentity);
 
   const retriever = new FinancialReportDocumentRetriever({
     documentRetriever,
@@ -69,15 +114,82 @@ async function main() {
 
   const generator = new FinancialReportGenerator();
 
+  console.log("Generating report...");
   const report = await generator.run({
     prompt: "Recovery from the COVID-19 pandemic",
-    accessPassport, // not necessary in this case, but include for example
+    accessPassport,
     retriever,
   });
 
   await fs.writeFile("examples/typescript/financial_report/report.txt", report);
+  console.log(
+    "Report written to examples/typescript/financial_report/report.txt"
+  );
 }
 
-main();
+function getOptions(options: OptionValues) {
+  const {
+    pinecone_index: indexName,
+    pinecone_namespace: namespace,
+    client_id: clientId,
+    role,
+  } = options;
+
+  if (typeof indexName !== "string") {
+    throw new Error("no index name or default specified");
+  }
+
+  if (typeof namespace !== "string") {
+    throw new Error("no namespace or default specified");
+  }
+
+  if (typeof clientId !== "string") {
+    throw new Error("no client id or default specified");
+  }
+
+  if (clientId !== "client_a" && clientId !== "client_b") {
+    throw new Error(
+      "invalid client id specified. Must be one of client_a or client_b"
+    );
+  }
+
+  if (typeof role !== "string") {
+    throw new Error("no role or default specified");
+  }
+
+  let accessIdentity: AccessIdentity;
+
+  switch (role) {
+    case "admin":
+      accessIdentity = new AdminIdentity();
+      break;
+    case "advisor":
+      accessIdentity = new AdvisorIdentity();
+      break;
+    default:
+      throw new Error(
+        "invalid role specified. Must be one of admin or advisor"
+      );
+  }
+
+  return {
+    indexName,
+    namespace,
+    clientId,
+    accessIdentity,
+  };
+}
+
+main()
+  .then(() => {
+    console.log("Done!");
+  })
+  .catch((err: any) => {
+    console.error("Error:", err);
+    process.exit(1);
+  })
+  .finally(() => {
+    process.exit(0);
+  });
 
 export {};
