@@ -54,7 +54,7 @@ class FileSystemRawDocument(RawDocument):
     file_loaders: dict[str, Callable[[str], BaseLoader]] = DEFAULT_FILE_LOADERS
 
     async def get_content(self) -> Result[str, str]:
-        # Get file loader w/ filePath (which is self.uri) & load_chunked_content
+        # Get file loader w/ file_path (which is self.uri) & load_chunked_content
         _, file_extension = os.path.splitext(self.uri)
 
         if file_extension in self.file_loaders:
