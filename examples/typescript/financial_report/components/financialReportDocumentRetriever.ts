@@ -1,14 +1,14 @@
-import { JSONObject } from "../../../src/common/jsonTypes";
-import { VectorDBTextQuery } from "../../../src/data-store/vector-DBs/vectorDB";
-import { Document } from "../../../src/document/document";
-import { DocumentMetadataDB } from "../../../src/document/metadata/documentMetadataDB";
-import { CSVRetriever } from "../../../src/retrieval/csvRetriever";
-import { DocumentRetriever } from "../../../src/retrieval/documentRetriever";
+import { JSONObject } from "../../../../src/common/jsonTypes";
+import { VectorDBTextQuery } from "../../../../src/data-store/vector-DBs/vectorDB";
+import { Document } from "../../../../src/document/document";
+import { DocumentMetadataDB } from "../../../../src/document/metadata/documentMetadataDB";
+import { CSVRetriever } from "../../../../src/retrieval/csvRetriever";
+import { DocumentRetriever } from "../../../../src/retrieval/documentRetriever";
 import {
   BaseRetriever,
   BaseRetrieverQueryParams,
-} from "../../../src/retrieval/retriever";
-import { CallbackManager } from "../../../src/utils/callbacks";
+} from "../../../../src/retrieval/retriever";
+import { CallbackManager } from "../../../../src/utils/callbacks";
 
 export type FinancialReportData = {
   company: string;
