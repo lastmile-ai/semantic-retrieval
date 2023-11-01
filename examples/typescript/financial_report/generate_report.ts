@@ -1,6 +1,6 @@
 #!/usr/bin/env ts-node
 // Description: Script to generate a report for financial advisor clients. Run this after ingest_data.ts
-// Usage Example: npx ts-node examples/typescript/financial_report/generate_report.ts -r advisor -c client_a -p my-index -n my-namespace
+// Usage Example: npx ts-node examples/typescript/financial_report/generate_report.ts -r advisor -c sarmad -p my-index -n my-namespace
 
 import { OptionValues, program } from "commander";
 import { AccessPassport } from "../../../src/access-control/accessPassport";
@@ -26,7 +26,6 @@ import {
   CallbackManager,
   RetrieveDataEvent,
   RetrievedFragmentPolicyCheckFailedEvent,
-  RetrieverProcessDocumentsEvent,
   RunCompletionGenerationEvent,
   RunCompletionRequestEvent,
   RunCompletionResponseEvent,
@@ -49,8 +48,8 @@ program.option(
 
 program.option(
   "-c, --client_id [CLIENT_ID]",
-  "specify the client id to generate a report for",
-  "client_a"
+  "specify the client id to generate a report for. One of sarmad or tanya",
+  "sarmad"
 );
 
 program.option(
@@ -215,9 +214,9 @@ function getOptions(options: OptionValues) {
     throw new Error("no client id or default specified");
   }
 
-  if (clientId !== "client_a" && clientId !== "client_b") {
+  if (clientId !== "sarmad" && clientId !== "tanya") {
     throw new Error(
-      "invalid client id specified. Must be one of client_a or client_b"
+      "invalid client id specified. Must be one of sarmad or tanya"
     );
   }
 

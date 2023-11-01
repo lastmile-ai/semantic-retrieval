@@ -23,7 +23,7 @@ class Config(Record):
     portfolio_csv_dir: str = "portfolios"
 
     # Misc
-    client_name: str = "client_a"
+    client_name: str = "sarmad"
     top_k: int = 10
     overfetch_factor: float = 5.0
 
