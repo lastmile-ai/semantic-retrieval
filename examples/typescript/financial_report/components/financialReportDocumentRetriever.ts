@@ -74,6 +74,7 @@ export class FinancialReportDocumentRetriever
           await Promise.all(
             documentIds.map((documentId) =>
               this.documentRetriever.retrieveData({
+                accessPassport: params.accessPassport,
                 query: {
                   text: params.query,
                   topK: 5,
