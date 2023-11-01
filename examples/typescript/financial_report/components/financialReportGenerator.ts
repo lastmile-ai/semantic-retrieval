@@ -43,6 +43,11 @@ export class FinancialReportGenerator<P, R> extends LLMCompletionGenerator<
     });
 
     const response = await this.model.run({
+      completionParams: {
+        messages: [],
+        model: "gpt-3.5-turbo-16k",
+        stream: false,
+      },
       ...modelParams,
       prompt: completionPrompt,
     });
