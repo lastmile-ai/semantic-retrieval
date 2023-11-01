@@ -13,6 +13,8 @@ import {
 import dotenv from "dotenv";
 import { ResourceAccessPolicy } from "../../../src/access-control/resourceAccessPolicy";
 import { AlwaysAllowAccessPolicy } from "../../../src/access-control/policies/alwaysAllowAccessPolicy";
+import fs from "fs/promises";
+import { FinancialReportGenerator } from "./financialReportGenerator";
 
 dotenv.config();
 
@@ -56,7 +58,7 @@ async function main() {
     "examples/example_data/financial_report/portfolios/client_a_portfolio.csv"
   );
 
-  // const accessPassport = new AccessPassport();
+  const accessPassport = new AccessPassport();
   // const identity = new AdvisorIdentity("client_a"); // TODO: Make this dynamic via script param
   // accessPassport.register(identity);
 
@@ -66,26 +68,15 @@ async function main() {
     metadataDB,
   });
 
-  const a = await retriever.retrieveData({
-    query: "Artificial intelligence in the industry",
+  const generator = new FinancialReportGenerator();
+
+  const report = await generator.run({
+    prompt: "Recovery from the COVIDE-19 pandemic",
+    accessPassport, // not necessary in this case, but include for example
+    retriever,
   });
 
-  console.log(a);
-
-  // const generator = new FinancialReportGenerator({
-  //   model: new OpenAIChatModel(),
-  //   retriever,
-  // });
-
-  // const prompt = new PromptTemplate("Use the following data to construct a financial report matching the following format ... {data}")
-
-  //   const res = await generator.run({
-  //     accessPassport, // not necessary in this case, but include for example
-  //     prompt,
-  //     retriever,
-  //   });
-
-  // TODO: Save res to disk
+  await fs.writeFile("examples/typescript/financial_report/report.txt", report);
 }
 
 main();

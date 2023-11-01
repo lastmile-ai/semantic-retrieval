@@ -9,7 +9,6 @@ import type {
   DocumentFragment,
 } from "../document/document";
 import { CompletionModelParams } from "../generator/completion-models/completionModel";
-import { LLMCompletionGeneratorParams } from "../generator/completionGenerator";
 import { VectorEmbedding } from "../transformation/embeddings/embeddings";
 
 export type LoadDocumentsSuccessEvent = {
@@ -118,11 +117,12 @@ export type RunCompletionEvent = {
   response: any;
 };
 
-export type RunCompletionGenerationEvent = {
-  name: "onRunCompletionGeneration";
-  params: LLMCompletionGeneratorParams<any>;
-  response: any;
-};
+export type RunCompletionGenerationEvent<P extends CompletionModelParams<any>> =
+  {
+    name: "onRunCompletionGeneration";
+    params: P;
+    response: any;
+  };
 
 export type GetRAGCompletionRetrievalQueryEvent = {
   name: "onGetRAGCompletionRetrievalQuery";
@@ -151,7 +151,7 @@ type CallbackEvent =
   | RetrieveDataEvent
   | GetFragmentsEvent
   | RunCompletionEvent
-  | RunCompletionGenerationEvent
+  | RunCompletionGenerationEvent<any>
   | GetRAGCompletionRetrievalQueryEvent;
 
 type Callback<T extends CallbackEvent> = (
@@ -180,7 +180,7 @@ interface CallbackMapping {
   onRetrieveData?: Callback<RetrieveDataEvent>[];
   onGetFragments?: Callback<GetFragmentsEvent>[];
   onRunCompletion?: Callback<RunCompletionEvent>[];
-  onRunCompletionGeneration?: Callback<RunCompletionGenerationEvent>[];
+  onRunCompletionGeneration?: Callback<RunCompletionGenerationEvent<any>>[];
   onGetRAGCompletionRetrievalQuery?: Callback<GetRAGCompletionRetrievalQueryEvent>[];
 }
 
