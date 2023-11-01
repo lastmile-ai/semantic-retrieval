@@ -62,13 +62,14 @@ class PineconeVectorDB(VectorDB):
         embedding_creator = self.embeddings
 
         embeddings_list = await embedding_creator.transform_documents(documents)
-        vector_embeddings_list = [embedding.vector for embedding in embeddings_list]
 
         # TODO: Update this to batch to get faster performance
         # Use this for batching to pinecone
         # https://docs.pinecone.io/docs/insert-data#batching-upserts
-        for idx, vectors_chunk in enumerate(vector_embeddings_list):
-            index.upsert(namespace=self.config.namespace, vectors=[(f"vec{idx}", vectors_chunk)])  # type: ignore
+        for idx, embedding in enumerate(embeddings_list):
+            metadata = {"text": embedding.text}
+            vectors_chunk = embedding.vector
+            index.upsert(namespace=self.config.namespace, vectors=[(f"vec{idx}", vectors_chunk, metadata)])  # type: ignore
 
     async def query(self, query: VectorDBQuery) -> List[VectorEmbedding]:
         async def _get_query_vector():
