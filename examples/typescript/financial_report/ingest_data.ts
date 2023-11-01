@@ -73,13 +73,16 @@ async function main() {
   const namespace = uuid();
   console.log(`NAMESPACE: ${namespace}`);
 
-  console.log("Upserting document embeddings to Pinecone index...");
-  await PineconeVectorDB.fromDocuments(transformedDocuments, {
+  const vectorDB = new PineconeVectorDB({
     indexName,
     namespace,
     embeddings: new OpenAIEmbeddings(),
     metadataDB,
   });
+
+  console.log("Upserting document embeddings to Pinecone index...");
+
+  await vectorDB.addDocuments(transformedDocuments);
 
   console.log("Ingestion complete");
 }
