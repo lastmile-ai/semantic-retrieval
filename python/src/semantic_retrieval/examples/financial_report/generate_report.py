@@ -8,33 +8,27 @@ from dotenv import load_dotenv
 from result import Err, Ok
 from semantic_retrieval.common.types import Record
 from semantic_retrieval.data_store.vector_dbs.pinecone_vector_db import (
-    PineconeVectorDB,
     PineconeVectorDBConfig,
-)
-from semantic_retrieval.data_store.vector_dbs.vector_db import (
-    VectorDBTextQuery,
 )
 
 from semantic_retrieval.document.metadata.in_memory_document_metadata_db import (
     InMemoryDocumentMetadataDB,
 )
 
-from semantic_retrieval.examples.financial_report.access_control.identities import (
-    AdvisorIdentity,
-)
 from semantic_retrieval.examples.financial_report.config import Config, argparsify
-from semantic_retrieval.retrieval.csv_retriever import CSVRetriever
-from semantic_retrieval.retrieval.vector_dbs.vector_db_document_retriever import (
-    VectorDBDocumentRetriever,
+from semantic_retrieval.examples.financial_report.financial_report_document_retriever import (
+    FinancialReportDocumentRetriever,
+    PortfolioData,
 )
+from semantic_retrieval.examples.financial_report.financial_report_generator import (
+    FinancialReportGenerator,
+)
+from semantic_retrieval.retrieval.csv_retriever import CSVRetriever
 
 from semantic_retrieval.transformation.embeddings.openai_embeddings import (
-    OpenAIEmbeddings,
     OpenAIEmbeddingsConfig,
 )
 
-
-from semantic_retrieval.access_control.access_passport import AccessPassport
 
 from semantic_retrieval.utils.configs.configs import combine_dicts, remove_nones
 
@@ -77,8 +71,6 @@ def get_config(args: argparse.Namespace):
             ]
         ]
     )
-    # print(args_resolved)
-
     return Config(**args_resolved)
 
 
@@ -92,63 +84,63 @@ async def run_generate_report(config: Config):
             print(f"Error loading metadataDB: {msg}")
             return -1
         case Ok(metadata_db):
-            print(f"{metadata_db.metadata=}")
-            vdbcfg = PineconeVectorDBConfig(
-                index_name=config.index_name,
-                namespace=config.namespace,
-            )
             openaiembcfg = OpenAIEmbeddingsConfig(api_key=config.openai_key)
 
-            embeddings = OpenAIEmbeddings(openaiembcfg)
-            vector_db = PineconeVectorDB(
-                vdbcfg,
-                embeddings=embeddings,
+            pcvdbcfg = PineconeVectorDBConfig(
+                index_name=config.index_name,
+                namespace=config.namespace,
+                api_key=config.pinecone_key,
+                environment=config.pinecone_environment,
+            )
+
+            portfolio_csv_name = f"{config.client_name}_portfolio.csv"
+            portfolio_csv_path = os.path.join(
+                config.portfolio_csv_dir, portfolio_csv_name
+            )
+            portfolio_retriever = CSVRetriever(
+                resolve_path(config.data_root, portfolio_csv_path)
+            )
+
+            portfolio: PortfolioData = await portfolio_retriever.retrieve_data(None)  # type: ignore [fixme]
+            print(f"{portfolio=}")
+
+            # access_passport = AccessPassport()
+            # identity = AdvisorIdentity(client=config.client_name)
+            # access_passport.register(identity)
+
+            retriever = FinancialReportDocumentRetriever(
+                #   access_passport,
+                vector_db_config=pcvdbcfg,
+                embeddings_config=openaiembcfg,
+                portfolio=portfolio,  # type: ignore [fixme]
                 metadata_db=metadata_db,
             )
 
-            query_res = await vector_db.query(
-                VectorDBTextQuery(
-                    mode="text", metadataFilter={}, topK=10, text="cash flow"
-                )
+            generator = FinancialReportGenerator()
+
+            retrieval_query = config.retrieval_query
+
+            system_prompt = (
+                "INSTRUCTIONS:\n"
+                "You are a helpful assistant. "
+                "Rearrange the context to answer the question. "
+                "Output your response following the requested structure. "
+                "Do not include Any words that do not appear in the context. "
             )
-            print(f"{query_res=}")
-
-            _document_retriever = VectorDBDocumentRetriever(
-                vector_db=vector_db,
-                metadata_db=metadata_db,
+            res = await generator.run(
+                portfolio,
+                system_prompt,
+                retrieval_query,
+                structure_prompt="Numbered List",
+                data_extraction_prompt=config.data_extraction_prompt,
+                top_k=config.top_k,
+                overfetch_factor=config.overfetch_factor,
+                retriever=retriever,
             )
-
-            _portfolio_retriever = CSVRetriever(
-                resolve_path(config.data_root, config.portfolio_csv_path)
-            )
-
-            access_passport = AccessPassport()
-            identity = AdvisorIdentity(client=config.client_name)
-            access_passport.register(identity)
-
-            # retriever = FinancialReportDocumentRetriever({
-            #   access_passport,
-            #   document_retriever,
-            #   portfolio_retriever,
-            #   metadata_db,
-            # })
-
-            # generator = FinancialReportGenerator({
-            #   model: OpenAIChatModel(),
-            #   retriever,
-            # })
-
-            # prompt = PromptTemplate("Use the following data to construct a financial report matching the following format ... {data}")
-
-            #   res = await generator.run({
-            #     access_passport, # not necessary in this case, but include for example
-            #     prompt,
-            #     retriever,
-            #   })
 
             # TODO: Save res to disk and/or print
             print("Report:\n")
-            # print(res)
+            print(res)
 
 
 if __name__ == "__main__":

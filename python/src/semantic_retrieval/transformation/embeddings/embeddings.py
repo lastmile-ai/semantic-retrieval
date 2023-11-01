@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 from semantic_retrieval.common.base import Attributable
 
@@ -26,7 +26,10 @@ class VectorEmbedding(Attributable):
 
 
 class ModelHandle(ABC):
-    create: Callable[[Any], Any] = lambda *args, **kwargs: "result"  # type: ignore
+    # e.g. openai.Embedding
+    creator: Any
+    # Contains a :
+    # create: Callable[[Any], Any] = lambda *args, **kwargs: "result"  # type: ignore
 
 
 class EmbeddingsTransformer(Transformer):
@@ -34,7 +37,12 @@ class EmbeddingsTransformer(Transformer):
         self.dimensions = dimensions
 
     @abstractmethod
-    async def embed(self, model_handle: ModelHandle, text: str, metadata: JSONObject) -> VectorEmbedding:  # type: ignore [fixme]
+    async def embed(
+        self,
+        text: str,
+        model_handle: Optional[ModelHandle],
+        metadata: Optional[JSONObject] = None,
+    ) -> VectorEmbedding:
         pass
 
 
@@ -42,8 +50,8 @@ class DocumentEmbeddingsTransformer(EmbeddingsTransformer):
     def __init__(self, dimensions: int):
         super().__init__(dimensions)
 
-    async def embedFragment(
-        self, model_handle: ModelHandle, fragment: DocumentFragment
+    async def embed_fragment(
+        self, fragment: DocumentFragment, model_handle: Optional[ModelHandle]
     ) -> VectorEmbedding:
         text = await fragment.get_content()
         metadata = {
@@ -52,20 +60,23 @@ class DocumentEmbeddingsTransformer(EmbeddingsTransformer):
             "fragmentId": fragment.fragment_id,
         }
 
-        return await self.embed(model_handle, text, metadata)
+        return await self.embed(text, model_handle=model_handle, metadata=metadata)
 
-    async def embedDocument(
-        self, model_handle: ModelHandle, document: Document
+    async def embed_document(
+        self, document: Document, model_handle: Optional[ModelHandle]
     ) -> List[VectorEmbedding]:
         embeddings = []
         for fragment in document.fragments:
-            embeddings.append(await self.embedFragment(model_handle, fragment))
+            embeddings.append(await self.embed_fragment(fragment, model_handle))
         return embeddings
 
-    async def transformDocuments(
-        self, model_handle: ModelHandle, documents: List[Document]
+    @abstractmethod
+    async def transform_documents(
+        self,
+        documents: List[Document],
+        model_handle: Optional[ModelHandle] = None,
     ) -> List[VectorEmbedding]:
         embeddings = []
         for document in documents:
-            embeddings.extend(await self.embedDocument(model_handle, document))
+            embeddings.extend(await self.embed_document(document, model_handle))
         return embeddings

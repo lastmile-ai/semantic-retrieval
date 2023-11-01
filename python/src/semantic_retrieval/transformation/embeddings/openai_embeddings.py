@@ -1,5 +1,5 @@
 import os
-from typing import Any, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional
 import openai
 
 from tiktoken import encoding_for_model
@@ -27,6 +27,10 @@ class OpenAIEmbeddingsConfig(Record):
     api_key: Optional[str] = None
 
 
+class OpenAIEmbeddingsHandle(ModelHandle):
+    creator: Callable[[Any], Any] = openai.Embedding
+
+
 DEFAULT_MODEL = "text-embedding-ada-002"
 
 MODEL_DIMENSIONS = {
@@ -52,10 +56,12 @@ class OpenAIEmbeddings(DocumentEmbeddingsTransformer):
 
     async def embed(
         self,
-        model_handle: ModelHandle,
         text: str,
+        model_handle: Optional[ModelHandle] = None,
         metadata: Optional[JSONObject] = None,
     ) -> VectorEmbedding:
+        if not model_handle:
+            model_handle = OpenAIEmbeddingsHandle()
         encoding = encoding_for_model(self.model)
         text_encoding = encoding.encode(text)
 
@@ -68,8 +74,8 @@ class OpenAIEmbeddings(DocumentEmbeddingsTransformer):
         # TODO wat
         # encoding.free()
 
-        embedding_res: Dict[Any, Any] = model_handle.create(input=[text], model=self.model).to_dict_recursive()  # type: ignore [fixme]
-
+        # TODO type this better
+        embedding_res: Dict[Any, Any] = model_handle.creator.create(input=[text], model=self.model).to_dict_recursive()  # type: ignore
         # TODO: include usage, metadata
         return VectorEmbedding(
             vector=embedding_res["data"][0]["embedding"],
@@ -84,9 +90,52 @@ class OpenAIEmbeddings(DocumentEmbeddingsTransformer):
         )
 
     async def transform_documents(self, documents: List[Document]) -> List[VectorEmbedding]:  # type: ignore [fixme]
-        # TODO
-        pass
+        # TODO: Update this to batch embeddings instead of creating one at a time
+        # Use this to batch create embeddings with openai - https://platform.openai.com/docs/api-reference/embeddings/create
+        # See: https://github.com/run-llama/llama_index/blob/408923fafbcefdabfd76c8fa609b570fe80b1b2f/llama_index/embeddings/base.py#L231
+        # Also see openAIEmbeddings.ts
+        embeddings = []
+        for document in documents:
+            fragments = document.fragments
+            for fragment in fragments:
+                # Instead of batching, just create embeddings for each fragment right now, batching can be done as optimization
+                # Need to essentially count tokens & add to array
+                content = await fragment.get_content()
+                vec_embeddings = await self.create_embeddings(
+                    [
+                        EmbedFragmentData(
+                            document_id=fragment.document_id,
+                            fragment_id=fragment.fragment_id,
+                            text=content,
+                        )
+                    ]
+                )
+
+                embeddings.extend(vec_embeddings)
+
+        return embeddings
 
     async def create_embeddings(self, fragments: List[EmbedFragmentData]) -> List[VectorEmbedding]:  # type: ignore [fixme]
-        # TODO
-        pass
+        model_handle = OpenAIEmbeddingsHandle()
+
+        input = [fragment.text for fragment in fragments]
+
+        # TODO: This is very slow... need to batch this & make this async (acreate)
+        embeddings = model_handle.creator.create(input=input, model=self.model)  # type: ignore
+
+        vector_embeddings: List[VectorEmbedding] = []
+        for idx, embedding in enumerate(embeddings["data"]):
+            vector_embeddings.append(
+                VectorEmbedding(
+                    vector=embedding["embedding"],
+                    text=fragments[idx].text,
+                    attributes={},
+                    metadata={
+                        "document_id": fragments[idx].document_id,
+                        "fragment_id": fragments[idx].fragment_id,
+                        "model": self.model,
+                    },
+                )
+            )
+
+        return vector_embeddings
