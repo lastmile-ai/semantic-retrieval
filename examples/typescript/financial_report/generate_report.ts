@@ -14,6 +14,7 @@ import { ResourceAccessPolicy } from "../../../src/access-control/resourceAccess
 import { AlwaysAllowAccessPolicy } from "../../../src/access-control/policies/alwaysAllowAccessPolicy";
 import fs from "fs/promises";
 import { FinancialReportGenerator } from "./components/financialReportGenerator";
+import { SecretReportAccessPolicy } from "./components/access_control/secretReportAccessPolicy";
 
 dotenv.config();
 
@@ -26,12 +27,14 @@ async function main() {
         // deserialize access policies to their instances
         return (value as ResourceAccessPolicy[]).map(
           (policy: ResourceAccessPolicy) => {
-            if (policy.policy === "AlwaysAllowAccessPolicy") {
-              return new AlwaysAllowAccessPolicy();
+            switch (policy.policy) {
+              case "AlwaysAllowAccessPolicy":
+                return new AlwaysAllowAccessPolicy();
+              case "SecretReportAccessPolicy":
+                return new SecretReportAccessPolicy();
+              default:
+                return policy;
             }
-            return policy;
-            // TODO: Handle other policies for demo. Could also try to dynamically import from
-            // policies dir based on name, or have static mapping of policy => class constructor
           }
         );
       }
@@ -58,8 +61,8 @@ async function main() {
   );
 
   const accessPassport = new AccessPassport();
-  // const identity = new AdvisorIdentity("client_a"); // TODO: Make this dynamic via script param
-  // accessPassport.register(identity);
+  const identity = new AdvisorIdentity(); // TODO: Make this dynamic via script param
+  accessPassport.register(identity);
 
   const retriever = new FinancialReportDocumentRetriever({
     documentRetriever,
@@ -71,7 +74,7 @@ async function main() {
 
   const report = await generator.run({
     prompt: "Recovery from the COVID-19 pandemic",
-    accessPassport, // not necessary in this case, but include for example
+    accessPassport,
     retriever,
   });
 

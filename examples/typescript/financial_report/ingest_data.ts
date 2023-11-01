@@ -21,7 +21,7 @@ async function main() {
     rawDocuments,
     {
       metadataDB,
-      // TODO: This should be a factory that applies User / Admin access policies based on some filter
+      // Always allow by default. Use update_access_control script to change
       accessControlPolicyFactory: new AlwaysAllowDocumentAccessPolicyFactory(),
     }
   );
