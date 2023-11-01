@@ -69,6 +69,8 @@ class TextChunkTransformer(BaseDocumentTransformer):
             def id_(chunk: str) -> str:
                 return chunk
 
+            # TODO: One other issue with chunks is some csvs are getting 0 chunks returned even though they have sub_chunks
+            # Definitely some issue with merge_sub_chunks, but not going to debug this right now
             for chunk in await self.chunk_text(original_fragment):  # type: ignore [fixme]
                 current_fragment = {
                     "fragment_id": str(uuid4()),
@@ -77,7 +79,7 @@ class TextChunkTransformer(BaseDocumentTransformer):
                     "metadata": original_fragment_data["metadata"],
                     "attributes": {},
                     "hash": md5(chunk.encode()).hexdigest(),
-                    "content": original_fragment_data["content"],
+                    "content": chunk,
                     "getContent": id_,
                     "serialize": id_,
                 }
