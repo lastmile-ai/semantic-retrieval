@@ -1,3 +1,4 @@
+import json
 import logging
 from typing import List
 from semantic_retrieval.common.core import LOGGER_FMT
@@ -38,7 +39,11 @@ class FinancialReportGenerator:
         
         retrieved_data  = res_retrieved_data.unwrap()
 
+        logger.debug("Raw retrieved data:")
+        logger.debug(json.dumps([rd.model_dump() for rd in retrieved_data], indent=2))
+
         retrieved_data_processed = process_retrieved_data(portfolio, retrieved_data)
+
 
         system_content = system_prompt
 

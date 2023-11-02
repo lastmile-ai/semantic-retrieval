@@ -61,9 +61,13 @@ def parse_re_output_to_df(re_output: List[Tuple[str, str, str, str, str]]):
             convert_factor = 1000
 
         out.append(
-            {"ticker": ticker, "value_millions": int(number_parsed * convert_factor)}
+            {"ticker": ticker, "value_raw": number, "value_millions": int(number_parsed * convert_factor)}
         )
     return pd.DataFrame.from_records(out)
+
+
+def gen_output_to_df(s_out: str) -> pd.DataFrame:
+    return parse_re_output_to_df(parse_raw_re(s_out))
 
 
 def file_contents(path: str):

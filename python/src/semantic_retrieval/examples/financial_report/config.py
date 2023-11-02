@@ -46,7 +46,7 @@ class Config(Record):
     log_level: str = "WARNING"
 
     # Eval
-    sample_output_path: str = "ticker_numerical_output_net_income_client_a.txt"
+    sample_output_path: str = "portfolio_10k_net_income_report.txt"
     ticker_eval_ground_truth_path: str = "ticker_numerical_eval_gt.csv"
 
     def __repr__(self) -> str:
