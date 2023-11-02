@@ -13,16 +13,21 @@ class SeparatorTextChunkConfig(TextChunkConfig):
 
 
 class SeparatorTextChunkerParams(TextChunkTransformerParams):
-    separator_text_chunk_config: SeparatorTextChunkConfig
+    def __init__(self, separator_text_chunk_config: SeparatorTextChunkConfig) -> None:
+        super().__init__()
+        self.separator_text_chunk_config = separator_text_chunk_config
 
 
 class SeparatorTextChunker(TextChunkTransformer):
     separator: str = " "  # e.g. words
     strip_new_lines: bool = True
 
-    def __init__(self, params: SeparatorTextChunkerParams):
+    def __init__(
+        self, stcc: SeparatorTextChunkConfig, params: TextChunkTransformerParams
+    ):
         super().__init__(params)
-        # TODO: Impl
+        self.separator = stcc.separator
+        self.strip_new_lines = stcc.strip_new_lines
         pass
 
     async def chunk_text(self, text: str) -> List[str]:
@@ -32,7 +37,5 @@ class SeparatorTextChunker(TextChunkTransformer):
 
         sub_chunks = self.sub_chunk_on_separator(text_to_chunk, self.separator)
         merged_chunks = await self.merge_sub_chunks(sub_chunks, self.separator)
-
-        # TODO: Callback / events
 
         return merged_chunks

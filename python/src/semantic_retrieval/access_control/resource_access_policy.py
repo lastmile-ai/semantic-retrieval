@@ -25,8 +25,6 @@ class ResourceAccessPolicy(Record):
     async def testPolicyPermission(
         self, requestor: AccessIdentity
     ) -> Union[List[str], bool]:
-        # Implement the testPolicyPermission logic
-        # TODO
         pass
 
 

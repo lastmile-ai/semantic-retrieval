@@ -10,7 +10,7 @@ def accuracy_metric(dataset: NumericalEvalDataset) -> float:
     return accuracy_score(dataset.ground_truth, dataset.output)  # type: ignore [fixme]
 
 
-# TODO type this better
+# TODO [P1 type this better
 def jaccard_similarity(dataset: IDSetPairEvalDataset) -> float:
     intersection = dataset.input_set & dataset.output_set
     # print(f"{dataset=}")

@@ -8,53 +8,50 @@ from semantic_retrieval.document.metadata.document_metadata import DocumentMetad
 from semantic_retrieval.document.metadata.document_metadata_db import DocumentMetadataDB
 from semantic_retrieval.document_parsers.parser_registry import ParserRegistry
 
-from semantic_retrieval.ingestion.document_parsers.document_parser import DocumentParser
-
 
 @dataclass
 class ParserConfig:
     metadata_db: Optional[DocumentMetadataDB]
     access_control_policy_factory: Optional[
         DocumentAccessPolicyFactory
-    ]  # TODO: Add type for access control policy factory in followup diff
+    ]  # TODO [P1]: Add type for access control policy factory in followup diff
     parser_registry: Optional[ParserRegistry] = None
 
 
-class MultiDocumentParser(DocumentParser):
-    async def parse_documents(
-        self, documents: Sequence[RawDocument], parser_config: ParserConfig
+async def parse_documents(
+        documents: Sequence[RawDocument], parser_config: ParserConfig
     ) -> Sequence[IngestedDocument]:
-        parser_registry = parser_config.parser_registry or ParserRegistry()
+    parser_registry = parser_config.parser_registry or ParserRegistry()
 
-        ingested_documents = []
-        for document in documents:
-            parser = parser_registry.get_parser(document.mime_type)
-            ingested_document = (
-                await parser.parse(document)
-            ).unwrap()  # TODO: Handle error case with unwrap
+    ingested_documents = []
+    for document in documents:
+        parser = parser_registry.get_parser(document.mime_type)
+        ingested_document = (
+            await parser.parse(document)
+        ).unwrap()
 
-            if parser_config.metadata_db is not None:
-                access_policies = []
-                if parser_config.access_control_policy_factory:
-                    access_policies = await parser_config.access_control_policy_factory.get_access_policies(
-                        document
-                    )
-
-                await parser_config.metadata_db.set_metadata(
-                    document.document_id,
-                    DocumentMetadata(
-                        # TODO: These were removed, but may need to be added back
-                        # document=ingested_document,
-                        # raw_document=document,
-                        document_id=document.document_id,
-                        uri=document.uri,
-                        mime_type=document.mime_type,
-                        metadata={},
-                        attributes={},
-                        access_policies=access_policies,
-                    ),
+        if parser_config.metadata_db is not None:
+            access_policies = []
+            if parser_config.access_control_policy_factory:
+                access_policies = await parser_config.access_control_policy_factory.get_access_policies(
+                    document
                 )
 
-            ingested_documents.append(ingested_document)
+            await parser_config.metadata_db.set_metadata(
+                document.document_id,
+                DocumentMetadata(
+                    # TODO [P0]: These were removed, but may need to be added back
+                    # document=ingested_document,
+                    # raw_document=document,
+                    document_id=document.document_id,
+                    uri=document.uri,
+                    mime_type=document.mime_type,
+                    metadata={},
+                    attributes={},
+                    access_policies=access_policies,
+                ),
+            )
 
-        return ingested_documents
+        ingested_documents.append(ingested_document)
+
+    return ingested_documents

@@ -18,11 +18,4 @@ class VectorDBDocumentRetriever(BaseVectorDBRetriever[List[Document]]):
         super().__init__(vector_db, metadata_db, callback_manager)
 
     async def process_documents(self, documents: List[Document]) -> List[Document]:
-        # TODO callbacks
-        # event = RetrieverProcessDocumentsEvent(
-        #     name="onRetrieverProcessDocuments", documents=documents
-        # )
-        # if self.callback_manager:
-        #     await self.callback_manager.run_callbacks(event)
-
         return documents

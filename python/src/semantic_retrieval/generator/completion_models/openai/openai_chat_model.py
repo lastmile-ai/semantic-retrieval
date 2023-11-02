@@ -32,16 +32,16 @@ class OpenAIChatModel(CompletionModel[ChatCompletionCreateParams, ChatCompletion
     resource_type = "chat.completion"
 
     def __init__(self, config: Optional[OpenAIChatModelConfig] = None):
-        # TODO
+        # TODO [P0] impl
         pass
 
     async def construct_messages(
         self, params: OpenAIChatModelParams
     ) -> List[ChatCompletionMessageParam]:
-        # TODO imple
+        # TODO [P0] imple w/ aiconfig?
         messages = []
         return messages
 
     async def run(self, params: OpenAIChatModelParams) -> ChatCompletion:  # type: ignore [fixme]
-        # TODO impl
+        # TODO [P0] impl w/ aiconfig?
         pass
