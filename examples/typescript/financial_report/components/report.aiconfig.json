@@ -1,0 +1,21 @@
+{
+  "name": "Report Generation Prompts",
+  "description": "Prompts for generating financial advisor report for clients",
+  "schema_version": "latest",
+  "metadata": {},
+  "prompts": [
+    {
+      "name": "topicalSummary",
+      "input": "For each group of company, profile and details in the following list, generate a brief paragraph with company value as the heading, the company profile as the first section and then summarize the given details with respect to topic {{topic}}: {{companyDetails}}",
+      "metadata": {
+        "model": {
+          "name": "gpt-3.5-turbo-16k",
+          "settings": {
+            "model": "gpt-3.5-turbo-16k"
+          }
+        },
+        "parameters": {}
+      }
+    }
+  ]
+}
