@@ -1,5 +1,5 @@
 import logging
-from typing import Callable, Generic, List, Sequence, Set, Tuple, TypeVar
+from typing import Awaitable, Callable, Sequence, Set, Tuple, TypeVar
 
 import pandas as pd
 from semantic_retrieval.common import types
@@ -8,37 +8,20 @@ from semantic_retrieval.common.core import LOGGER_FMT
 logger = logging.getLogger(__name__)
 logging.basicConfig(format=LOGGER_FMT)
 
-class SampleEvalDataset(types.Record):
+T = TypeVar("T")
+
+
+class IDSetPairEvalDataset(types.Record):
+    input_set: Set[str]
+    output_set: Set[str]
+
+class NumericalEvalDataset(types.Record):
     output: Sequence[float | int]
     ground_truth: Sequence[float | int]
 
 
-T = TypeVar("T")
-
-class EvalSetPair(types.Record, Generic[T]):
-    input_set: Set[T]
-    output_set: Set[T]  
-
-
-
-# TODO: newtype
-Metric = Callable[[SampleEvalDataset], float]
-
-
-PathMuncher = Callable[[str, str], EvalSetPair[str]]
-
-def evaluate_sample_local_filesystem(
-    path_output: str,
-    path_ground_truth: str,
-    path_muncher: PathMuncher,
-    metric: Metric,
-):
-    return 1
-
-
-
-T = TypeVar("T")
-
+IDSetPairEvalDataPathMuncher = Callable[[str, str], Awaitable[IDSetPairEvalDataset]]
+NumericalEvalDataPathMuncher = Callable[[str, str], Awaitable[NumericalEvalDataset]]
 
 class LocalFileSystemGenLLMEvalDataset(types.Record):
     names: Sequence[str]
@@ -62,16 +45,43 @@ class LocalFileSystemGenLLMEvalDataset(types.Record):
             )
 
 
+class LocalFileSystemIDSetPairEvalDatasetConfig(types.Record):
+    """
+    Container struct for the logic you need to run eval
+    on a local dataset, where the structured data is a pair of ID sets
+    """
+    fn_path_muncher: IDSetPairEvalDataPathMuncher
+    metric: Callable[[IDSetPairEvalDataset], float]
 
-def evaluate_sample_local_filesystem(
+
+class LocalFileSystemNumericalEvalDatasetConfig(types.Record):
+    """
+    Container struct for the logic you need to run eval
+    on a local dataset, where the structured data is a
+    pair of numerical arrays
+    """
+    fn_path_muncher: NumericalEvalDataPathMuncher
+    metric: Callable[[NumericalEvalDataset], float]
+
+
+LocalFileSystemEvalDatasetConfig = LocalFileSystemIDSetPairEvalDatasetConfig | LocalFileSystemNumericalEvalDatasetConfig
+
+
+async def evaluate_sample_local_filesystem(
     path_output: str,
     path_ground_truth: str,
-    path_muncher: Callable[[str, str], SampleEvalDataset],
-    metric: Metric,
+    local_filesystem_eval_dataset_config: LocalFileSystemEvalDatasetConfig
 ) -> float:
-    dataset_for_sample = path_muncher(path_output, path_ground_truth)
-    value = metric(dataset_for_sample)
-    return value
+    match local_filesystem_eval_dataset_config:
+        # Code happens to be the same in the two branches.
+        # These types should actually be one generic type,
+        # But that's not well-supported, e.g. bounded generics.
+        case LocalFileSystemIDSetPairEvalDatasetConfig(metric=m, fn_path_muncher=pm):
+            dataset_for_sample = await pm(path_ground_truth, path_output)
+            return m(dataset_for_sample)
+        case LocalFileSystemNumericalEvalDatasetConfig(metric=m, fn_path_muncher=pm):
+            dataset_for_sample = await pm(path_ground_truth, path_output)            
+            return m(dataset_for_sample)
 
 
 
@@ -99,13 +109,11 @@ def local_filesystem_dataset_to_df(dataset: LocalFileSystemGenLLMEvalDataset):
 
 async def evaluate_llm_eval_dataset_local_filesystem(
     llm_eval_dataset: LocalFileSystemGenLLMEvalDataset,
-    data_munchers: List[PathMuncher],
-    metrics: List[Metric]
+    eval_configs: Sequence[LocalFileSystemEvalDatasetConfig]
 ):
   results = []
-  for name, ip, op, dm, m in zip(llm_eval_dataset.names, llm_eval_dataset.input_paths, llm_eval_dataset.final_output_path, data_munchers, metrics):
-      munched = await dm(ip, op)
-      value = m(munched)
+  for name, ip, op, cfg in zip(llm_eval_dataset.names, llm_eval_dataset.input_paths, llm_eval_dataset.final_output_path, eval_configs):
+      value = await evaluate_sample_local_filesystem(op, ip, cfg)
       results.append(
           {
               "name": name,

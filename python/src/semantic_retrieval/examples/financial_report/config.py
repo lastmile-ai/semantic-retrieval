@@ -3,7 +3,7 @@ import argparse
 import json
 import logging
 import os
-from typing import List, Type
+from typing import List, Sequence, Type
 
 from dotenv import load_dotenv
 from semantic_retrieval.common.types import Record
@@ -109,3 +109,17 @@ def resolve_path(data_root: str, path: str) -> str:
     """
 
     return os.path.join(os.getcwd(), data_root, path)
+
+
+
+def set_up_script(argv: Sequence[str], loggers: List[logging.Logger]):
+    load_dotenv()
+
+    parser = argparsify(Config)
+    args = parser.parse_args(argv[1:])
+
+    config = get_config(args)
+
+    set_log_level(config.log_level, loggers)
+
+    return args
