@@ -13,8 +13,12 @@ interface FinancialReportGeneratorParams
   retriever: FinancialReportDocumentRetriever;
 }
 
-const PROMPT_TEMPLATE =
-  "For each group of company, profile and details in the following list, generate a brief paragraph with company value as the heading, the company profile as the first section and then summarize the given details with respect to topic {{topic}}: {{companyDetails}}";
+const PROMPT_TEMPLATE = `For each group of {company: <company>, profile: <profile>, details: <details>} in DETAILS, generate a brief paragraph of the form: 
+** <company> **:
+Info: Exact content of <profile>
+{{topic}}: summary of <details> with respect to {{topic}}
+
+DETAILS: {{companyDetails}}`;
 
 export class FinancialReportGenerator<P, R> extends LLMCompletionGenerator<
   ChatCompletionCreateParams,

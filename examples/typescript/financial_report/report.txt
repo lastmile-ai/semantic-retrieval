@@ -1,79 +1,27 @@
-Company: Apple Inc.
+**AAPL**:
+Info: Apple Inc. is an American multinational technology company headquartered in Cupertino, California. As of March 2023, Apple is the world's biggest company by market capitalization, and with US$394.3 billion the largest technology company by 2022 revenue.
+Recovery from the COVID-19 pandemic: The COVID-19 pandemic has had, and continues to have, a significant impact around the world, prompting governments and businesses to take unprecedented measures, such as restrictions on travel and business operations, temporary closures of businesses, and quarantine and shelter-in-place orders. The COVID-19 pandemic has at times significantly curtailed global economic activity and caused significant volatility and disruption in global financial markets. The COVID-19 pandemic and the measures taken by many countries in response have adversely affected and could in the future materially adversely impact the Company's business, results of operations, financial condition, and stock price.
 
-Company Profile:
-Apple Inc. is an American multinational technology company headquartered in Cupertino, California. As of March 2023, Apple is the world's biggest company by market capitalization and the largest technology company by revenue. 
+**AMZN**:
+Info: Amazon.com, Inc. is an American multinational technology company focusing on e-commerce, cloud computing, online advertising, digital streaming, and artificial intelligence. It has been often referred to as "one of the most influential economic and cultural forces in the world", and is often regarded as one of the world's most valuable brands.
+Recovery from the COVID-19 pandemic: Macroeconomic factors, including inflation, increased interest rates, significant capital market volatility, the prolonged COVID-19 pandemic, global supply chain constraints, and global economic and geopolitical developments, have direct and indirect impacts on our results of operations that are difficult to isolate and quantify. These factors contributed to increases in our operating costs during 2022. The extent to which use of our services is affected by the COVID-19 pandemic, data security breaches, and other events is uncertain and depends on various factors outside the company's control.
 
-Details Related to Recovery from the COVID-19 Pandemic:
-The COVID-19 pandemic has significantly impacted global economic activity and caused disruptions in global financial markets. The measures taken by countries to contain the spread of the virus, such as travel and business restrictions and temporary closures, have affected Apple's business operations. The company's outsourcing partners, component suppliers, and logistical service providers have experienced disruptions, resulting in supply shortages. The future impacts on Apple's business and financial performance remain uncertain and will depend on factors such as the trajectory and duration of the pandemic, the development of vaccines and treatments, and the overall demand for consumer products and services. The COVID-19 pandemic has adversely affected Apple's results of operations, financial condition, and stock price.
+**NVDA**:
+Info: Nvidia Corporation is an American multinational technology company incorporated in Delaware and based in Santa Clara, California. It is a software and fabless company which designs graphics processing units (GPUs), APIs for data science and high-performance computing, and SoCs for the mobile computing and automotive market. Nvidia is a dominant supplier of artificial intelligence hardware and software.
+Recovery from the COVID-19 pandemic: The COVID-19 pandemic has affected and continues to impact Nvidia's financial condition and results of operations. The pandemic has disrupted the supply chain and logistics, creating constraints. The uncertainty surrounding the COVID-19 pandemic and its potential resurfacing pose challenges in estimating demand and may impact the company's financial performance. Nvidia has modified its business and workforce practices in response to COVID-19, including implementing flexible work and social distancing measures.
 
-Company: Microsoft Corporation
+**UNH**:
+Info: UnitedHealth Group Incorporated is an American multinational managed healthcare and insurance company based in Minnetonka, Minnesota. Offering insurance services under UnitedHealthcare and healthcare products under Optum, it is the world's eleventh-largest company by revenue and the largest healthcare company by revenue, and the largest insurance company by net premiums.
+Recovery from the COVID-19 pandemic: Large-scale medical emergencies, pandemics, and other extreme events could result in public health crises or have a material adverse effect on UnitedHealth's business operations, cash flows, financial condition, and results of operations. The COVID-19 pandemic has impacted the company's workforce, operations, and supply chain. The government's response to public health crises could disrupt business operations, including by restricting pharmaceuticals or other supplies. The pandemic has also affected medical and administrative costs and could impact demand for healthcare services.
 
-Company Profile:
-Microsoft Corporation is an American multinational technology corporation headquartered in Redmond, Washington. The company is best known for its Windows operating systems, Microsoft 365 suite of productivity applications, and Edge web browser.
+**JNJ**:
+Info: Johnson & Johnson (J&J) is an American multinational pharmaceutical and medical technologies corporation headquartered in New Brunswick, New Jersey.
+Recovery from the COVID-19 pandemic: The COVID-19 pandemic has adversely impacted J&J's business operations, results of operations, and financial condition, including lower sales and reduced customer demand for certain products. The company has robust business continuity plans to mitigate the impact of health crises, but future impacts remain uncertain. J&J continues to monitor and modify its business practices and take actions required by authorities to prioritize the health and safety of its employees, customers, and business partners.
 
-Details Related to Recovery from the COVID-19 Pandemic:
-The COVID-19 pandemic and its containment efforts have had and may continue to have an adverse impact on Microsoft's operations, financial condition, and results of operations. The duration and scope of the pandemic, along with governmental and business responses, can affect economic activity and lead to recession or financial market instability. These factors may result in increased costs for managing the business, lower revenues, and potential challenges in meeting growth expectations. The long-term effects of the pandemic on the global economy and the IT industry are uncertain.
+**MRK**:
+Info: Merck & Co., Inc. is an American multinational pharmaceutical company headquartered in Rahway, New Jersey, and is named for Merck Group, founded in Germany in 1668, of whom it was once the American arm.
+Recovery from the COVID-19 pandemic: The COVID-19 pandemic and any future pandemic or public health threat could impact Merck's business, operations, financial performance, and prospects. The pandemic has negatively impacted the company's business and financial results, and future impacts remain uncertain. Merck has implemented measures to address the pandemic, support employees, and manage potential risks associated with health crises.
 
-Company: Nvidia Corporation
-
-Company Profile:
-Nvidia Corporation is an American multinational technology company based in Santa Clara, California. It specializes in designing graphics processing units, application programming interfaces for data science and high-performance computing, and system on a chip units for mobile computing and automotive markets. Nvidia is a dominant supplier of artificial intelligence hardware and software.
-
-Details Related to Recovery from the COVID-19 Pandemic:
-The COVID-19 pandemic has negatively impacted Nvidia's financial condition and results of operations. Disruptions caused by the pandemic, including supply chain and logistics constraints, have affected the company's workforce, operations, customers, partners, vendors, and suppliers. The containment efforts, such as lockdowns in certain regions, have reduced demand for Nvidia's products. Additionally, global financial market volatility and potential lockdown measures in response to resurging cases can further impact the company's business. The extent of the impact of the pandemic on Nvidia's operational and financial performance is uncertain.
-
-Company: Alphabet Inc.
-
-Company Profile:
-Alphabet Inc. is an American multinational technology conglomerate holding company headquartered in Mountain View, California. It is the parent company of Google and several former Google subsidiaries. Alphabet is one of the world's most valuable companies and the third-largest technology company by revenue.
-
-Details Related to Recovery from the COVID-19 Pandemic:
-The ongoing effects of the COVID-19 pandemic are highly unpredictable and could significantly harm Alphabet's business, financial condition, and operating results. The pandemic has impacted the company's business, operations, and financial performance due to macroeconomic impacts and changes in consumer behaviors. Governmental responses, economic activity, and the possibility of recession or financial market instability can affect revenue growth rates and expenses. Uncertainty surrounding the pandemic makes future operating results fluctuate, posing risks to Alphabet's business.
-
-Company: ExxonMobil Corporation
-
-Company Profile:
-ExxonMobil Corporation is an American multinational oil and gas corporation and the largest direct descendant of John D. Rockefeller's Standard Oil. The company operates across the entire oil and gas industry and has a chemicals division.
-
-Details Related to Recovery from the COVID-19 Pandemic:
-The COVID-19 pandemic has impacted ExxonMobil's business and resulted in underinvestment and supply tightness due to declining industry revenue. Lockdown measures and industry rationalization of refining assets have affected capacity and disrupted supply chains. The rate of recovery from the pandemic and future outbreaks, along with the impact on global markets and economies, can influence demand for oil, gas, and petrochemicals. Other factors, such as energy efficiency improvements and economic conditions, may also affect ExxonMobil's business.
-
-Company: The Procter & Gamble Company (P&G)
-
-Company Profile:
-The Procter & Gamble Company is an American multinational consumer goods corporation headquartered in Cincinnati, Ohio. It specializes in personal health, consumer health, personal care, and hygiene products.
-
-Details Related to Recovery from the COVID-19 Pandemic:
-P&G's business may be negatively impacted by disease outbreaks, including pandemics, which can lead to reduced demand for products and supply chain disruptions. The COVID-19 pandemic has caused significant economic disruption and uncertainty, impacting P&G's business operations and financial performance. Factors such as demand reductions, changes in consumer behaviors, and governmental responses can affect the company's revenue growth and expenses. P&G's ability to manage the challenges associated with disease outbreaks is crucial for maintaining operations.
-
-Company: The Home Depot, Inc.
-
-Company Profile:
-The Home Depot, Inc., commonly referred to as Home Depot, is an American multinational home improvement retail corporation. It is the largest home improvement retailer in the United States, selling tools, construction products, appliances, and services.
-
-Details Related to Recovery from the COVID-19 Pandemic:
-The COVID-19 pandemic and associated containment efforts have affected Home Depot's business. The company faces challenges related to changes in customer demand, supply chain disruptions, and government actions. Retail restrictions and shutdown orders may impact the availability of products and increase supply chain costs. Home Depot continues to monitor the evolving circumstances and implement necessary measures to meet customer demand. The extent and duration of the pandemic's impact on the company's financial condition and results of operations remain uncertain.
-
-Company: Merck & Co., Inc.
-
-Company Profile:
-Merck & Co., Inc. is an American multinational pharmaceutical company headquartered in New Jersey. It is one of the largest pharmaceutical companies globally.
-
-Details Related to Recovery from the COVID-19 Pandemic:
-The COVID-19 pandemic has negatively affected Merck's business and financial results. The company's operations and financial performance have been impacted by disruptions caused by the pandemic. Merck is actively involved in antiviral research and providing support to healthcare providers and communities. The future impact of the pandemic on Merck's business is uncertain, and the company continues to focus on employee health and safety. The global nature of Merck's operations poses additional risks.
-
-Company: Costco Wholesale Corporation
-
-Company Profile:
-Costco Wholesale Corporation is an American multinational warehouse club retailer. It is one of the largest retailers in the world, offering a range of products to its members.
-
-Details Related to Recovery from the COVID-19 Pandemic:
-The COVID-19 pandemic and its effects are uncertain and challenging to predict. Pandemics can impact various aspects of Costco's business operations, including demand for products and services, supply chain operations, labor availability, and inventory access. Changes in consumer behaviors and economic conditions can add to the uncertainties. Costco is continuously monitoring the retail landscape and adapting its strategies to prioritize digital capabilities. The company aims to build resilience and effectively distribute products through all channels of trade.
-
-Company: PepsiCo, Inc.
-
-Company Profile:
-PepsiCo, Inc. is an American multinational food, snack, and beverage corporation. The company manufactures, distributes, and markets a wide range of products.
-
-Details Related to Recovery from the COVID-19 Pandemic:
-PepsiCo faces various challenges related to the COVID-19 pandemic, including inflationary cost environments, supply chain disruptions, and labor shortages. These challenges have impacted the company's business operations and financial performance. PepsiCo closely manages its exposure to commodity prices and maintains supply chain finance agreements with financial institutions. The company also focuses on building global e-commerce and digital capabilities. While pandemic-related uncertainties and increased competition exist, PepsiCo remains committed to product innovation and employee health and safety.
+**PEP**:
+Info: PepsiCo, Inc. is an American multinational food, snack, and beverage corporation headquartered in Harrison, New York, in the hamlet of Purchase.
+Recovery from the COVID-19 pandemic: PepsiCo faced challenges in 2022 due to supply chain disruptions, inflationary cost environment, adverse weather conditions, labor shortages, and the continued impact of the COVID-19 pandemic. The company continues to monitor changes in the retail landscape and seeks to adapt its business practices to mitigate unfavorable impacts. PepsiCo maintains voluntary supply chain finance agreements and focuses on digital capabilities to distribute products effectively. The company's operating profit growth was impacted by higher commodity costs and advertising expenses. PepsiCo prioritizes the health and safety of its employees and provides resources to support their well-being during the pandemic.
