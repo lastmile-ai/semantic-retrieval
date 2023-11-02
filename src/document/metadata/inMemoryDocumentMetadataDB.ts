@@ -58,13 +58,17 @@ export class InMemoryDocumentMetadataDB implements DocumentMetadataDB {
   async persist(filePath: string) {
     await fs.writeFile(
       filePath,
-      JSON.stringify(this.metadata, (key, value) => {
-        // Don't serialize fragment relationships to avoid circular references
-        if (key === "previousFragment" || key === "nextFragment") {
-          return;
-        }
-        return value;
-      })
+      JSON.stringify(
+        this.metadata,
+        (key, value) => {
+          // Don't serialize fragment relationships to avoid circular references
+          if (key === "previousFragment" || key === "nextFragment") {
+            return;
+          }
+          return value;
+        },
+        2
+      )
     );
   }
 
