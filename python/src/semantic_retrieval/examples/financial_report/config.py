@@ -90,19 +90,6 @@ def get_config(args: argparse.Namespace):
     return Config(**args_resolved)
 
 
-def set_up_script(argv: List[str], loggers: List[logging.Logger]):
-    load_dotenv()
-
-    parser = argparsify(Config)
-    args = parser.parse_args(argv[1:])
-
-    config = get_config(args)
-
-    set_log_level(config.log_level, loggers)
-
-    return args
-
-
 def set_log_level(log_level: int | str, loggers: List[logging.Logger]):
     ll: int = -1
     match log_level:
