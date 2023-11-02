@@ -1,3 +1,4 @@
+import json
 import logging
 from typing import List
 from semantic_retrieval.common.core import LOGGER_FMT
@@ -26,14 +27,23 @@ class FinancialReportGenerator:
         overfetch_factor: float,
         retriever: FinancialReportDocumentRetriever,
     ):
-        retrieved_data = await retriever.retrieve_data(
+        res_retrieved_data = await retriever.retrieve_data(
             portfolio=portfolio,
             query=retrieval_query,
             top_k=top_k,
             overfetch_factor=overfetch_factor,
         )
 
+        if res_retrieved_data.is_err():
+            raise Exception(res_retrieved_data.err())
+        
+        retrieved_data  = res_retrieved_data.unwrap()
+
+        logger.debug("Raw retrieved data:")
+        logger.debug(json.dumps([rd.model_dump() for rd in retrieved_data], indent=2))
+
         retrieved_data_processed = process_retrieved_data(portfolio, retrieved_data)
+
 
         system_content = system_prompt
 

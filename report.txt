@@ -1,0 +1,1 @@
+/Users/jonathan/Projects/semantic-retrieval/examples/typescript/financial_report/report.txt
