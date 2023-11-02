@@ -9,6 +9,7 @@ from semantic_retrieval.common.core import LOGGER_FMT
 from semantic_retrieval.evaluation.lib import (
     SampleEvalDataset,
     evaluate_sample_local_filesystem,
+    file_contents,
 )
 from semantic_retrieval.evaluation.metrics import accuracy_metric
 
@@ -68,16 +69,6 @@ def parse_re_output_to_df(re_output: List[Tuple[str, str, str, str, str]]):
 
 def gen_output_to_df(s_out: str) -> pd.DataFrame:
     return parse_re_output_to_df(parse_raw_re(s_out))
-
-
-def file_contents(path: str):
-    try:
-        with open(path, "r") as f:
-            return f.read()
-    except Exception as e:
-        # todo deal with this
-        logger.critical("exn=" + str(e))
-        return ""
 
 
 def path_muncher(output_path: str, ground_truth_path: str) -> SampleEvalDataset:
