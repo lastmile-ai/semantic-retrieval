@@ -67,14 +67,26 @@ program.option(
   "ea4bcf44-e0f3-46ff-bf66-5b1f9e7502df" // default pinecone namespace from 'good' ingest_data run
 );
 
+program.option(
+  "-t, --topic [TOPIC]",
+  "specify the topic to generate a report for",
+  "Recovery from the COVID-19 pandemic"
+);
+
 program.option("-v, --verbose", "specify whether to print verbose logs", false);
 
 program.parse(process.argv);
 
 async function main() {
   const options = program.opts();
-  const { indexName, namespace, clientId, accessIdentity, verboseLogging } =
-    getOptions(options);
+  const {
+    indexName,
+    namespace,
+    clientId,
+    accessIdentity,
+    topic,
+    verboseLogging,
+  } = getOptions(options);
 
   // Load the metadataDB persisted from ingest_data script
   const metadataDB = await InMemoryDocumentMetadataDB.fromJSONFile(
@@ -137,7 +149,7 @@ async function main() {
 
   console.log("Generating report...");
   const report = await generator.run({
-    prompt: "Recovery from the COVID-19 pandemic",
+    prompt: topic,
     accessPassport,
     retriever,
   });
@@ -205,6 +217,7 @@ function getOptions(options: OptionValues) {
     pinecone_namespace: namespace,
     client_id: clientId,
     role,
+    topic,
     verbose,
   } = options;
 
@@ -218,6 +231,10 @@ function getOptions(options: OptionValues) {
 
   if (typeof clientId !== "string") {
     throw new Error("no client id or default specified");
+  }
+
+  if (typeof topic !== "string") {
+    throw new Error("no topic or default specified");
   }
 
   if (clientId !== "sarmad" && clientId !== "tanya") {
@@ -250,6 +267,7 @@ function getOptions(options: OptionValues) {
     namespace,
     clientId,
     accessIdentity,
+    topic,
     verboseLogging: verbose !== false,
   };
 }
