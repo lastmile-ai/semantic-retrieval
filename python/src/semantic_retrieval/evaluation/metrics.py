@@ -1,9 +1,7 @@
-import numpy as np
+from sklearn.metrics import accuracy_score
 
 from semantic_retrieval.evaluation.lib import SampleEvalDataset
 
 
-def accuracy_metric(dataset: SampleEvalDataset):
-    preds = np.array(dataset.output)
-    ground_truth = np.array(dataset.ground_truth)
-    return (preds == ground_truth).astype(int).mean()
+def accuracy_metric(dataset: SampleEvalDataset) -> float:
+    return accuracy_score(dataset.ground_truth, dataset.output)  # type: ignore [fixme]
