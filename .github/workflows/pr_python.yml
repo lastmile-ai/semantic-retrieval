@@ -27,3 +27,19 @@ jobs:
       - name: Run tests
         run: |
           pytest
+
+      # TODO: This will need to move into separate workflow that is on push to main rather than on each PR
+      # Also will want to use matrix strategy to build for different platforms: See https://github.com/pypa/cibuildwheel#example-setup
+      - name: Install cibuildwheel
+        run: cd python && python -m pip install cibuildwheel==2.16.2
+
+      - name: Build wheels
+        run: cd python && python -m cibuildwheel --output-dir wheelhouse
+        # to supply options, put them in 'env', like:
+        # env:
+        #   CIBW_SOME_OPTION: value
+
+      - uses: actions/upload-artifact@v3
+        with:
+          path: ./python/wheelhouse/*.whl
+          retention-days: 30 # Optional

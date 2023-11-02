@@ -28,3 +28,10 @@ jobs:
       - name: Test
         run: |
           yarn test
+
+      - name: Zip release & publish to github releases (dist dir, ignore node_modules, keep / copy package.json, etc.)
+        uses: actions/upload-artifact@v2
+        with:
+          name: dist
+          path: dist
+          retention-days: 30 # Optional
