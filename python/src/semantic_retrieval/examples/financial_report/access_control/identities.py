@@ -1,19 +1,21 @@
 from enum import Enum
 from typing import Optional
 
-from semantic_retrieval.access_control.access_identity import AccessIdentity
+from semantic_retrieval.common.types import Record
 
 
 class Role(Enum):
-    USER = "user"
-    ADMIN = "admin"
+    ADVISOR = "advisor"
+    CLIENT = "client"
 
 
-class FinancialReportIdentity(AccessIdentity):
-    resource: str = "financial_data"
-    role: Role
 
-
-class AdvisorIdentity(FinancialReportIdentity):
-    role: Role = Role.USER
+class AdvisorIdentity(Record):
+    role: Role = Role.ADVISOR
     client: Optional[str] = None
+
+class ClientIdentity(Record):
+    role: Role = Role.CLIENT
+    name: str
+
+FinancialReportIdentity = AdvisorIdentity | ClientIdentity

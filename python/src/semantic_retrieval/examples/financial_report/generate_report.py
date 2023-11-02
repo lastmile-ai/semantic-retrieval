@@ -1,21 +1,28 @@
-import argparse
 import asyncio
+import json
+import logging
 import os
 import sys
 from typing import List
-from dotenv import load_dotenv
 
+from semantic_retrieval.common.core import LOGGER_FMT
+from semantic_retrieval.examples.financial_report.access_control.identities import AdvisorIdentity
+
+import semantic_retrieval.examples.financial_report.financial_report_generator as frg
 from result import Err, Ok
 from semantic_retrieval.common.types import Record
 from semantic_retrieval.data_store.vector_dbs.pinecone_vector_db import (
     PineconeVectorDBConfig,
 )
-
 from semantic_retrieval.document.metadata.in_memory_document_metadata_db import (
     InMemoryDocumentMetadataDB,
 )
-
-from semantic_retrieval.examples.financial_report.config import Config, argparsify
+from semantic_retrieval.examples.financial_report.config import (
+    Config,
+    get_config,
+    resolve_path,
+    set_up_script,
+)
 from semantic_retrieval.examples.financial_report.financial_report_document_retriever import (
     FinancialReportDocumentRetriever,
     PortfolioData,
@@ -24,58 +31,32 @@ from semantic_retrieval.examples.financial_report.financial_report_generator imp
     FinancialReportGenerator,
 )
 from semantic_retrieval.retrieval.csv_retriever import CSVRetriever
-
 from semantic_retrieval.transformation.embeddings.openai_embeddings import (
     OpenAIEmbeddingsConfig,
 )
 
+import semantic_retrieval.examples.financial_report.financial_report_document_retriever as frdr
 
-from semantic_retrieval.utils.configs.configs import combine_dicts, remove_nones
+logger = logging.getLogger(__name__)
+logging.basicConfig(format=LOGGER_FMT)
 
 
 class FinancialReport(Record):
     pass
 
 
-def resolve_path(data_root: str, path: str) -> str:
-    """
-    data_root is relative to csv
-    path is relative to data_root
-    """
-
-    return os.path.join(os.getcwd(), data_root, path)
-
-
 async def main(argv: List[str]):
-    load_dotenv()
+    loggers = [logger, frg.logger, frdr.logger]
 
-    parser = argparsify(Config)
-    args = parser.parse_args(argv[1:])
-
+    args = set_up_script(argv, loggers)
     config = get_config(args)
+    logger.debug("CONFIG:\n")
+    logger.debug(str(config))
 
     return await run_generate_report(config)
 
 
-def get_config(args: argparse.Namespace):
-    # TODO combine stuff cleaner
-    args_resolved = combine_dicts(
-        [
-            remove_nones(d)
-            for d in [
-                vars(args),
-                dict(
-                    openai_key=os.getenv("OPENAI_API_KEY"),
-                    pinecone_key=os.getenv("PINECONE_API_KEY"),
-                ),
-            ]
-        ]
-    )
-    return Config(**args_resolved)
-
-
 async def run_generate_report(config: Config):
-    # Load the metadataDB persisted from ingest_data script
     metadata_path = resolve_path(config.data_root, config.metadata_db_path)
     res_metadata_db = await InMemoryDocumentMetadataDB.from_json_file(metadata_path)
 
@@ -93,6 +74,7 @@ async def run_generate_report(config: Config):
                 environment=config.pinecone_environment,
             )
 
+            logger.info(f"Client name: {config.client_name}")
             portfolio_csv_name = f"{config.client_name}_portfolio.csv"
             portfolio_csv_path = os.path.join(
                 config.portfolio_csv_dir, portfolio_csv_name
@@ -102,14 +84,15 @@ async def run_generate_report(config: Config):
             )
 
             portfolio: PortfolioData = await portfolio_retriever.retrieve_data(None)  # type: ignore [fixme]
-            print(f"{portfolio=}")
+            logger.info("\nPortfolio:\n" + json.dumps(portfolio, indent=2))
 
-            # access_passport = AccessPassport()
-            # identity = AdvisorIdentity(client=config.client_name)
-            # access_passport.register(identity)
+            viewer_identity = AdvisorIdentity(client="client_a")
+
+
 
             retriever = FinancialReportDocumentRetriever(
-                #   access_passport,
+                viewer_identity,
+                config.client_name,
                 vector_db_config=pcvdbcfg,
                 embeddings_config=openaiembcfg,
                 portfolio=portfolio,  # type: ignore [fixme]
@@ -131,7 +114,7 @@ async def run_generate_report(config: Config):
                 portfolio,
                 system_prompt,
                 retrieval_query,
-                structure_prompt="Numbered List",
+                structure_prompt=config.structure_prompt,
                 data_extraction_prompt=config.data_extraction_prompt,
                 top_k=config.top_k,
                 overfetch_factor=config.overfetch_factor,
