@@ -1,3 +1,4 @@
+from abc import abstractmethod
 from typing import TypeVar, Optional, List
 from semantic_retrieval.access_control.access_passport import AccessPassport
 from semantic_retrieval.document.document import Document, DocumentFragment
@@ -22,15 +23,15 @@ class DocumentRetriever(BaseRetriever[R, Q]):
         super().__init__(metadata_db, callback_manager)
         self.metadata_db = metadata_db
 
+    @abstractmethod
     async def get_fragments_unsafe(self, params: BaseRetrieverQueryParams[Q]) -> List[DocumentFragment]:  # type: ignore [fixme]
-        # TODO impl
         pass
 
     async def filter_accessible_fragments(
         self, fragments: List[DocumentFragment], access_passport: AccessPassport
     ) -> List[DocumentFragment]:
         accessible_fragments = []
-        # TODO re-implement this
+        # TODO [P0] re-implement this
         return fragments
         for fragment in fragments:
             metadata = await self.metadata_db.get_metadata(fragment.document_id)
@@ -55,24 +56,16 @@ class DocumentRetriever(BaseRetriever[R, Q]):
 
         filtered_fragments = list(filter(None, accessible_fragments))
 
-        # TODO callback
-        # event = {
-        #     "name": "on_retriever_filter_accessible_fragments",
-        #     "fragments": filtered_fragments,
-        # }
-        # if self.callback_manager:
-        #     await self.callback_manager.run_callbacks(event)
-
         return filtered_fragments
 
     async def get_documents_for_fragments(self, fragments: List[DocumentFragment]):  # type: ignore [fixme]
-        # TOD impl
+        # TODO [P0] impl
         documents = []
 
         return documents
 
+    @abstractmethod
     async def process_documents(self, _documents: List[Document]) -> R:  # type: ignore [fixme]
-        # TODO impl
         pass
 
     async def retrieve_data(self, params: BaseRetrieverQueryParams[Q]) -> R:
@@ -84,10 +77,5 @@ class DocumentRetriever(BaseRetriever[R, Q]):
             accessible_fragments
         )
         processed_documents = await self.process_documents(accessible_documents)
-
-        # TODO callback
-        # event = {"name": "on_retrieve_data", "data": processed_documents}
-        # if self.callback_manager:
-        #     await self.callback_manager.run_callbacks(event)
 
         return processed_documents

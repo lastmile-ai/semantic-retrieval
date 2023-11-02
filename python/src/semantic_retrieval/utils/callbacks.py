@@ -7,7 +7,7 @@ class Traceable:
     """
     Interface for classes that support callbacks.
 
-    TODO: figure out a way to type-enforce this
+    TODO [P1]: figure out a way to type-enforce this
     By extending Traceable, a class affirms that it
     * accepts and stores a CallbackManager on init,
     * calls `run_callbacks()` on the CallbackManager
@@ -45,11 +45,10 @@ class CallbackManager:
         self.callbacks: Final[Sequence[Callback]] = callbacks
         self.results = []
 
-    # TODO: statically type each event?
-    # TODO: [optimization] index callbacks by event type?
+    # TODO [P1]: statically type each event?
+    # TODO [P1]: [optimization] index callbacks by event type?
     async def run_callbacks(self, event: CallbackEvent) -> Optional[CallbackResult]:
-        # TODO
-        # TODO: [optimization] do this storage more efficiently
+        # TODO [P1]: [optimization] do this storage more efficiently
         for callback in self.callbacks:
             result = await callback(event)
             if result is not None:

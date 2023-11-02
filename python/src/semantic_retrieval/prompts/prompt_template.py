@@ -13,8 +13,6 @@ class PromptTemplate(IPrompt):
         self.parameters = params
 
     def resolve_template(self, parameters: Optional[PromptTemplateParameters] = None):
-        # TODO: Implement using handlebars. Merge parameters with self.parameters and have
-        # method parameters take precedence.
         return ""
 
     async def to_string(self) -> str:
