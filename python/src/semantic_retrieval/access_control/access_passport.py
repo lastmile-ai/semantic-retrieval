@@ -19,20 +19,7 @@ class AccessPassport(Traceable):
     def register(self, access_identity: AccessIdentity):
         self.access_identities.update({access_identity.resource: access_identity})
 
-        # TODO callback
-        # if self.callback_manager:
-        #     event = RegisterAccessIdentityEvent(
-        #         name="onRegisterAccessIdentity", access_identity=access_identity
-        #     )
-        #     self.callback_manager.run_callbacks(event)
-
     def get_identity(self, resource: str) -> Result[AccessIdentity, str]:
-        # TODO callback
-        # if self.callback_manager:
-        #     event = GetAccessIdentityEvent(
-        #         name="onGetAccessIdentity", access_identity=access_identity
-        #     )
-        #     self.callback_manager.run_callbacks(event)
         if resource in self.access_identities:
             return Ok(self.access_identities[resource])
         else:

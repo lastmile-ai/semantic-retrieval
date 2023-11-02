@@ -23,7 +23,7 @@ class Config(Record):
     pinecone_environment: str = "asia-southeast1-gcp-free"
 
     # Local paths
-    # TODO: double check this: data_root is relative to cwd.
+    # TODO [P1]: double check this: data_root is relative to cwd.
     data_root: str = "examples/example_data/financial_report"
     metadata_db_path: str = "artifacts/metadata_db_py_v2.json"
     portfolio_csv_dir: str = "portfolios"
@@ -74,7 +74,7 @@ def argparsify(r: Record | Type[Record]):
 
 
 def get_config(args: argparse.Namespace):
-    # TODO combine stuff cleaner
+    # TODO [P1] combine stuff cleaner
     args_resolved = combine_dicts(
         [
             remove_nones(d)

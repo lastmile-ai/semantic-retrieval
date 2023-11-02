@@ -1,3 +1,4 @@
+from abc import abstractmethod
 from typing import Generic, List
 
 from attr import dataclass
@@ -32,22 +33,12 @@ class RAGCompletionGenerator(
     Generic[P, Q, R, T_[P, Q]],  # type: ignore [fixme][This might be unfixable. Limitation of py generic types]
     LLMCompletionGenerator[P, R],
 ):
-    async def get_retrieval_query(self, params: T_[P, Q]) -> Q:  # type: ignore [fixme]
-        # TODO: Implement this method to construct the query for the underlying retriever
+    @abstractmethod
+    async def get_retrieval_query(self, params: T_[P, Q]) -> Q:
         pass
 
     async def run(  # type: ignore [fixme][This might be unfixable. Limitation of py generic types]
         self, params: T_[P, Q]
     ) -> R:  # type: ignore [fixme]
-        # TODO impl
+        # TODO [P1] impl
         pass
-
-
-# Val = TypeVar("Val")
-
-# class MyGeneric(Generic[Val]):
-#     def __init__(self, a: Val): ...
-
-# T = TypeVar("T")
-
-# SingleG = MyGeneric[T]

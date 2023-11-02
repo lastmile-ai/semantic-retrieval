@@ -16,7 +16,6 @@ from semantic_retrieval.document.metadata.in_memory_document_metadata_db import 
 )
 
 from semantic_retrieval.document_parsers.multi_document_parser import (
-    MultiDocumentParser,
     ParserConfig,
 )
 
@@ -27,6 +26,7 @@ from semantic_retrieval.access_control.always_allow_document_access_policy_facto
 
 
 from semantic_retrieval.transformation.document.text.separator_text_chunker import (
+    SeparatorTextChunkConfig,
     SeparatorTextChunker,
     SeparatorTextChunkerParams,
 )
@@ -43,6 +43,8 @@ from semantic_retrieval.transformation.embeddings.openai_embeddings import (
     OpenAIEmbeddings,
     OpenAIEmbeddingsConfig,
 )
+
+import semantic_retrieval.document_parsers.multi_document_parser as mdp
 
 
 logger = logging.getLogger(__name__)
@@ -72,7 +74,7 @@ async def run_ingest(config: Config):
     metadata_db = InMemoryDocumentMetadataDB()
 
     # Parse the raw documents
-    parsedDocuments = await MultiDocumentParser().parse_documents(
+    parsedDocuments = await mdp.parse_documents(
         rawDocuments,
         ParserConfig(
             metadata_db=metadata_db,
@@ -81,12 +83,17 @@ async def run_ingest(config: Config):
     )
 
     # Initialize a document transformer
-    # TODO set parameters better
+    # TODO [P1] set parameters better
     documentTransformer = SeparatorTextChunker(
-        SeparatorTextChunkerParams(
-            metadata_db=metadata_db,
+        params=SeparatorTextChunkerParams(
             text_chunk_config=TextChunkConfig(
-                chunk_size_limit=500, chunk_overlap=100, size_fn=len
+                chunk_size_limit=500,
+                chunk_overlap=100,
+            ),
+            metadata_db=metadata_db,
+            separator_text_chunk_config=SeparatorTextChunkConfig(
+                chunk_size_limit=500,
+                chunk_overlap=100,
             ),
         )
     )
@@ -115,7 +122,7 @@ async def run_ingest(config: Config):
         transformedDocuments, pcvdbcfg, embeddings, metadata_db
     )
 
-    # TODO: validate state of pineconeVectorDB
+    # TODO [P1]: validate state of pineconeVectorDB
     print(f"{pineconeVectorDB=}")
 
 

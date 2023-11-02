@@ -10,28 +10,34 @@ from semantic_retrieval.document.document import (
 from semantic_retrieval.utils.callbacks import CallbackManager, Traceable
 
 
+from abc import abstractmethod
+from result import Result
+
+from semantic_retrieval.document.document import IngestedDocument, RawDocument
+
+
 class DocumentParser(Attributable, Traceable):
     mime_type_restriction: Optional[List[str]] = None
-
-    def parse(self, raw_document: RawDocument) -> IngestedDocument:  # type: ignore [fixme]
-        # TODO impl
+    @abstractmethod
+    async def parse(self, raw_document: RawDocument) -> Result[IngestedDocument, str]:
         pass
 
+
+    @abstractmethod 
     def parse_next(
         self,
         raw_document: RawDocument,
         previous_fragment: Optional[DocumentFragment] = None,
         take: Optional[int] = None,
-    ) -> DocumentFragment:  # type: ignore [fixme]
-        # TODO impl
+    ) -> DocumentFragment: 
         pass
 
-    async def to_string(self, raw_document: RawDocument) -> str:  # type: ignore [fixme]
-        # TODO impl
+    @abstractmethod
+    async def to_string(self, raw_document: RawDocument) -> str:
         pass
 
-    async def serialize(self, raw_document: RawDocument) -> str:  # type: ignore [fixme]
-        # TODO impl
+    @abstractmethod
+    async def serialize(self, raw_document: RawDocument) -> str:
         pass
 
 
@@ -43,21 +49,21 @@ class BaseDocumentParser(DocumentParser):
         callback_manager: Optional[CallbackManager] = None,
     ):
         super().__init__()
-        self.attributes = attributes if attributes else {}
-        self.metadata = metadata if metadata else {}
-        self.callback_manager = callback_manager
+        # self.attributes = attributes if attributes else {}
+        # self.metadata = metadata if metadata else {}
+        # self.callback_manager = callback_manager
 
-    def parse(self, raw_document: RawDocument) -> IngestedDocument:  # type: ignore
-        # TODO: impl
+    @abstractmethod
+    async def parse(self, raw_document: RawDocument) -> Result[IngestedDocument, str]:
         pass
 
+    @abstractmethod
     def parse_next(
         self,
         raw_document: RawDocument,
         previous_fragment: Optional[DocumentFragment] = None,
         take: Optional[int] = None,
-    ) -> DocumentFragment:  # type: ignore [fixme]
-        # TODO impl
+    ) -> DocumentFragment: 
         pass
 
     async def to_string(self, raw_document: RawDocument) -> str:
