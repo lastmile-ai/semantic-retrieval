@@ -18,7 +18,6 @@ from semantic_retrieval.transformation.embeddings.embeddings import (
 )
 
 
-
 class PineconeVectorDBConfig(VectorDBConfig):
     index_name: str
     api_key: str
