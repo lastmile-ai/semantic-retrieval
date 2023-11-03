@@ -20,7 +20,7 @@ interface FinancialReportGeneratorParams extends CompletionModelParams<never> {
 }
 
 export class FinancialReportGenerator extends LLMCompletionGenerator<
-  CompletionModel<never, Output | Output[]>,
+  AIConfigCompletion,
   FinancialReportGeneratorParams,
   string
 > {
