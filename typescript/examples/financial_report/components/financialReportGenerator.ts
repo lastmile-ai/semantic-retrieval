@@ -1,15 +1,14 @@
-import { AccessPassport } from "../../../../src/access-control/accessPassport";
+import { AccessPassport } from "../../../src/access-control/accessPassport";
 import {
-  CompletionModel,
   CompletionModelParams,
-} from "../../../../src/generator/completion-models/completionModel";
-import { LLMCompletionGenerator } from "../../../../src/generator/completionGenerator";
+} from "../../../src/generator/completion-models/completionModel";
+import { LLMCompletionGenerator } from "../../../src/generator/completionGenerator";
 import { FinancialReportDocumentRetriever } from "./financialReportDocumentRetriever";
 import {
   AIConfigCompletion,
   AIConfigPromptParams,
-} from "../../../../src/generator/completion-models/aiconfig/aiconfigCompletionModel";
-import { CallbackManager } from "../../../../src/utils/callbacks";
+} from "../../../src/generator/completion-models/aiconfig/aiconfigCompletionModel";
+import { CallbackManager } from "../../../src/utils/callbacks";
 import { Output } from "aiconfig";
 import { JSONObject } from "aiconfig/dist/common";
 import * as path from "path";

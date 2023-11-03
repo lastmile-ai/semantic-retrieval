@@ -1,4 +1,4 @@
-import { AccessIdentity } from "../../../../../src/access-control/accessIdentity";
+import { AccessIdentity } from "../../../../src/access-control/accessIdentity";
 
 export interface FinancialReportIdentity extends AccessIdentity {
   resource: "financial_data";

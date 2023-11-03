@@ -1,6 +1,6 @@
-import { AccessIdentity } from "../../../../../src/access-control/accessIdentity";
-import { ResourceAccessPolicy } from "../../../../../src/access-control/resourceAccessPolicy";
-import { Document } from "../../../../../src/document/document";
+import { AccessIdentity } from "../../../../../typescript/src/access-control/accessIdentity";
+import { ResourceAccessPolicy } from "../../../../../typescript/src/access-control/resourceAccessPolicy";
+import { Document } from "../../../../../typescript/src/document/document";
 import { isFinancialReportIdentity } from "./financialReportIdentity";
 
 export const RESOURCE = "financial_data";

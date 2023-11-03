@@ -7,7 +7,7 @@ const config: Config = {
   transform: {
     "^.+\\.ts?$": "ts-jest",
   },
-  transformIgnorePatterns: ["<rootDir>/node_modules/"],
+  transformIgnorePatterns: ["node_modules/"],
   modulePathIgnorePatterns: ["__tests__/__mocks__", "__tests__/__utils__"],
 };
 
