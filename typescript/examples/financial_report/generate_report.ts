@@ -3,12 +3,12 @@
 // Usage Example: npx ts-node examples/typescript/financial_report/generate_report.ts -r advisor -c sarmad -p my-index -n my-namespace
 
 import { OptionValues, program } from "commander";
-import { AccessPassport } from "../../../src/access-control/accessPassport";
-import { PineconeVectorDB } from "../../../src/data-store/vector-DBs/pineconeVectorDB";
-import { InMemoryDocumentMetadataDB } from "../../../src/document/metadata/inMemoryDocumentMetadataDB";
-import { CSVRetriever } from "../../../src/retrieval/csvRetriever";
-import { VectorDBDocumentRetriever } from "../../../src/retrieval/vector-DBs/vectorDBDocumentRetriever";
-import { OpenAIEmbeddings } from "../../../src/transformation/embeddings/openAIEmbeddings";
+import { AccessPassport } from "../../../typescript/src/access-control/accessPassport";
+import { PineconeVectorDB } from "../../../typescript/src/data-store/vector-DBs/pineconeVectorDB";
+import { InMemoryDocumentMetadataDB } from "../../../typescript/src/document/metadata/inMemoryDocumentMetadataDB";
+import { CSVRetriever } from "../../../typescript/src/retrieval/csvRetriever";
+import { VectorDBDocumentRetriever } from "../../../typescript/src/retrieval/vector-DBs/vectorDBDocumentRetriever";
+import { OpenAIEmbeddings } from "../../../typescript/src/transformation/embeddings/openAIEmbeddings";
 import { AdvisorIdentity } from "./components/access_control/advisorIdentity";
 import { AdminIdentity } from "./components/access_control/adminIdentity";
 import {
@@ -17,12 +17,12 @@ import {
   PortfolioData,
 } from "./components/financialReportDocumentRetriever";
 import dotenv from "dotenv";
-import { ResourceAccessPolicy } from "../../../src/access-control/resourceAccessPolicy";
-import { AlwaysAllowAccessPolicy } from "../../../src/access-control/policies/alwaysAllowAccessPolicy";
+import { ResourceAccessPolicy } from "../../../typescript/src/access-control/resourceAccessPolicy";
+import { AlwaysAllowAccessPolicy } from "../../../typescript/src/access-control/policies/alwaysAllowAccessPolicy";
 import fs from "fs/promises";
 import { FinancialReportGenerator } from "./components/financialReportGenerator";
 import { SecretReportAccessPolicy } from "./components/access_control/secretReportAccessPolicy";
-import { AccessIdentity } from "../../../src/access-control/accessIdentity";
+import { AccessIdentity } from "../../../typescript/src/access-control/accessIdentity";
 import {
   CallbackManager,
   RetrieveDataEvent,
@@ -30,7 +30,7 @@ import {
   RunCompletionGenerationEvent,
   RunCompletionRequestEvent,
   RunCompletionResponseEvent,
-} from "../../../src/utils/callbacks";
+} from "../../../typescript/src/utils/callbacks";
 import { v4 as uuid } from "uuid";
 
 dotenv.config();
@@ -90,7 +90,7 @@ async function main() {
 
   // Load the metadataDB persisted from ingest_data script
   const metadataDB = await InMemoryDocumentMetadataDB.fromJSONFile(
-    "examples/typescript/financial_report/metadataDB.json",
+    "examples/financial_report/metadataDB.json",
     (key, value) => {
       if (key === "accessPolicies") {
         // deserialize access policies to their instances
@@ -127,11 +127,11 @@ async function main() {
   });
 
   const portfolioRetriever = new CSVRetriever<PortfolioData>(
-    `examples/example_data/financial_report/portfolios/${clientId}_portfolio.csv`
+    `../examples/example_data/financial_report/portfolios/${clientId}_portfolio.csv`
   );
 
   const companyProfilesRetriever = new CSVRetriever<CompanyProfiles>(
-    "examples/example_data/financial_report/company_profiles.csv"
+    "../examples/example_data/financial_report/company_profiles.csv"
   );
 
   const accessPassport = new AccessPassport();
