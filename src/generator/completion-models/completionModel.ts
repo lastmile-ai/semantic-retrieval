@@ -7,6 +7,14 @@ export interface CompletionModelParams<P> {
   completionParams?: P;
 }
 
+export type ModelParams<M> = M extends CompletionModel<infer MP, infer _MR>
+  ? MP
+  : never;
+
+export type ModelResponse<M> = M extends CompletionModel<infer _MP, infer MR>
+  ? MR
+  : never;
+
 /**
  * A simple class for interacting with different LLM completion models. CompletionModels
  * are leveraged by CompletionGenerators to generate completions from prompts.

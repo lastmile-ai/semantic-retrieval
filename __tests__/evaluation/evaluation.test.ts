@@ -160,7 +160,10 @@ describe("Retrieval evaluation metrics", () => {
       calculateRetrievedFragmentPrecision,
     ];
 
-    const evalDataset: RetrievalEvaluationDataset<string[], VectorDBQuery> = {
+    const evalDataset: RetrievalEvaluationDataset<
+      VectorDBDocumentRetriever,
+      string[]
+    > = {
       relevantDataByQuery: [[queryParams, relevantFragmentIds]],
     };
 
