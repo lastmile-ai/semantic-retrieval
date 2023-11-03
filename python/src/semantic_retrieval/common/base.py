@@ -4,7 +4,7 @@ from typing import Any, Dict, Optional
 from semantic_retrieval.common.types import Record
 
 
-class Attributable(Record, ABC):
+class Attributable(ABC, Record):
     metadata: Optional[Dict[Any, Any]] = None
     attributes: Optional[Dict[Any, Any]] = None
 

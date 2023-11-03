@@ -1,3 +1,4 @@
+from abc import abstractmethod
 from typing import Optional, Generic
 from semantic_retrieval.access_control.access_passport import AccessPassport
 
@@ -21,6 +22,6 @@ class BaseRetriever(Generic[R, Q]):
         self.metadata_db = metadata_db
         self.callback_manager = callback_manager
 
+    @abstractmethod
     async def retrieve_data(self, params: BaseRetrieverQueryParams[Q]) -> R:  # type: ignore [fixme]
-        # TODO
         pass

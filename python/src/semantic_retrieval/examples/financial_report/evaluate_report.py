@@ -44,7 +44,7 @@ def parse_raw_re(s_out: str) -> List[Tuple[str, str, str, str, str]]:
             flags=re.IGNORECASE,
         )
     except Exception as e:
-        # todo deal with this
+        # TODO [P1] deal with this
         logger.warning("parse output exn, returning empty list, exn=", str(e))
         return []
 
@@ -87,7 +87,7 @@ def gen_output_to_df(s_out: str) -> pd.DataFrame:
 
 #     logger.info(f"Outputs and Ground truth:\n{df_join}")
 
-    # # TODO this better
+    # # TODO [P1] this better
     # return SampleEvalDataset(
     #     output=df_join.value_millions.tolist(),
     #     ground_truth=df_join.net_earnings_millions_2022.tolist(),
