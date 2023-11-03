@@ -14,7 +14,7 @@ class DocumentMetadataQuery(Record):
 
 
 class DocumentMetadataDB(ABC):
-    # TODO: saqadri - implement a Postgres implementation of this interface.
+    # TODO [P1]: saqadri - implement a Postgres implementation of this interface.
     @abstractmethod
     async def get_metadata(self, document_id: str) -> Result[DocumentMetadata, str]:
         pass

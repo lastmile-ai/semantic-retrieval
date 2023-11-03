@@ -5,6 +5,7 @@ import pandas as pd
 from semantic_retrieval.common import types
 from semantic_retrieval.common.core import LOGGER_FMT
 
+
 logger = logging.getLogger(__name__)
 logging.basicConfig(format=LOGGER_FMT)
 
@@ -90,7 +91,7 @@ def file_contents(path: str):
         with open(path, "r") as f:
             return f.read()
     except Exception as e:
-        # todo deal with this
+        # TODO [P1] deal with this
         logger.critical("exn=" + str(e))
         return ""
 

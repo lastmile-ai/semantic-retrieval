@@ -1,7 +1,7 @@
-from dataclasses import dataclass
 from uuid import uuid4
 from hashlib import md5
-from typing import Any, Callable, List, Optional
+from typing import List, Optional
+from semantic_retrieval.common.types import Record
 
 from semantic_retrieval.document.metadata.document_metadata_db import DocumentMetadataDB
 
@@ -16,17 +16,15 @@ from semantic_retrieval.document.document import (
 )
 
 
-@dataclass
-class TextChunkConfig:
+class TextChunkConfig(Record):
     chunk_size_limit: int
     chunk_overlap: int
-    size_fn: Callable[[Any], int]
+    # size_fn: Callable[[Any], int]
 
 
-@dataclass
 class TextChunkTransformerParams:
     metadata_db: Optional[DocumentMetadataDB]
-    text_chunk_config: TextChunkConfig
+    # text_chunk_config: TextChunkConfig
 
 
 async def _len(x: str) -> int:
@@ -34,7 +32,6 @@ async def _len(x: str) -> int:
 
 
 class TextChunkTransformer(BaseDocumentTransformer):
-    # TODO: finish impl
     def __init__(self, params: Optional[TextChunkTransformerParams] = None):
         self.params = params
         self.size_fn = _len
@@ -69,7 +66,7 @@ class TextChunkTransformer(BaseDocumentTransformer):
             def id_(chunk: str) -> str:
                 return chunk
 
-            # TODO: One other issue with chunks is some csvs are getting 0 chunks returned even though they have sub_chunks
+            # TODO [P1]: One other issue with chunks is some csvs are getting 0 chunks returned even though they have sub_chunks
             # Definitely some issue with merge_sub_chunks, but not going to debug this right now
             for chunk in await self.chunk_text(original_fragment):  # type: ignore [fixme]
                 current_fragment = {
@@ -84,7 +81,7 @@ class TextChunkTransformer(BaseDocumentTransformer):
                     "serialize": id_,
                 }
 
-                # TODO: Unsure if this is working correctly
+                # TODO [P1]: Unsure if this is working correctly
                 if fragment_count > 0:
                     transformed_fragments[fragment_count - 1][
                         "nextFragment"
@@ -102,7 +99,7 @@ class TextChunkTransformer(BaseDocumentTransformer):
             attributes={},
         )
 
-        # TODO: callback
+        # TODO [P0]: callback
         # event = TransformDocumentEvent(
         #     name="onTransformDocument",
         #     originalDocument=document,
@@ -200,5 +197,5 @@ class TextChunkTransformer(BaseDocumentTransformer):
         if len(current_sub_chunks) > 0:
             chunk = self.join_sub_chunks(current_sub_chunks, separator)
 
-        # TODO is this correct?
+        # TODO [P1] is this correct?
         return chunks
