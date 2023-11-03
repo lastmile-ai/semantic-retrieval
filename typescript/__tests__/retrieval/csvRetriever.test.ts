@@ -3,7 +3,7 @@ import { CSVRetriever } from "../../src/retrieval/csvRetriever";
 describe("csvRetriever for retrieving structured data from CSV", () => {
   test("throws error if primary key column is missing", async () => {
     const retriever = new CSVRetriever(
-      "examples/example_data/financial_report/portfolios/sarmad_portfolio.csv"
+      "../examples/example_data/financial_report/portfolios/sarmad_portfolio.csv"
     );
     await expect(
       retriever.retrieveData({
@@ -18,7 +18,7 @@ describe("csvRetriever for retrieving structured data from CSV", () => {
     const retriever = new CSVRetriever<{
       [Company: string]: { Shares: number | null };
     }>(
-      "examples/example_data/financial_report/portfolios/sarmad_portfolio.csv"
+      "../examples/example_data/financial_report/portfolios/sarmad_portfolio.csv"
     );
 
     const data = await retriever.retrieveData({
