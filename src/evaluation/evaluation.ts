@@ -1,11 +1,11 @@
 import { DocumentRetriever } from "../retrieval/documentRetriever";
-import { BaseRetrieverQueryParams } from "../retrieval/retriever";
+import { RetrieverParams, RetrieverResponse } from "../retrieval/retriever";
 
 // Interface
 
 // Types
-export interface RetrievalEvaluationDataset<E, Q> {
-  relevantDataByQuery: retrievalQueryExpectedResultPair<E, Q>[];
+export interface RetrievalEvaluationDataset<R, E> {
+  relevantDataByQuery: retrievalQueryExpectedResultPair<R, E>[];
 }
 
 export interface RetrievalMetric<R, E> {
@@ -13,18 +13,20 @@ export interface RetrievalMetric<R, E> {
   name: string;
 }
 
-// Retrieval eval function
-/* 
-R: returned data type from retriever
-Q: query type
-E: expected data type
-
-Example: R = Document[], Q = VectorDBQuery, E = Fragment[]
-*/
-export async function evaluateRetrievers<R, Q, E>(
-  retrievers: DocumentRetriever<R, Q>[],
-  data: RetrievalEvaluationDataset<E, Q>,
-  metrics: RetrievalMetric<R, E>[]
+/**
+ * Perform evaluation of the retrievers with provided data and metrics
+ * @param retrievers DocumentRetrievers to perform evaluation on
+ * @param data Dataset of retrieval queries and expected results of type E
+ * @param metrics Array of RetrievalMetrics to evaluate
+ * @returns
+ */
+export async function evaluateRetrievers<
+  R extends DocumentRetriever<RetrieverParams<R>, RetrieverResponse<R>>,
+  E,
+>(
+  retrievers: R[],
+  data: RetrievalEvaluationDataset<R, E>,
+  metrics: RetrievalMetric<RetrieverResponse<R>, E>[]
 ) {
   const results: { [metricName: string]: number }[] = [];
 
@@ -41,7 +43,7 @@ export async function evaluateRetrievers<R, Q, E>(
 
 // Internal convenience types
 
-type retrievalQueryExpectedResultPair<E, Q> = [BaseRetrieverQueryParams<Q>, E];
+type retrievalQueryExpectedResultPair<R, E> = [RetrieverParams<R>, E];
 
 // Common metrics
 
@@ -73,13 +75,16 @@ function setIntersect<T>(a: Set<T>, b: Set<T>): Set<T> {
   return intersection;
 }
 
-async function averageMetricValue<R, Q, E>(
-  retriever: DocumentRetriever<R, Q>,
-  metric: RetrievalMetric<R, E>,
-  data: RetrievalEvaluationDataset<E, Q>
+async function averageMetricValue<
+  R extends DocumentRetriever<RetrieverParams<R>, RetrieverResponse<R>>,
+  E,
+>(
+  retriever: R,
+  metric: RetrievalMetric<RetrieverResponse<R>, E>,
+  data: RetrievalEvaluationDataset<R, E>
 ): Promise<number> {
   let total = 0;
-  const dataList: retrievalQueryExpectedResultPair<E, Q>[] =
+  const dataList: retrievalQueryExpectedResultPair<R, E>[] =
     data.relevantDataByQuery;
   if (data.relevantDataByQuery.length === 0) {
     throw new Error("No data in evaluation dataset");

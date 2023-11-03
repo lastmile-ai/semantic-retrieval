@@ -1,13 +1,11 @@
 import { JSONObject } from "../../../../src/common/jsonTypes";
-import { VectorDBTextQuery } from "../../../../src/data-store/vector-DBs/vectorDB";
-import { Document } from "../../../../src/document/document";
 import { DocumentMetadataDB } from "../../../../src/document/metadata/documentMetadataDB";
 import { CSVRetriever } from "../../../../src/retrieval/csvRetriever";
-import { DocumentRetriever } from "../../../../src/retrieval/documentRetriever";
 import {
   BaseRetriever,
   BaseRetrieverQueryParams,
 } from "../../../../src/retrieval/retriever";
+import { VectorDBDocumentRetriever } from "../../../../src/retrieval/vector-DBs/vectorDBDocumentRetriever";
 import {
   CallbackManager,
   RetrieveDataEvent,
@@ -18,7 +16,7 @@ export type FinancialReportData = {
   details: string;
 }[];
 
-type FinancialReportQuery = string;
+type FinancialReportQuery = BaseRetrieverQueryParams<string>;
 
 export interface PortfolioData extends JSONObject {
   [Company: string]: { Shares: number | null };
@@ -30,17 +28,17 @@ export interface CompanyProfiles extends JSONObject {
 
 export type FinancialReportDocumentRetrieverConfig = {
   metadataDB: DocumentMetadataDB;
-  documentRetriever: DocumentRetriever<Document[], VectorDBTextQuery>;
+  documentRetriever: VectorDBDocumentRetriever;
   portfolioRetriever: CSVRetriever<PortfolioData>;
   companyProfilesRetriever: CSVRetriever<CompanyProfiles>;
   callbackManager?: CallbackManager;
 };
 
 export class FinancialReportDocumentRetriever
-  extends BaseRetriever<FinancialReportData, FinancialReportQuery>
+  extends BaseRetriever<FinancialReportQuery, FinancialReportData>
   implements FinancialReportDocumentRetrieverConfig
 {
-  documentRetriever: DocumentRetriever<Document[], VectorDBTextQuery>;
+  documentRetriever: VectorDBDocumentRetriever;
   portfolioRetriever: CSVRetriever<PortfolioData>;
   companyProfilesRetriever: CSVRetriever<CompanyProfiles>;
   metadataDB: DocumentMetadataDB;
@@ -56,7 +54,7 @@ export class FinancialReportDocumentRetriever
   // For each of the companies with owned shares in the Portfolio, retrieve embedded documents
   // related to the query from pinecone, and return the details for each company
   async retrieveData(
-    params: BaseRetrieverQueryParams<FinancialReportQuery>
+    params: FinancialReportQuery
   ): Promise<FinancialReportData> {
     const portfolio = await this.portfolioRetriever.retrieveData({
       query: { primaryKeyColumn: "Company" },

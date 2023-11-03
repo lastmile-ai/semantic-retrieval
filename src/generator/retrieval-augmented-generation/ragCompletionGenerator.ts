@@ -3,11 +3,19 @@ import { PromptTemplate } from "../../prompts/prompt-templates/promptTemplate";
 import { Document } from "../../document/document";
 import { DocumentRetriever } from "../../retrieval/documentRetriever";
 import { LLMCompletionGenerator } from "../completionGenerator";
-import { CompletionModelParams } from "../completion-models/completionModel";
+import {
+  CompletionModel,
+  CompletionModelParams,
+  ModelParams,
+  ModelResponse,
+} from "../completion-models/completionModel";
+import { RetrieverParams, RetrieverQuery } from "../../retrieval/retriever";
 
-export interface RAGCompletionGeneratorParams<P, Q>
-  extends CompletionModelParams<P> {
-  retriever: DocumentRetriever<Document[], Q>;
+export interface RAGCompletionGeneratorParams<
+  P,
+  R extends DocumentRetriever<RetrieverParams<R>, Document[]>,
+> extends CompletionModelParams<P> {
+  retriever: R;
   accessPassport?: AccessPassport;
   ragPromptTemplate?: PromptTemplate;
 }
@@ -20,17 +28,16 @@ export const DEFAULT_RAG_TEMPLATE =
  * be leveraged for modifying the prompt prior to completion generation by the model
  */
 export abstract class RAGCompletionGenerator<
-  P,
-  Q,
-  R,
-  T extends RAGCompletionGeneratorParams<P, Q>,
-> extends LLMCompletionGenerator<P, R, T, R> {
+  M extends CompletionModel<ModelParams<M>, ModelResponse<M>>,
+  P extends RAGCompletionGeneratorParams<ModelParams<M>, R>,
+  R extends DocumentRetriever<RetrieverParams<R>, Document[]>,
+> extends LLMCompletionGenerator<M, P, ModelResponse<M>> {
   /**
    * Construct the query for the underlying retriever using the given parameters
    * @param params The parameters to use for constructing the query
    * @returns A promise that resolves to the query in valid format for the retriever
    */
-  abstract getRetrievalQuery(params: T): Promise<Q>;
+  abstract getRetrievalQuery(params: P): Promise<RetrieverQuery<R>>;
 
   /**
    * Performs completion generation using the given parameters and returns the generated
@@ -38,7 +45,7 @@ export abstract class RAGCompletionGenerator<
    * @param params The parameters to use for generating the completion
    * @returns A promise that resolves to the generated completion data
    */
-  async run(params: T): Promise<R> {
+  async run(params: P): Promise<ModelResponse<M>> {
     const { accessPassport, prompt, retriever, ...modelParams } = params;
 
     const queryPrompt =
@@ -47,7 +54,7 @@ export abstract class RAGCompletionGenerator<
     const contextDocs = await retriever.retrieveData({
       accessPassport,
       query: await this.getRetrievalQuery(params),
-    });
+    } as RetrieverParams<R>);
 
     const contextChunksPromises = [];
     for (const doc of contextDocs) {
