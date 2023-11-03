@@ -1,0 +1,29 @@
+from dataclasses import dataclass
+from typing import Generic, Optional
+from semantic_retrieval.common.types import P, R
+from semantic_retrieval.utils.callbacks import (
+    CallbackManager,
+    Traceable,
+)
+
+from semantic_retrieval.generator.completion_models.completion_model import (
+    CompletionModel,
+    CompletionModelParams,
+)
+
+
+@dataclass
+class LLMCompletionGeneratorParams(Generic[P], CompletionModelParams[P]):
+    pass
+
+
+class LLMCompletionGenerator(Generic[P, R], Traceable):
+    def __init__(
+        self, model: CompletionModel[P, R], callback_manager: Optional[CallbackManager] = None
+    ):
+        self.model = model
+        self.callback_manager = callback_manager
+
+    async def run(self, params: LLMCompletionGeneratorParams[P]) -> R:  # type: ignore [fixme]
+        # TODO impl
+        pass
