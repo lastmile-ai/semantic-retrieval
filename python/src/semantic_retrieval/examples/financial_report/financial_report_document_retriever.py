@@ -71,7 +71,7 @@ class FinancialReportDocumentRetriever:
         self,
         query: str,
         portfolio: PortfolioData,
-        # TODO pull this stuff out into a Record
+        # TODO [P1] pull this stuff out into a Record
         top_k: int,
         overfetch_factor: float = 1.0,
     ) -> Result[List[FinancialReportData], str]:
@@ -85,7 +85,7 @@ class FinancialReportDocumentRetriever:
             mode="text",
             topK=int(overfetch_factor * top_k),
             text=query,
-            # TODO
+            # TODO [P1]
             metadata_filter={},
         )
 
@@ -108,13 +108,13 @@ class FinancialReportDocumentRetriever:
         for knn_result in knn:
             doc_id = _get_doc_id(knn_result)
             if doc_id not in metadata:
-                # TODO log
+                # TODO [P1] log
                 continue
 
             meta = metadata[doc_id]
             match meta:
                 case Err(msg):
-                    # TODO log
+                    # TODO [P1] log
                     print(msg)
                     continue
                 case Ok(DocumentMetadata(uri=uri)):

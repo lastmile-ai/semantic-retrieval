@@ -6,7 +6,7 @@ import numpy.typing as npt
 from pydantic import BaseModel, ConfigDict
 
 
-# TODO: is this useful?
+# TODO [P1]: is this useful?
 NPA = npt.NDArray[Any]
 
 ArrayLike = npt.ArrayLike

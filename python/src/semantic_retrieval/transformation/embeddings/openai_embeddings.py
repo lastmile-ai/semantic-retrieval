@@ -41,7 +41,7 @@ MODEL_DIMENSIONS = {
 class OpenAIEmbeddings(DocumentEmbeddingsTransformer):
     model = DEFAULT_MODEL
 
-    # TODO: Handle this for other models when they are supported
+    # TODO [P1]: Handle this for other models when they are supported
     max_encoding_length = 8191
 
     def __init__(self, config: OpenAIEmbeddingsConfig):
@@ -51,7 +51,7 @@ class OpenAIEmbeddings(DocumentEmbeddingsTransformer):
         if not api_key:
             raise ValueError("No OpenAI API key found for OpenAIEmbeddings")
 
-        # TODO WARNING: GLOBAL STATE MUTATION
+        # TODO [P1] WARNING: GLOBAL STATE MUTATION
         openai.api_key = api_key
 
     async def embed(
@@ -71,12 +71,13 @@ class OpenAIEmbeddings(DocumentEmbeddingsTransformer):
                 f"Text encoded length {len(text_encoding)} exceeds max input tokens {self.max_encoding_length} for model {self.model}"
             )
 
-        # TODO wat
+        # TODO [P1] wat
         # encoding.free()
 
-        # TODO type this better
+        # TODO [P1] type this better
         embedding_res: Dict[Any, Any] = model_handle.creator.create(input=[text], model=self.model).to_dict_recursive()  # type: ignore
-        # TODO: include usage, metadata
+        # TODO: [P1] include usage
+        # TODO: [P0] metadata
         return VectorEmbedding(
             vector=embedding_res["data"][0]["embedding"],
             text=text,
@@ -90,7 +91,7 @@ class OpenAIEmbeddings(DocumentEmbeddingsTransformer):
         )
 
     async def transform_documents(self, documents: List[Document]) -> List[VectorEmbedding]:  # type: ignore [fixme]
-        # TODO: Update this to batch embeddings instead of creating one at a time
+        # TODO [P0]: Update this to batch embeddings instead of creating one at a time
         # Use this to batch create embeddings with openai - https://platform.openai.com/docs/api-reference/embeddings/create
         # See: https://github.com/run-llama/llama_index/blob/408923fafbcefdabfd76c8fa609b570fe80b1b2f/llama_index/embeddings/base.py#L231
         # Also see openAIEmbeddings.ts
@@ -120,7 +121,7 @@ class OpenAIEmbeddings(DocumentEmbeddingsTransformer):
 
         input = [fragment.text for fragment in fragments]
 
-        # TODO: This is very slow... need to batch this & make this async (acreate)
+        # TODO [P0]: This is very slow... need to batch this & make this async (acreate)
         embeddings = model_handle.creator.create(input=input, model=self.model)  # type: ignore
 
         vector_embeddings: List[VectorEmbedding] = []

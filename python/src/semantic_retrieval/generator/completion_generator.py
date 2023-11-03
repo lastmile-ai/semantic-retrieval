@@ -1,3 +1,4 @@
+from abc import abstractmethod
 from dataclasses import dataclass
 from typing import Generic, Optional
 from semantic_retrieval.common.types import P, R
@@ -24,6 +25,6 @@ class LLMCompletionGenerator(Generic[P, R], Traceable):
         self.model = model
         self.callback_manager = callback_manager
 
-    async def run(self, params: LLMCompletionGeneratorParams[P]) -> R:  # type: ignore [fixme]
-        # TODO impl
+    @abstractmethod
+    async def run(self, params: LLMCompletionGeneratorParams[P]) -> R: 
         pass

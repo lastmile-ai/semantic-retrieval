@@ -5,16 +5,15 @@ from semantic_retrieval.document.metadata.in_memory_document_metadata_db import 
 )
 from semantic_retrieval.ingestion.data_sources.fs.file_system import FileSystem
 from semantic_retrieval.document_parsers.multi_document_parser import (
-    MultiDocumentParser,
     ParserConfig,
 )
 from semantic_retrieval.transformation.document.text.separator_text_chunker import (
+    SeparatorTextChunkConfig,
     SeparatorTextChunker,
     SeparatorTextChunkerParams,
 )
-from semantic_retrieval.transformation.document.text.text_chunk_transformer import (
-    TextChunkConfig,
-)
+
+import semantic_retrieval.document_parsers.multi_document_parser as mdp
 from dotenv import load_dotenv
 
 
@@ -33,20 +32,28 @@ async def test_create_index():
     file_system = FileSystem(full_path)
     raw_documents = file_system.load_documents()
 
-    parsed_documents = await MultiDocumentParser().parse_documents(
+    parsed_documents = await mdp.parse_documents(
         raw_documents,
         parser_config=ParserConfig(
             metadata_db=metadata_db, access_control_policy_factory=None
         ),
     )
 
+    stcc = SeparatorTextChunkConfig(
+        chunk_size_limit=500,
+        chunk_overlap=100,
+    )
+
     documentTransformer = SeparatorTextChunker(
-        SeparatorTextChunkerParams(
-            metadata_db=metadata_db,
-            text_chunk_config=TextChunkConfig(
-                chunk_size_limit=500, chunk_overlap=100, size_fn=len
-            ),
-        )
+        stcc=stcc,
+        params=SeparatorTextChunkerParams(
+            separator_text_chunk_config=stcc,
+            # text_chunk_config=TextChunkConfig(
+            #     chunk_size_limit=500,
+            #     chunk_overlap=100,
+            # ),
+            # metadata_db=metadata_db,
+        ),
     )
 
     # Transform the parsed documents
@@ -54,7 +61,7 @@ async def test_create_index():
         parsed_documents
     )
 
-    # TODO: Commenting out for now to get tests to pass, will add back in later - want to ship to have notebook ready
+    # TODO [P1]: Commenting out for now to get tests to pass, will add back in later - want to ship to have notebook ready
     # # Create the embeddings, use dotenv to get the environment vars & setup properly
     # await PineconeVectorDB.from_documents(
     #     transformed_documents,

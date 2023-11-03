@@ -121,7 +121,7 @@ async def run_generate_report(config: Config):
                 retriever=retriever,
             )
 
-            # TODO: Save res to disk and/or print
+            # TODO [P1]: Save res to disk
             print("Report:\n")
             print(res)
 

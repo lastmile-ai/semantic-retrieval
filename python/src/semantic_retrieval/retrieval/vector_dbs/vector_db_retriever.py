@@ -24,9 +24,9 @@ class BaseVectorDBRetriever(DocumentRetriever[R, VectorDBQuery], Generic[R]):
         self.vectorDB = vector_db
 
     async def getFragmentsUnsafe(self, params: VectorDBRetrieverQueryParams):
-        # TODO
+        # TODO [P1]
         pass
 
     async def retrieveData(self, params: VectorDBRetrieverQueryParams):
-        # TODO
+        # TODO [P1]
         pass

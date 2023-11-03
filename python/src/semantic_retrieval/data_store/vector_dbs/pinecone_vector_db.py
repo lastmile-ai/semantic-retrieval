@@ -49,7 +49,7 @@ class PineconeVectorDB(VectorDB):
         return instance
 
     def sanitize_metadata(self, unsanitized_metadata: Record):
-        # TODO
+        # TODO [P0]
         pass
 
     async def add_documents(
@@ -63,7 +63,7 @@ class PineconeVectorDB(VectorDB):
 
         embeddings_list = await embedding_creator.transform_documents(documents)
 
-        # TODO: Update this to batch to get faster performance
+        # TODO [P0]: Update this to batch to get faster performance
         # Use this for batching to pinecone
         # https://docs.pinecone.io/docs/insert-data#batching-upserts
         for idx, embedding in enumerate(embeddings_list):
@@ -100,11 +100,12 @@ class PineconeVectorDB(VectorDB):
             filter=metadata_filter,
         )
 
-        # TODO type better
+        # TODO [P1] type better
         def _response_record_to_vector_embedding(
             match: ScoredVector,
         ) -> VectorEmbedding:
             return VectorEmbedding(
+                # TODO [P1] ?? 
                 vector=match.values[:10],
                 metadata=match.metadata,
                 text=match.metadata["text"],

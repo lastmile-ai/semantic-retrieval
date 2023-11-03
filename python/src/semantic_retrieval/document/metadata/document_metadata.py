@@ -15,7 +15,7 @@ class DocumentMetadata(Record):
     # raw_document: Optional[RawDocument] = None
     # document: Optional[Document] = None
     collection_id: Optional[str] = None
-    # TODO: Fix this because fails at pydantic serialization
+    # TODO [P1]: Fix this because fails at pydantic serialization
     # data_source: Optional[DataSource] = None
     name: Optional[str] = None
     mime_type: Optional[str] = None
@@ -28,7 +28,7 @@ class DocumentMetadata(Record):
             "uri": self.uri,
             "metadata": self.metadata,
             "attributes": self.attributes,
-            # TODO: Need to make sure that these also end up being serializable when implemented
+            # TODO [P1]: Need to make sure that these also end up being serializable when implemented
             # Assuming that RawDocument, Document, DataSource and ResourceAccessPolicy have to_dict function
             "raw_document": self.raw_document.to_dict() if self.raw_document else None,  # type: ignore [fixme]
             "document": self.document.to_dict() if self.document else None,  # type: ignore [fixme]

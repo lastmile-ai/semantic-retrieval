@@ -1,5 +1,7 @@
-from typing import Dict, Any, List
+from abc import abstractmethod
+from typing import Dict, Any, List, Sequence
 from semantic_retrieval.common.types import Record
+from semantic_retrieval.document.document import Document
 
 from semantic_retrieval.transformation.embeddings.embeddings import (
     VectorEmbedding,
@@ -53,14 +55,14 @@ class VectorDB(Traceable):
         self.vector_db_config = vector_db_config
 
     @classmethod
-    def fromDocuments(cls, documents, config) -> "VectorDB":  # type: ignore [fixme]
-        # TODO implement
+    @abstractmethod
+    def fromDocuments(cls, documents: Sequence[Document], config: VectorDBConfig) -> "VectorDB": 
         pass
 
-    async def addDocuments(self, documents) -> None:  # type: ignore [fixme]
-        # TODO implement
+    @abstractmethod
+    async def addDocuments(self, documents: Sequence[Document]) -> None:
         pass
 
+    @abstractmethod
     async def query(self, query: VectorDBQuery) -> List[VectorEmbedding]:
-        # TODO implement
-        return []
+        pass
