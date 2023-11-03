@@ -26,8 +26,8 @@ export interface VectorDBRetrieverQueryParams
  * Abstract class for retrieving data R from an underlying VectorDB
  */
 export abstract class BaseVectorDBRetriever<R> extends DocumentRetriever<
-  R,
-  VectorDBQuery
+  VectorDBRetrieverQueryParams,
+  R
 > {
   vectorDB: VectorDB;
 

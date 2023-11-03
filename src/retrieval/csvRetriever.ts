@@ -12,8 +12,8 @@ export type CSVRetrieverQuery = {
  * Retrieve structured data from a CSV file as a JSON object for use in completion generation.
  */
 export class CSVRetriever<R extends JSONObject> extends BaseRetriever<
-  R,
-  CSVRetrieverQuery
+  BaseRetrieverQueryParams<CSVRetrieverQuery>,
+  R
 > {
   filePath: string;
 
