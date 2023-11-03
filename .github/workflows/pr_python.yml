@@ -27,3 +27,36 @@ jobs:
       - name: Run tests
         run: |
           pytest
+
+      # TODO: This will need to move into separate workflow that is on push to main rather than on each PR
+      # Also will want to use matrix strategy to build for different platforms: See https://github.com/pypa/cibuildwheel#example-setup
+      # - name: Install cibuildwheel
+      #   run: cd python && python -m pip install cibuildwheel==2.16.2
+
+      # - name: Build wheels
+      #   run: cd python && python -m cibuildwheel --output-dir wheelhouse
+      #   # to supply options, put them in 'env', like:
+      #   # env:
+      #   #   CIBW_SOME_OPTION: value
+
+      # Got this error with cibuildwheel:  cibuildwheel: Build failed because a pure Python wheel was generated.
+      # If you intend to build a pure-Python wheel, you don't need cibuildwheel - use
+      # `pip wheel -w DEST_DIR .` instead.
+      - name: Build wheels
+        run: cd python && pip wheel -w wheelhouse .
+
+      - name: Copy pyproject.toml, requirements.txt into wheelhouse
+        run: cd python && cp pyproject.toml wheelhouse && cp requirements.txt wheelhouse
+
+      - uses: actions/upload-artifact@v3
+        with:
+          path: ./python/wheelhouse/*.whl
+          retention-days: 30 # Optional
+
+
+      # When this is moved into a push on main w/ tags - use this to limit to specific tags
+      # https://github.com/softprops/action-gh-release#-limit-releases-to-pushes-to-tags
+      # - name: Release
+      #   uses: softprops/action-gh-release@v1
+      #   with:
+      #     files: ./python/wheelhouse/*.whl
