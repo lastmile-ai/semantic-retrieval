@@ -14,8 +14,8 @@
     // pdf-parse module resolution) that would otherwise force us to use nodenext and
     // .js extension in imports + declare our own pdf-parse types module. Skip lib check
     // to avoid that.
-    "skipLibCheck": true
+    "skipLibCheck": true,
   },
-  "include": ["src", "index.ts"],
-  "exclude": ["dist", "docs", "examples", "node_modules", "__tests__"]
+  "include": ["src", "__tests__"],
+  "exclude": ["dist", "docs", "examples", "node_modules"]
 }
