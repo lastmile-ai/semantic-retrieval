@@ -29,6 +29,7 @@ class Config(Record):
     portfolio_csv_dir: str = "portfolios"
 
     # Misc
+    viewer_role: str = "advisor/jonathan"
     client_name: str = "sarmad"
     top_k: int = 10
     overfetch_factor: float = 5.0
@@ -109,7 +110,6 @@ def resolve_path(data_root: str, path: str) -> str:
     """
 
     return os.path.join(os.getcwd(), data_root, path)
-
 
 
 def set_up_script(argv: Sequence[str], loggers: List[logging.Logger]):

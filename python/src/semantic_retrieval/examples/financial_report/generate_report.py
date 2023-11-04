@@ -2,14 +2,18 @@ import asyncio
 import json
 import logging
 import os
+import re
 import sys
 from typing import List
 
+import pandas as pd
+from semantic_retrieval.access_control.access_function import AccessFunction
+from semantic_retrieval.access_control.access_identity import AuthenticatedIdentity
+
 from semantic_retrieval.common.core import LOGGER_FMT
-from semantic_retrieval.examples.financial_report.access_control.identities import AdvisorIdentity
 
 import semantic_retrieval.examples.financial_report.financial_report_generator as frg
-from result import Err, Ok
+from result import Err, Ok, Result
 from semantic_retrieval.common.types import Record
 from semantic_retrieval.data_store.vector_dbs.pinecone_vector_db import (
     PineconeVectorDBConfig,
@@ -79,51 +83,103 @@ async def run_generate_report(config: Config):
             portfolio_csv_path = os.path.join(
                 config.portfolio_csv_dir, portfolio_csv_name
             )
+
+            # TODO [P1]: This is where we would authenticate the viewer.
+            viewer_identity = AuthenticatedIdentity(viewer_auth_id=config.viewer_role)
+            portfolio_access_function: AccessFunction = validate_portfolio_access
             portfolio_retriever = CSVRetriever(
-                resolve_path(config.data_root, portfolio_csv_path)
+                file_path=resolve_path(config.data_root, portfolio_csv_path),
+                viewer_identity=viewer_identity,
+                user_access_function=portfolio_access_function,
             )
 
-            portfolio: PortfolioData = await portfolio_retriever.retrieve_data(None)  # type: ignore [fixme]
-            logger.info("\nPortfolio:\n" + json.dumps(portfolio, indent=2))
+            res_portfolio: Result[
+                pd.DataFrame, str
+            ] = await portfolio_retriever.retrieve_data()
 
-            viewer_identity = AdvisorIdentity(client="client_a")
+            match res_portfolio:
+                case Err(msg):
+                    print(f"Error loading portfolio: {msg}")
+                case Ok(df_portfolio):
+                    report = await _generate_report_for_portfolio(
+                        df_portfolio,
+                        pcvdbcfg=pcvdbcfg,
+                        openaiembcfg=openaiembcfg,
+                        metadata_db=metadata_db,
+                        config=config,
+                    )
+
+                    # TODO [P1]: Save res to disk
+                    print("Report:\n")
+                    print(str(report))
 
 
+async def _generate_report_for_portfolio(
+    df_portfolio: pd.DataFrame,
+    pcvdbcfg: PineconeVectorDBConfig,
+    openaiembcfg: OpenAIEmbeddingsConfig,
+    metadata_db: InMemoryDocumentMetadataDB,
+    config: Config,
+) -> Result[str, str]:
+    portfolio = portfolio_df_to_dict(df_portfolio)
+    logger.info("\nPortfolio:\n" + json.dumps(portfolio, indent=2))
 
-            retriever = FinancialReportDocumentRetriever(
-                viewer_identity,
-                config.client_name,
-                vector_db_config=pcvdbcfg,
-                embeddings_config=openaiembcfg,
-                portfolio=portfolio,  # type: ignore [fixme]
-                metadata_db=metadata_db,
-            )
+    retriever = FinancialReportDocumentRetriever(
+        vector_db_config=pcvdbcfg,
+        embeddings_config=openaiembcfg,
+        portfolio=portfolio,  # type: ignore [fixme]
+        metadata_db=metadata_db,
+    )
 
-            generator = FinancialReportGenerator()
+    generator = FinancialReportGenerator()
 
-            retrieval_query = config.retrieval_query
+    retrieval_query = config.retrieval_query
 
-            system_prompt = (
-                "INSTRUCTIONS:\n"
-                "You are a helpful assistant. "
-                "Rearrange the context to answer the question. "
-                "Output your response following the requested structure. "
-                "Do not include Any words that do not appear in the context. "
-            )
-            res = await generator.run(
-                portfolio,
-                system_prompt,
-                retrieval_query,
-                structure_prompt=config.structure_prompt,
-                data_extraction_prompt=config.data_extraction_prompt,
-                top_k=config.top_k,
-                overfetch_factor=config.overfetch_factor,
-                retriever=retriever,
-            )
+    system_prompt = (
+        "INSTRUCTIONS:\n"
+        "You are a helpful assistant. "
+        "Rearrange the context to answer the question. "
+        "Output your response following the requested structure. "
+        "Do not include Any words that do not appear in the context. "
+    )
+    res = await generator.run(
+        portfolio,
+        system_prompt,
+        retrieval_query,
+        structure_prompt=config.structure_prompt,
+        data_extraction_prompt=config.data_extraction_prompt,
+        top_k=config.top_k,
+        overfetch_factor=config.overfetch_factor,
+        retriever=retriever,
+    )
 
-            # TODO [P1]: Save res to disk
-            print("Report:\n")
-            print(res)
+    return Ok(res)
+
+
+def portfolio_df_to_dict(df: pd.DataFrame) -> PortfolioData:
+    return PortfolioData(
+        df.set_index("Company")
+        .astype(float)
+        .fillna(0)
+        .query("Shares > 0")["Shares"]
+        .to_dict()
+    )
+
+
+async def validate_portfolio_access(resource_auth_id: str, viewer_auth_id: str) -> bool:
+    # In this case, the resource_auth_id is the csv path
+    # and the viewer_auth_id is the advisor name.
+    basename = os.path.basename(resource_auth_id)
+    re_client_name = re.search(r"(.*)_portfolio.csv", basename)
+    if not re_client_name:
+        return False
+
+    client_name = re_client_name.groups()[0]
+
+    # User can look this up in real DB.
+    advisor_db = {"sarmad": "advisor/jonathan"}
+
+    return advisor_db.get(client_name, None) == viewer_auth_id
 
 
 if __name__ == "__main__":
