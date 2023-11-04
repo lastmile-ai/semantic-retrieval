@@ -3,17 +3,11 @@ import {
   VectorDBRAGCompletionGenerator,
   VectorDBRAGCompletionGeneratorParams,
 } from "../../../src/generator/retrieval-augmented-generation/vectorDBRAGCompletionGenerator";
-import {
-  TestCompletionRequestParams,
-  TestCompletionResponse,
-} from "./testCompletionModel";
+import { TestCompletionModel } from "./testCompletionModel";
 
-export class TestVectorDBRAGCompletionGenerator extends VectorDBRAGCompletionGenerator<
-  TestCompletionRequestParams,
-  TestCompletionResponse
-> {
+export class TestVectorDBRAGCompletionGenerator extends VectorDBRAGCompletionGenerator<TestCompletionModel> {
   async getRetrievalQuery(
-    params: VectorDBRAGCompletionGeneratorParams<TestCompletionRequestParams>
+    params: VectorDBRAGCompletionGeneratorParams<TestCompletionModel>
   ): Promise<VectorDBTextQuery> {
     const query = {
       topK: 1,
