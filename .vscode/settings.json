@@ -1,20 +1,6 @@
 {
-    "typescript.tsdk": "node_modules/typescript/lib",
-    "typescript.enablePromptUseWorkspaceTsdk": true,
-    "search.exclude": {
-      "**/node_modules": true,
-      "**/.sl": true,
-      "yarn.lock": true
-    },
-    "editor.formatOnSave": true,
-    "[javascript]": {
-      "editor.defaultFormatter": "esbenp.prettier-vscode"
-    },
-    "[typescript]": {
-      "editor.defaultFormatter": "esbenp.prettier-vscode"
-    },
-    "[python]": {
-      "editor.defaultFormatter": "ms-python.black-formatter"
-    },
+    "eslint.workingDirectories": [
+      "./typescript"
+    ],
   }
   
