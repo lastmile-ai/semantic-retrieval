@@ -112,8 +112,12 @@ async def run_ingest(config: Config):
     openaiembcfg = OpenAIEmbeddingsConfig(api_key=config.openai_key)
 
     embeddings = OpenAIEmbeddings(openaiembcfg)
-    pineconeVectorDB = await PineconeVectorDB.from_documents(
-        transformedDocuments, pcvdbcfg, embeddings, metadata_db
+
+    pineconeVectorDB = await PineconeVectorDB.from_documents(  # type: ignore [fixme TODO]
+        transformedDocuments,
+        pcvdbcfg,
+        embeddings,
+        metadata_db,
     )
 
     # TODO [P1]: validate state of pineconeVectorDB
