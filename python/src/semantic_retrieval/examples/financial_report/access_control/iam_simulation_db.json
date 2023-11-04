@@ -1,0 +1,12 @@
+{
+  "advisors": {
+    "sarmad": "advisor/jonathan",
+    "tanya": "advisor/ryan"
+  },
+  "access_10ks": {
+    "advisor/jonathan": [
+      "AAPL",
+      "MSFT"
+    ]
+  }
+}
