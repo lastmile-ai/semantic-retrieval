@@ -3,14 +3,14 @@
 // Usage Example: npx ts-node examples/typescript/financial_report/ingest_data.ts -p my-index
 
 import { program } from "commander";
-import { FileSystem } from "../../../src/ingestion/data-sources/fs/fileSystem";
-import * as MultiDocumentParser from "../../../src/ingestion/document-parsers/multiDocumentParser";
+import { FileSystem } from "../../src/ingestion/data-sources/fs/fileSystem";
+import * as MultiDocumentParser from "../../src/ingestion/document-parsers/multiDocumentParser";
 import dotenv from "dotenv";
-import { InMemoryDocumentMetadataDB } from "../../../src/document/metadata/inMemoryDocumentMetadataDB";
-import { AlwaysAllowDocumentAccessPolicyFactory } from "../../../src/access-control/alwaysAllowDocumentAccessPolicyFactory";
-import { SeparatorTextChunker } from "../../../src/transformation/document/text/separatorTextChunker";
-import { PineconeVectorDB } from "../../../src/data-store/vector-DBs/pineconeVectorDB";
-import { OpenAIEmbeddings } from "../../../src/transformation/embeddings/openAIEmbeddings";
+import { InMemoryDocumentMetadataDB } from "../../src/document/metadata/inMemoryDocumentMetadataDB";
+import { AlwaysAllowDocumentAccessPolicyFactory } from "../../src/access-control/alwaysAllowDocumentAccessPolicyFactory";
+import { SeparatorTextChunker } from "../../src/transformation/document/text/separatorTextChunker";
+import { PineconeVectorDB } from "../../src/data-store/vector-DBs/pineconeVectorDB";
+import { OpenAIEmbeddings } from "../../src/transformation/embeddings/openAIEmbeddings";
 import { v4 as uuid } from "uuid";
 
 dotenv.config();
@@ -40,7 +40,7 @@ async function main() {
   }
 
   const fileSystem = new FileSystem(
-    "examples/example_data/financial_report/10ks"
+    "../examples/example_data/financial_report/10ks"
   );
   const rawDocuments = await fileSystem.loadDocuments();
   const metadataDB = new InMemoryDocumentMetadataDB();
