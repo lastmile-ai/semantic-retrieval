@@ -1,5 +1,7 @@
 from abc import abstractmethod
 from typing import TypeVar, Optional, List
+
+from result import Ok, Result
 from semantic_retrieval.access_control.access_passport import AccessPassport
 from semantic_retrieval.document.document import Document, DocumentFragment
 
@@ -68,7 +70,9 @@ class DocumentRetriever(BaseRetriever[R, Q]):
     async def process_documents(self, _documents: List[Document]) -> R:  # type: ignore [fixme]
         pass
 
-    async def retrieve_data(self, params: BaseRetrieverQueryParams[Q]) -> R:
+    async def retrieve_data(
+        self, params: BaseRetrieverQueryParams[Q]
+    ) -> Result[R, str]:
         unsafe_fragments = await self.get_fragments_unsafe(params)
         accessible_fragments = await self.filter_accessible_fragments(
             unsafe_fragments, params.access_passport
@@ -78,4 +82,4 @@ class DocumentRetriever(BaseRetriever[R, Q]):
         )
         processed_documents = await self.process_documents(accessible_documents)
 
-        return processed_documents
+        return Ok(processed_documents)
