@@ -107,11 +107,12 @@ async def run_generate_report(config: Config):
                         openaiembcfg=openaiembcfg,
                         metadata_db=metadata_db,
                         config=config,
+                        viewer_identity=viewer_identity,
                     )
 
                     # TODO [P1]: Save res to disk
                     print("Report:\n")
-                    print(str(report))
+                    print(report.unwrap_or_else(lambda err: f"Error: {err}"))
 
 
 async def _generate_report_for_portfolio(
@@ -119,16 +120,20 @@ async def _generate_report_for_portfolio(
     pcvdbcfg: PineconeVectorDBConfig,
     openaiembcfg: OpenAIEmbeddingsConfig,
     metadata_db: InMemoryDocumentMetadataDB,
+    viewer_identity: AuthenticatedIdentity,
     config: Config,
 ) -> Result[str, str]:
     portfolio = portfolio_df_to_dict(df_portfolio)
     logger.info("\nPortfolio:\n" + json.dumps(portfolio, indent=2))
 
+    access_function_10k: AccessFunction = validate_10k_access
     retriever = FinancialReportDocumentRetriever(
         vector_db_config=pcvdbcfg,
         embeddings_config=openaiembcfg,
-        portfolio=portfolio,  # type: ignore [fixme]
+        portfolio=portfolio,
         metadata_db=metadata_db,
+        viewer_identity=viewer_identity,
+        user_access_function=access_function_10k,
     )
 
     generator = FinancialReportGenerator()
@@ -184,6 +189,13 @@ async def validate_portfolio_access(resource_auth_id: str, viewer_auth_id: str) 
     db_iam_simulation = json.loads(file_contents(path))["advisors"]
 
     return db_iam_simulation.get(client_name, None) == viewer_auth_id
+
+
+async def validate_10k_access(resource_auth_id: str, viewer_auth_id: str) -> bool:
+    logger.debug(f"validate_10k_access({resource_auth_id=}, {viewer_auth_id=}")
+    path = "python/src/semantic_retrieval/examples/financial_report/access_control/iam_simulation_db.json"
+    db_iam_simulation = json.loads(file_contents(path))["access_10ks"]
+    return resource_auth_id in db_iam_simulation.get(viewer_auth_id, [])
 
 
 if __name__ == "__main__":
