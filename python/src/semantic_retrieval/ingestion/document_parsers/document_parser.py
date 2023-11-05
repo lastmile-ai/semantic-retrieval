@@ -18,18 +18,18 @@ from semantic_retrieval.document.document import IngestedDocument, RawDocument
 
 class DocumentParser(Attributable, Traceable):
     mime_type_restriction: Optional[List[str]] = None
+
     @abstractmethod
     async def parse(self, raw_document: RawDocument) -> Result[IngestedDocument, str]:
         pass
 
-
-    @abstractmethod 
+    @abstractmethod
     def parse_next(
         self,
         raw_document: RawDocument,
         previous_fragment: Optional[DocumentFragment] = None,
         take: Optional[int] = None,
-    ) -> DocumentFragment: 
+    ) -> DocumentFragment:
         pass
 
     @abstractmethod
@@ -63,7 +63,7 @@ class BaseDocumentParser(DocumentParser):
         raw_document: RawDocument,
         previous_fragment: Optional[DocumentFragment] = None,
         take: Optional[int] = None,
-    ) -> DocumentFragment: 
+    ) -> DocumentFragment:
         pass
 
     async def to_string(self, raw_document: RawDocument) -> str:
