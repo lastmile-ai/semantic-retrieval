@@ -32,11 +32,11 @@ from semantic_retrieval.examples.financial_report.config import (
 )
 from semantic_retrieval.examples.financial_report.financial_report_document_retriever import (
     FinancialReportDocumentRetriever,
-    PortfolioData,
 )
 from semantic_retrieval.examples.financial_report.financial_report_generator import (
     FinancialReportGenerator,
 )
+from semantic_retrieval.examples.financial_report.lib import portfolio_df_to_dict
 from semantic_retrieval.retrieval.csv_retriever import CSVRetriever
 from semantic_retrieval.transformation.embeddings.openai_embeddings import (
     OpenAIEmbeddingsConfig,
@@ -165,16 +165,6 @@ async def _generate_report_for_portfolio(
     )
 
     return Ok(res)
-
-
-def portfolio_df_to_dict(df: pd.DataFrame) -> PortfolioData:
-    return PortfolioData(
-        df.set_index("Company")
-        .astype(float)
-        .fillna(0)
-        .query("Shares > 0")["Shares"]
-        .to_dict()
-    )
 
 
 async def validate_portfolio_access(resource_auth_id: str, viewer_auth_id: str) -> bool:
