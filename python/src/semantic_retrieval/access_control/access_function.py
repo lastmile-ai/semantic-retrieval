@@ -1,7 +1,9 @@
 import asyncio
-from typing import Callable, Protocol, TypeVar
+from typing import Awaitable, Callable, List, Protocol, TypeVar
 
 from result import Err, Ok, Result
+
+from semantic_retrieval.common.types import result_reduce_list_separate
 
 T = TypeVar("T")
 U = TypeVar("U")
@@ -40,3 +42,27 @@ async def get_data_access_checked(
         return Ok(get_data_unsafe(params))
     else:
         return Err("Access denied")
+
+
+async def get_data_access_checked_list(
+    params: T,
+    user_access_function: AccessFunction,
+    get_data_unsafe: Callable[[T], List[U]],
+    resource_auth_id_fn: Callable[[U], Awaitable[str]],
+    viewer_auth_id: str,
+):
+    data_list_unchecked = get_data_unsafe(params)
+    data_list_checked = [
+        await get_data_access_checked(
+            item,
+            user_access_function,
+            lambda x: x,
+            await resource_auth_id_fn(item),
+            viewer_auth_id,
+        )
+        for item in data_list_unchecked
+    ]
+
+    allowed, _denied = result_reduce_list_separate(data_list_checked)
+    # TODO [P1]: log denied
+    return allowed

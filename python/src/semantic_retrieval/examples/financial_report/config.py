@@ -41,7 +41,7 @@ class Config(Record):
     # generated output
     retrieved_context_limit: int = 4000
     retrieval_query: str = "overall cash flow"
-    structure_prompt: str = "Numbered list"
+    structure_prompt: str = "Numbered list, one security per list item,"
     data_extraction_prompt: str = "data_extraction_prompt"
 
     log_level: str = "WARNING"

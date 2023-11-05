@@ -3,6 +3,8 @@ import re
 from typing import Dict, List, NewType
 
 from result import Err, Ok, Result
+from semantic_retrieval.access_control.access_function import AccessFunction
+from semantic_retrieval.access_control.access_identity import AuthenticatedIdentity
 from semantic_retrieval.common.core import LOGGER_FMT
 from semantic_retrieval.common.types import Record
 from semantic_retrieval.data_store.vector_dbs.pinecone_vector_db import (
@@ -42,18 +44,26 @@ class FinancialReportDocumentRetriever:
         self,
         vector_db_config: PineconeVectorDBConfig,
         embeddings_config: OpenAIEmbeddingsConfig,
-        portfolio: CSVRetriever,
+        portfolio: PortfolioData,
         metadata_db: DocumentMetadataDB,
+        user_access_function: AccessFunction,
+        viewer_identity: AuthenticatedIdentity,
     ) -> None:
         embeddings = OpenAIEmbeddings(embeddings_config)
+
+        self.viewer_identity = viewer_identity
+        self.user_access_function = user_access_function
+
+        self.portfolio = portfolio
+        self.metadata_db = metadata_db
 
         self.vector_db = PineconeVectorDB(
             vector_db_config,
             embeddings=embeddings,
             metadata_db=metadata_db,
+            user_access_function=self.user_access_function,
+            viewer_identity=self.viewer_identity,
         )
-        self.portfolio = portfolio
-        self.metadata_db = metadata_db
 
     async def retrieve_data(
         self,
