@@ -7,10 +7,31 @@ export type BaseRetrieverQueryParams<Q> = {
   query: Q;
 };
 
+export type RetrieverParams<R> = R extends BaseRetriever<infer RP, infer _RR>
+  ? RP
+  : never;
+
+export type RetrieverResponse<R> = R extends BaseRetriever<infer _RQ, infer RR>
+  ? RR
+  : never;
+
+export type RetrieverQuery<R> = R extends BaseRetriever<
+  infer _RP,
+  infer _RR,
+  infer RQ
+>
+  ? RQ
+  : never;
+
 /**
- * Abstract base class for retrieving data R from from an underlying source.
+ * Abstract base class for retrieving data R from from an underlying source based on query Q.
  */
-export abstract class BaseRetriever<R, Q> implements Traceable {
+export abstract class BaseRetriever<
+  P extends BaseRetrieverQueryParams<Q>,
+  R,
+  Q = P extends BaseRetrieverQueryParams<infer RQ> ? RQ : never,
+> implements Traceable
+{
   metadataDB?: DocumentMetadataDB;
   callbackManager?: CallbackManager;
 
@@ -27,5 +48,5 @@ export abstract class BaseRetriever<R, Q> implements Traceable {
    * @param params The retriever query params to use for the query.
    * @returns A promise that resolves to the retrieved data.
    */
-  abstract retrieveData(params: BaseRetrieverQueryParams<Q>): Promise<R>;
+  abstract retrieveData(params: P): Promise<R>;
 }

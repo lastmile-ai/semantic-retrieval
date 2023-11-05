@@ -1,31 +1,36 @@
 import {
   VectorDBBaseQuery,
-  VectorDBQuery,
   VectorDBTextQuery,
 } from "../../data-store/vector-DBs/vectorDB";
 import { VectorDBDocumentRetriever } from "../../retrieval/vector-DBs/vectorDBDocumentRetriever";
+import {
+  CompletionModel,
+  ModelParams,
+  ModelResponse,
+} from "../completion-models/completionModel";
 import {
   RAGCompletionGenerator,
   RAGCompletionGeneratorParams,
 } from "./ragCompletionGenerator";
 
-export interface VectorDBRAGCompletionGeneratorParams<P>
-  extends RAGCompletionGeneratorParams<P, VectorDBQuery> {
-  retriever: VectorDBDocumentRetriever;
+export interface VectorDBRAGCompletionGeneratorParams<
+  M extends CompletionModel<ModelParams<M>, ModelResponse<M>>,
+> extends RAGCompletionGeneratorParams<
+    ModelParams<M>,
+    VectorDBDocumentRetriever
+  > {
   retrievalQuery?: VectorDBBaseQuery;
 }
 
 export class VectorDBRAGCompletionGenerator<
-  P,
-  R,
+  M extends CompletionModel<ModelParams<M>, ModelResponse<M>>,
 > extends RAGCompletionGenerator<
-  P,
-  VectorDBTextQuery,
-  R,
-  VectorDBRAGCompletionGeneratorParams<P>
+  M,
+  VectorDBRAGCompletionGeneratorParams<M>,
+  VectorDBDocumentRetriever
 > {
   async getRetrievalQuery(
-    params: VectorDBRAGCompletionGeneratorParams<P>
+    params: VectorDBRAGCompletionGeneratorParams<M>
   ): Promise<VectorDBTextQuery> {
     const { prompt, retrievalQuery } = params;
     const text = typeof prompt === "string" ? prompt : await prompt.toString();

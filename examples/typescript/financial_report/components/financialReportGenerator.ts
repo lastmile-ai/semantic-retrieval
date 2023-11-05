@@ -1,5 +1,8 @@
 import { AccessPassport } from "../../../../src/access-control/accessPassport";
-import { CompletionModelParams } from "../../../../src/generator/completion-models/completionModel";
+import {
+  CompletionModel,
+  CompletionModelParams,
+} from "../../../../src/generator/completion-models/completionModel";
 import { LLMCompletionGenerator } from "../../../../src/generator/completionGenerator";
 import { FinancialReportDocumentRetriever } from "./financialReportDocumentRetriever";
 import {
@@ -16,9 +19,8 @@ interface FinancialReportGeneratorParams extends CompletionModelParams<never> {
   retriever: FinancialReportDocumentRetriever;
 }
 
-export class FinancialReportGenerator<P, R> extends LLMCompletionGenerator<
-  never,
-  Output | Output[],
+export class FinancialReportGenerator extends LLMCompletionGenerator<
+  AIConfigCompletion,
   FinancialReportGeneratorParams,
   string
 > {

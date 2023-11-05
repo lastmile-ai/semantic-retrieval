@@ -3,6 +3,7 @@ dist
 tsconfig.tsbuildinfo
 .env
 
+python/build
 __pycache__/
 .mypy_cache/
 .pytest_cache/
