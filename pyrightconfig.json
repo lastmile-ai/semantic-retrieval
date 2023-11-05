@@ -1,7 +1,7 @@
 {
   "typeCheckingMode": "strict",
   "include": ["python"],
-  "exclude": [],
+  "exclude": ["**/*scratch*", "python/build"],
   "ignore": [],
   "venv": "semantic-retrieval",
   "pythonVersion": "3.11",
