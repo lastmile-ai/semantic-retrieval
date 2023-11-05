@@ -3,7 +3,8 @@ from typing import Awaitable, Callable, List, Protocol, TypeVar
 
 from result import Err, Ok, Result
 
-from semantic_retrieval.common.types import result_reduce_list_separate
+from semantic_retrieval.functional.functional import result_reduce_list_separate
+
 
 T = TypeVar("T")
 U = TypeVar("U")
@@ -14,6 +15,14 @@ class AccessFunction(Protocol):
         self, resource_auth_id: str, viewer_auth_id: str
     ) -> bool:  # type: ignore [intentional; this is just a type signature.]
         pass
+
+
+def always_allow() -> AccessFunction:
+    async def fn(resource_auth_id: str, viewer_auth_id: str) -> bool:
+        return True
+
+    out: AccessFunction = fn
+    return out
 
 
 async def user_access_check(

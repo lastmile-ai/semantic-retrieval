@@ -1,10 +1,9 @@
 # Don't rely on the generic type. Wrong annotation might be missed.
 # Use `Any` to signal that uncertainty explicitly.
-from typing import Any, List, Tuple, TypeVar
+from typing import Any, TypeVar
 
 import numpy.typing as npt
 from pydantic import BaseModel, ConfigDict
-from result import Err, Ok, Result
 
 
 # TODO [P1]: is this useful?
@@ -28,15 +27,3 @@ P = TypeVar("P")
 
 class Record(BaseModel):
     model_config = ConfigDict(strict=True, frozen=True)
-
-
-def result_reduce_list_separate(lst: List[Result[T, str]]) -> Tuple[List[T], List[str]]:
-    oks, errs = [], []
-    for item in lst:
-        match item:
-            case Ok(x):
-                oks.append(x)
-            case Err(e):
-                errs.append(e)
-
-    return oks, errs
