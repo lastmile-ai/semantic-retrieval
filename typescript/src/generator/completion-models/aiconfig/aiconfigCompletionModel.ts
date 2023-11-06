@@ -1,4 +1,8 @@
-import { CompletionModel, CompletionModelParams } from "../completionModel";
+import {
+  CompletionModel,
+  CompletionModelParams,
+  CompletionModelResponse,
+} from "../completionModel";
 import { CallbackManager } from "../../../utils/callbacks";
 
 import { AIConfigRuntime, Output } from "aiconfig";
@@ -8,7 +12,11 @@ export interface AIConfigPromptParams extends CompletionModelParams {
   params: JSONObject;
 }
 
-export class AIConfigCompletion extends CompletionModel<Output | Output[]> {
+export interface AIConfigCompletionResponse extends CompletionModelResponse {
+  data: Output | Output[];
+}
+
+export class AIConfigCompletion extends CompletionModel {
   private aiConfig: AIConfigRuntime;
 
   constructor(aiConfigFilePath: string, callbackManager?: CallbackManager) {
@@ -17,7 +25,7 @@ export class AIConfigCompletion extends CompletionModel<Output | Output[]> {
     this.aiConfig = AIConfigRuntime.load(aiConfigFilePath);
   }
 
-  async run(input: AIConfigPromptParams): Promise<Output | Output[]> {
+  async run(input: AIConfigPromptParams): Promise<AIConfigCompletionResponse> {
     const { prompt, params } = input;
 
     // Assuming prompt is prompt name for AIConfig
@@ -57,6 +65,6 @@ export class AIConfigCompletion extends CompletionModel<Output | Output[]> {
       response: result,
     });
 
-    return result;
+    return { data: result };
   }
 }

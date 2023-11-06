@@ -25,16 +25,13 @@ export abstract class CompletionGenerator implements Traceable {
  * LLM Completion Generators are used for generating some completion response from an
  * LLM Completion Model based on input parameters and any applicable internal logic.
  */
-export abstract class LLMCompletionGenerator<
-    M extends CompletionModel<MR>,
-    MR = M extends CompletionModel<infer R> ? R : never,
-  >
+export abstract class LLMCompletionGenerator
   extends CompletionGenerator
   implements Traceable
 {
-  model: M;
+  model: CompletionModel;
 
-  constructor(model: M, callbackManager?: CallbackManager) {
+  constructor(model: CompletionModel, callbackManager?: CallbackManager) {
     super(callbackManager);
     this.model = model;
   }
