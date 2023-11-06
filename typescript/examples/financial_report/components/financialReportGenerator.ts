@@ -16,7 +16,9 @@ interface FinancialReportGeneratorParams extends CompletionModelParams {
   retriever: FinancialReportDocumentRetriever;
 }
 
-export class FinancialReportGenerator extends LLMCompletionGenerator<AIConfigCompletion> {
+export class FinancialReportGenerator extends LLMCompletionGenerator {
+  model: AIConfigCompletion;
+
   constructor(callbackManager?: CallbackManager) {
     super(
       new AIConfigCompletion(
@@ -52,7 +54,7 @@ export class FinancialReportGenerator extends LLMCompletionGenerator<AIConfigCom
       response,
     });
 
-    return processResponse(response);
+    return processResponse(response.data);
   }
 }
 

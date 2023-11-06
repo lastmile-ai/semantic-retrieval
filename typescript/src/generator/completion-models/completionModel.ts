@@ -7,18 +7,20 @@ export interface CompletionModelParams {
   completionParams?: unknown;
 }
 
-export type ModelResponse<M> = M extends CompletionModel<infer MR> ? MR : never;
+export interface CompletionModelResponse {
+  data: unknown;
+}
 
 /**
  * A simple class for interacting with different LLM completion models. CompletionModels
  * are leveraged by CompletionGenerators to generate completions from prompts.
  */
-export abstract class CompletionModel<R> implements Traceable {
+export abstract class CompletionModel implements Traceable {
   callbackManager?: CallbackManager;
 
   constructor(callbackManager?: CallbackManager) {
     this.callbackManager = callbackManager;
   }
 
-  abstract run(params: CompletionModelParams): Promise<R>;
+  abstract run(params: CompletionModelParams): Promise<CompletionModelResponse>;
 }

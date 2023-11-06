@@ -5,7 +5,7 @@ import {
 } from "../../../src/generator/retrieval-augmented-generation/vectorDBRAGCompletionGenerator";
 import { TestCompletionModel } from "./testCompletionModel";
 
-export class TestVectorDBRAGCompletionGenerator extends VectorDBRAGCompletionGenerator<TestCompletionModel> {
+export class TestVectorDBRAGCompletionGenerator extends VectorDBRAGCompletionGenerator {
   async getRetrievalQuery(
     params: VectorDBRAGCompletionGeneratorParams
   ): Promise<VectorDBTextQuery> {
