@@ -1,27 +1,41 @@
-1. AAPL (Apple Inc.)
-   Profile: Apple Inc. is an American multinational technology company headquartered in Cupertino, California. As of March 2023, Apple is the world's biggest company by market capitalization, and with US$394.3 billion the largest technology company by 2022 revenue.
-   Recovery from the COVID-19 pandemic: The COVID-19 pandemic has had, and continues to have, a significant impact around the world, prompting governments and businesses to take unprecedented measures, such as restrictions on travel and business operations, temporary closures of businesses, and quarantine and shelter-in-place orders. The COVID-19 pandemic and related measures have adversely affected and could in the future materially impact Apple's business, results of operations, and financial condition.
+1. Apple Inc. (AAPL)
+   
+   Company Profile: Apple Inc. is an American multinational technology company headquartered in Cupertino, California. As of March 2023, Apple is the world's biggest company by market capitalization, and with US$394.3 billion the largest technology company by 2022 revenue.
+   
+   Recovery from the COVID-19 pandemic: The COVID-19 pandemic has had, and continues to have, a significant impact around the world, prompting governments and businesses to take unprecedented measures, such as restrictions on travel and business operations, temporary closures of businesses, and quarantine and shelter-in-place orders. The COVID-19 pandemic has at times significantly curtailed global economic activity and caused significant volatility and disruption in global financial markets. The measures taken by many countries in response have affected and could in the future materially impact Apple's business, results of operations, and financial condition. 
 
-2. AMZN (Amazon.com, Inc.)
-   Profile: Amazon.com, Inc. is an American multinational technology company focusing on e-commerce, cloud computing, online advertising, digital streaming, and artificial intelligence. It has been often referred to as "one of the most influential economic and cultural forces in the world" and is often regarded as one of the world's most valuable brands.
-   Recovery from the COVID-19 pandemic: Amazon.com, Inc. experienced challenges during the COVID-19 pandemic, including increased interest rates, significant capital market volatility, and global supply chain constraints. The pandemic also impacted their retail sales and could result in disruptions from natural disasters, geopolitical events, and labor disputes. Despite these challenges, Amazon.com, Inc. continues to adapt its business practices to address the impacts of the pandemic.
+2. Amazon.com, Inc. (AMZN)
+   
+   Company Profile: Amazon.com, Inc. is an American multinational technology company focusing on e-commerce, cloud computing, online advertising, digital streaming, and artificial intelligence. It has been often referred to as "one of the most influential economic and cultural forces in the world", and is often regarded as one of the world's most valuable brands.
+   
+   Recovery from the COVID-19 pandemic: Macroeconomic factors, including the prolonged COVID-19 pandemic, have direct and indirect impacts on Amazon's results of operations that are difficult to isolate and quantify. The pandemic has caused increases in operating costs, particularly across North America. Additionally, global economic conditions, natural or human-caused disasters, and geopolitical events can impact the demand for Amazon's products and services. 
 
-3. NVDA (Nvidia Corporation)
-   Profile: Nvidia Corporation is an American multinational technology company that designs graphics processing units (GPUs), data science APIs, and system on a chip units (SoCs) for the mobile computing and automotive market. It is a dominant supplier of artificial intelligence hardware and software.
-   Recovery from the COVID-19 pandemic: Nvidia Corporation faced challenges during the COVID-19 pandemic, including supply chain and logistics constraints. The pandemic impacted their financial condition and results of operations. The company modified its business and workforce practices to address the pandemic's effects and may continue to incur incremental expenses and costs. The extent of the impact on their operational and financial performance will depend on future developments related to the pandemic.
+3. Nvidia Corporation (NVDA)
+   
+   Company Profile: Nvidia Corporation is an American multinational technology company incorporated in Delaware and based in Santa Clara, California. It is a dominant supplier of artificial intelligence hardware and software, while also designing GPUs, APIs for data science, high-performance computing, and SoCs for mobile computing and automotive market.
+   
+   Recovery from the COVID-19 pandemic: The COVID-19 pandemic has created supply chain and logistics constraints, and estimating future demand has become more volatile on a global and regional basis. Nvidia's financial condition and results of operations have been adversely impacted by the pandemic. The extent of future impacts on business operations and financial performance remain uncertain and dependent on global developments, government policies, and economic conditions.
 
-4. UNH (UnitedHealth Group Incorporated)
-   Profile: UnitedHealth Group Incorporated is an American multinational managed healthcare and insurance company. It offers insurance services under UnitedHealthcare and healthcare products under Optum. It is the largest healthcare company by revenue and the largest insurance company by net premiums.
-   Recovery from the COVID-19 pandemic: UnitedHealth Group Incorporated is exposed to risks associated with large-scale medical emergencies, pandemics, and other extreme events like the COVID-19 pandemic. Such events could have adverse effects on their business operations, financial condition, and results of operations. The company has implemented business continuity plans and continues to adapt its practices to address the impacts of health crises.
+4. UnitedHealth Group Incorporated (UNH)
+   
+   Company Profile: UnitedHealth Group Incorporated is an American multinational managed healthcare and insurance company based in Minnetonka, Minnesota. It offers insurance services under UnitedHealthcare and healthcare products under Optum. It is the largest healthcare company by revenue and the largest insurance company by net premiums.
+   
+   Recovery from the COVID-19 pandemic: Large-scale emergencies, pandemics, and extreme events like the COVID-19 pandemic could have an adverse effect on UnitedHealth Group's business. Public health crises may result in reduced demand for healthcare services and impact business operations. The company is taking measures to address the impact of the pandemic on its workforce and operations, while also managing healthcare costs and focusing on growth under value-based care arrangements.
 
-5. JNJ (Johnson & Johnson)
-   Profile: Johnson & Johnson is an American multinational pharmaceutical and medical technologies corporation. It is engaged in various healthcare-related businesses, including pharmaceuticals and medical devices.
-   Recovery from the COVID-19 pandemic: The COVID-19 pandemic adversely impacted certain aspects of Johnson & Johnson's business, results of operations, and financial condition. Lower sales and reduced customer demand for certain products were observed. The company implemented robust business continuity plans and continues to adapt its practices to address the impacts of the pandemic on its operations.
+5. Johnson & Johnson (JNJ)
+   
+   Company Profile: Johnson & Johnson is an American multinational pharmaceutical and medical technologies corporation headquartered in New Brunswick, New Jersey.
+   
+   Recovery from the COVID-19 pandemic: The COVID-19 pandemic has adversely impacted certain aspects of Johnson & Johnson's business, including lower sales and reduced customer demand for some products. Although the company has implemented business continuity plans, future impacts on operations and financial performance remain uncertain. Johnson & Johnson continues to prioritize the health and safety of employees through various measures and adapts its business practices to government regulations and the best interests of stakeholders.
 
-6. MRK (Merck & Co., Inc.)
-   Profile: Merck & Co., Inc. is an American multinational pharmaceutical company. It operates globally and is involved in the research, development, production, and marketing of a wide range of healthcare products.
-   Recovery from the COVID-19 pandemic: Merck & Co., Inc. faces risks associated with global health crises, including the COVID-19 pandemic. The pandemic has negatively impacted their business and financial results. The company has taken measures to address the impacts of the pandemic, such as providing support resources for employees. Future impacts on their business and financial performance will depend on various factors related to the pandemic.
+6. Merck & Co., Inc. (MRK)
+   
+   Company Profile: Merck & Co., Inc. is an American multinational pharmaceutical company headquartered in Rahway, New Jersey, and named for Merck Group, founded in Germany in 1668.
+   
+   Recovery from the COVID-19 pandemic: Merck & Co., Inc.'s business, operations, financial performance, and prospects have been impacted by the global COVID-19 pandemic. The company has implemented business continuity plans and provided support to employees. Future impacts will depend on global developments, government actions, and the duration of the pandemic. Merck continues to focus on innovation, antiviral approaches, and the health and safety of its employees.
 
-7. PEP (PepsiCo, Inc.)
-   Profile: PepsiCo, Inc. is an American multinational food, snack, and beverage corporation. It is involved in various aspects of the food and beverage market, including manufacturing, distribution, and marketing of its products.
-   Recovery from the COVID-19 pandemic: PepsiCo, Inc. faced challenges during the COVID-19 pandemic, including supply chain disruptions, labor shortages, and changes in consumer preferences and behaviors. The pandemic also impacted their operating costs and commodity prices. The company continues to monitor the retail landscape and seeks to build its global e-commerce and digital capabilities to mitigate unfavorable impacts in the future.
+7. PepsiCo, Inc. (PEP)
+   
+   Company Profile: PepsiCo, Inc. is an American multinational food, snack, and beverage corporation headquartered in Harrison, New York. Its business encompasses all aspects of the food and beverage market, including manufacturing, distribution, and marketing.
+   
+   Recovery from the COVID-19 pandemic: PepsiCo has faced challenges due to the COVID-19 pandemic, supply chain disruptions, labor shortages, and adverse weather conditions. The company monitors changes in the retail landscape and aims to build its global e-commerce and digital capabilities. The impacts of the pandemic on future results are uncertain, but PepsiCo strives to ensure operational efficiency and continues to focus on employee health and safety.

@@ -1,7 +1,5 @@
 import { AccessPassport } from "../../../src/access-control/accessPassport";
-import {
-  CompletionModelParams,
-} from "../../../src/generator/completion-models/completionModel";
+import { CompletionModelParams } from "../../../src/generator/completion-models/completionModel";
 import { LLMCompletionGenerator } from "../../../src/generator/completionGenerator";
 import { FinancialReportDocumentRetriever } from "./financialReportDocumentRetriever";
 import {
@@ -13,24 +11,21 @@ import { Output } from "aiconfig";
 import { JSONObject } from "aiconfig/dist/common";
 import * as path from "path";
 
-interface FinancialReportGeneratorParams extends CompletionModelParams<never> {
+interface FinancialReportGeneratorParams extends CompletionModelParams {
   accessPassport: AccessPassport;
   retriever: FinancialReportDocumentRetriever;
 }
 
-export class FinancialReportGenerator extends LLMCompletionGenerator<
-  AIConfigCompletion,
-  FinancialReportGeneratorParams,
-  string
-> {
+export class FinancialReportGenerator extends LLMCompletionGenerator {
+  model: AIConfigCompletion;
+
   constructor(callbackManager?: CallbackManager) {
-    super(
-      new AIConfigCompletion(
-        path.join(__dirname, "report.aiconfig.json"),
-        callbackManager
-      ),
+    const model = new AIConfigCompletion(
+      path.join(__dirname, "report.aiconfig.json"),
       callbackManager
     );
+    super(model, callbackManager);
+    this.model = model;
   }
 
   async run(params: FinancialReportGeneratorParams): Promise<string> {
@@ -58,7 +53,7 @@ export class FinancialReportGenerator extends LLMCompletionGenerator<
       response,
     });
 
-    return processResponse(response);
+    return processResponse(response.data);
   }
 }
 
