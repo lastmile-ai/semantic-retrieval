@@ -6,21 +6,27 @@ import {
   ChatCompletionMessageParam,
 } from "openai/resources/chat/completions";
 import { type ClientOptions as OpenAIClientOptions, OpenAI } from "openai";
-import { CompletionModel, CompletionModelParams } from "../completionModel";
+import {
+  CompletionModel,
+  CompletionModelParams,
+  CompletionModelResponse,
+} from "../completionModel";
 import { CallbackManager } from "../../../utils/callbacks";
 
-export type OpenAIChatModelParams =
-  CompletionModelParams<ChatCompletionCreateParams>;
+export interface OpenAIChatModelParams extends CompletionModelParams {
+  completionParams: ChatCompletionCreateParams;
+}
+
+export interface OpenAIChatModelResponse extends CompletionModelResponse {
+  data: ChatCompletion;
+}
 
 export interface OpenAIChatModelConfig extends OpenAIClientOptions {
   callbackManager?: CallbackManager;
   defaultModel?: string;
 }
 
-export class OpenAIChatModel extends CompletionModel<
-  ChatCompletionCreateParams,
-  ChatCompletion
-> {
+export class OpenAIChatModel extends CompletionModel {
   private client: OpenAI;
   private defaultModel = "gpt-3.5-turbo";
 
@@ -57,7 +63,7 @@ export class OpenAIChatModel extends CompletionModel<
     return messages;
   }
 
-  async run(params: OpenAIChatModelParams): Promise<ChatCompletion> {
+  async run(params: OpenAIChatModelParams): Promise<OpenAIChatModelResponse> {
     const completionParams = params.completionParams;
     const model = params.model ?? completionParams?.model ?? this.defaultModel;
 
@@ -88,7 +94,7 @@ export class OpenAIChatModel extends CompletionModel<
         response,
       });
 
-      return response;
+      return { data: response };
     }
   }
 }
