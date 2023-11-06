@@ -90,7 +90,7 @@ export type QueryVectorDBEvent = {
 export type RetrievedFragmentPolicyCheckFailedEvent = {
   name: "onRetrievedFragmentPolicyCheckFailed";
   fragment: DocumentFragment;
-  policy: ResourceAccessPolicy;
+  policy: ResourceAccessPolicy | null;
 };
 
 export type RetrieverFilterAccessibleFragmentsEvent = {

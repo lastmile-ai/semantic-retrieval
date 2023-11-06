@@ -2,7 +2,7 @@ import { VectorDBTextQuery } from "../../../src/data-store/vector-DBs/vectorDB";
 import {
   VectorDBRAGCompletionGenerator,
   VectorDBRAGCompletionGeneratorParams,
-} from "../../../src/generator/retrieval-augmented-generation/vectorDBRAGCompletionGenerator";
+} from "../../../src/generator/retrieval-augmented-generation/vectorDbRAGCompletionGenerator";
 import { TestCompletionModel } from "./testCompletionModel";
 
 export class TestVectorDBRAGCompletionGenerator extends VectorDBRAGCompletionGenerator {

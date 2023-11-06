@@ -13,7 +13,7 @@ export interface VectorDBRAGCompletionGeneratorParams
   retrievalQuery?: VectorDBBaseQuery;
 }
 
-export class VectorDBRAGCompletionGenerator extends RAGCompletionGenerator<VectorDBDocumentRetriever> {
+export class VectorDbRAGCompletionGenerator extends RAGCompletionGenerator<VectorDBDocumentRetriever> {
   async getRetrievalQuery(
     params: VectorDBRAGCompletionGeneratorParams
   ): Promise<VectorDBTextQuery> {
