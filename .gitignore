@@ -4,6 +4,8 @@ typescript/tsconfig.tsbuildinfo
 .env
 
 python/build
+python/dist
+python/**/*.egg-info/
 __pycache__/
 .mypy_cache/
 .pytest_cache/
