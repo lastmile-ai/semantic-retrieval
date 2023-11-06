@@ -1,6 +1,23 @@
-// Exclude __tests__ from compiled dist/
+// Exclude __tests__ and flatten /src/ from compiled dist/
 {
   "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "declaration": true,
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "noImplicitAny": true,
+    "outDir": "./dist",
+    "resolveJsonModule": true,
+    "rootDir": "./src",
+    "strict": true,
+    "target": "es6",
+    "esModuleInterop": true,
+    // LangChain does some very restrictive things (resolution-mode assertions, exact
+    // pdf-parse module resolution) that would otherwise force us to use nodenext and
+    // .js extension in imports + declare our own pdf-parse types module. Skip lib check
+    // to avoid that.
+    "skipLibCheck": true,
+  },
   "exclude": [
     "__tests__"
   ]
