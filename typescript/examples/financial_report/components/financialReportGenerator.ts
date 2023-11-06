@@ -20,13 +20,12 @@ export class FinancialReportGenerator extends LLMCompletionGenerator {
   model: AIConfigCompletion;
 
   constructor(callbackManager?: CallbackManager) {
-    super(
-      new AIConfigCompletion(
-        path.join(__dirname, "report.aiconfig.json"),
-        callbackManager
-      ),
+    const model = new AIConfigCompletion(
+      path.join(__dirname, "report.aiconfig.json"),
       callbackManager
     );
+    super(model, callbackManager);
+    this.model = model;
   }
 
   async run(params: FinancialReportGeneratorParams): Promise<string> {
