@@ -5,7 +5,6 @@ import {
 import { VectorDBDocumentRetriever } from "../../retrieval/vector-DBs/vectorDBDocumentRetriever";
 import {
   CompletionModel,
-  ModelParams,
   ModelResponse,
 } from "../completion-models/completionModel";
 import {
@@ -13,24 +12,16 @@ import {
   RAGCompletionGeneratorParams,
 } from "./ragCompletionGenerator";
 
-export interface VectorDBRAGCompletionGeneratorParams<
-  M extends CompletionModel<ModelParams<M>, ModelResponse<M>>,
-> extends RAGCompletionGeneratorParams<
-    ModelParams<M>,
-    VectorDBDocumentRetriever
-  > {
+export interface VectorDBRAGCompletionGeneratorParams
+  extends RAGCompletionGeneratorParams<VectorDBDocumentRetriever> {
   retrievalQuery?: VectorDBBaseQuery;
 }
 
 export class VectorDBRAGCompletionGenerator<
-  M extends CompletionModel<ModelParams<M>, ModelResponse<M>>,
-> extends RAGCompletionGenerator<
-  M,
-  VectorDBRAGCompletionGeneratorParams<M>,
-  VectorDBDocumentRetriever
-> {
+  M extends CompletionModel<ModelResponse<M>>,
+> extends RAGCompletionGenerator<M, VectorDBDocumentRetriever> {
   async getRetrievalQuery(
-    params: VectorDBRAGCompletionGeneratorParams<M>
+    params: VectorDBRAGCompletionGeneratorParams
   ): Promise<VectorDBTextQuery> {
     const { prompt, retrievalQuery } = params;
     const text = typeof prompt === "string" ? prompt : await prompt.toString();

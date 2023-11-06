@@ -1,7 +1,5 @@
 import { AccessPassport } from "../../../src/access-control/accessPassport";
-import {
-  CompletionModelParams,
-} from "../../../src/generator/completion-models/completionModel";
+import { CompletionModelParams } from "../../../src/generator/completion-models/completionModel";
 import { LLMCompletionGenerator } from "../../../src/generator/completionGenerator";
 import { FinancialReportDocumentRetriever } from "./financialReportDocumentRetriever";
 import {
@@ -13,16 +11,12 @@ import { Output } from "aiconfig";
 import { JSONObject } from "aiconfig/dist/common";
 import * as path from "path";
 
-interface FinancialReportGeneratorParams extends CompletionModelParams<never> {
+interface FinancialReportGeneratorParams extends CompletionModelParams {
   accessPassport: AccessPassport;
   retriever: FinancialReportDocumentRetriever;
 }
 
-export class FinancialReportGenerator extends LLMCompletionGenerator<
-  AIConfigCompletion,
-  FinancialReportGeneratorParams,
-  string
-> {
+export class FinancialReportGenerator extends LLMCompletionGenerator<AIConfigCompletion> {
   constructor(callbackManager?: CallbackManager) {
     super(
       new AIConfigCompletion(

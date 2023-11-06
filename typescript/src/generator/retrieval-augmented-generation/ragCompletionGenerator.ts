@@ -6,15 +6,13 @@ import { LLMCompletionGenerator } from "../completionGenerator";
 import {
   CompletionModel,
   CompletionModelParams,
-  ModelParams,
   ModelResponse,
 } from "../completion-models/completionModel";
 import { RetrieverParams, RetrieverQuery } from "../../retrieval/retriever";
 
 export interface RAGCompletionGeneratorParams<
-  P,
   R extends DocumentRetriever<RetrieverParams<R>, Document[]>,
-> extends CompletionModelParams<P> {
+> extends CompletionModelParams {
   retriever: R;
   accessPassport?: AccessPassport;
   ragPromptTemplate?: PromptTemplate;
@@ -28,16 +26,17 @@ export const DEFAULT_RAG_TEMPLATE =
  * be leveraged for modifying the prompt prior to completion generation by the model
  */
 export abstract class RAGCompletionGenerator<
-  M extends CompletionModel<ModelParams<M>, ModelResponse<M>>,
-  P extends RAGCompletionGeneratorParams<ModelParams<M>, R>,
+  M extends CompletionModel<ModelResponse<M>>,
   R extends DocumentRetriever<RetrieverParams<R>, Document[]>,
-> extends LLMCompletionGenerator<M, P, ModelResponse<M>> {
+> extends LLMCompletionGenerator<M> {
   /**
    * Construct the query for the underlying retriever using the given parameters
    * @param params The parameters to use for constructing the query
    * @returns A promise that resolves to the query in valid format for the retriever
    */
-  abstract getRetrievalQuery(params: P): Promise<RetrieverQuery<R>>;
+  abstract getRetrievalQuery(
+    params: RAGCompletionGeneratorParams<R>
+  ): Promise<RetrieverQuery<R>>;
 
   /**
    * Performs completion generation using the given parameters and returns the generated
@@ -45,7 +44,9 @@ export abstract class RAGCompletionGenerator<
    * @param params The parameters to use for generating the completion
    * @returns A promise that resolves to the generated completion data
    */
-  async run(params: P): Promise<ModelResponse<M>> {
+  async run(
+    params: RAGCompletionGeneratorParams<R>
+  ): Promise<ModelResponse<M>> {
     const { accessPassport, prompt, retriever, ...modelParams } = params;
 
     const queryPrompt =

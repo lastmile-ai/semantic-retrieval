@@ -120,21 +120,20 @@ export type GetFragmentsEvent = {
 
 export type RunCompletionRequestEvent = {
   name: "onRunCompletionRequest";
-  params: CompletionModelParams<any>;
+  params: CompletionModelParams;
 };
 
 export type RunCompletionResponseEvent = {
   name: "onRunCompletionResponse";
-  params: CompletionModelParams<any>;
+  params: CompletionModelParams;
   response: any;
 };
 
-export type RunCompletionGenerationEvent<P extends CompletionModelParams<any>> =
-  {
-    name: "onRunCompletionGeneration";
-    params: P;
-    response: any;
-  };
+export type RunCompletionGenerationEvent<P extends CompletionModelParams> = {
+  name: "onRunCompletionGeneration";
+  params: P;
+  response: any;
+};
 
 export type GetRAGCompletionRetrievalQueryEvent = {
   name: "onGetRAGCompletionRetrievalQuery";
