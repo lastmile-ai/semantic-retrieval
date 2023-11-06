@@ -1,6 +1,8 @@
 typescript/node_modules
 typescript/dist
 typescript/tsconfig.tsbuildinfo
+typescript/.env
+typescript/lastmileai-semantic-retrieval-v0.0.1.tgz
 .env
 
 python/build
