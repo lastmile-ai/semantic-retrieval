@@ -1,11 +1,14 @@
 import { DocumentRetriever } from "../retrieval/documentRetriever";
-import { RetrieverParams, RetrieverResponse } from "../retrieval/retriever";
+import {
+  BaseRetrieverQueryParams,
+  RetrieverResponse,
+} from "../retrieval/retriever";
 
 // Interface
 
 // Types
-export interface RetrievalEvaluationDataset<R, E> {
-  relevantDataByQuery: retrievalQueryExpectedResultPair<R, E>[];
+export interface RetrievalEvaluationDataset<E> {
+  relevantDataByQuery: retrievalQueryExpectedResultPair<E>[];
 }
 
 export interface RetrievalMetric<R, E> {
@@ -20,12 +23,9 @@ export interface RetrievalMetric<R, E> {
  * @param metrics Array of RetrievalMetrics to evaluate
  * @returns
  */
-export async function evaluateRetrievers<
-  R extends DocumentRetriever<RetrieverParams<R>, RetrieverResponse<R>>,
-  E,
->(
+export async function evaluateRetrievers<R extends DocumentRetriever, E>(
   retrievers: R[],
-  data: RetrievalEvaluationDataset<R, E>,
+  data: RetrievalEvaluationDataset<E>,
   metrics: RetrievalMetric<RetrieverResponse<R>, E>[]
 ) {
   const results: { [metricName: string]: number }[] = [];
@@ -43,7 +43,7 @@ export async function evaluateRetrievers<
 
 // Internal convenience types
 
-type retrievalQueryExpectedResultPair<R, E> = [RetrieverParams<R>, E];
+type retrievalQueryExpectedResultPair<E> = [BaseRetrieverQueryParams, E];
 
 // Common metrics
 
@@ -75,16 +75,13 @@ function setIntersect<T>(a: Set<T>, b: Set<T>): Set<T> {
   return intersection;
 }
 
-async function averageMetricValue<
-  R extends DocumentRetriever<RetrieverParams<R>, RetrieverResponse<R>>,
-  E,
->(
+async function averageMetricValue<R extends DocumentRetriever, E>(
   retriever: R,
   metric: RetrievalMetric<RetrieverResponse<R>, E>,
-  data: RetrievalEvaluationDataset<R, E>
+  data: RetrievalEvaluationDataset<E>
 ): Promise<number> {
   let total = 0;
-  const dataList: retrievalQueryExpectedResultPair<R, E>[] =
+  const dataList: retrievalQueryExpectedResultPair<E>[] =
     data.relevantDataByQuery;
   if (data.relevantDataByQuery.length === 0) {
     throw new Error("No data in evaluation dataset");
@@ -93,7 +90,9 @@ async function averageMetricValue<
   for (let i = 0; i < dataList.length; i++) {
     const qrp = dataList[i];
     const [query, relevantData] = qrp;
-    const retrievedData = await retriever.retrieveData(query);
+    const retrievedData = (await retriever.retrieveData(
+      query
+    )) as RetrieverResponse<R>;
 
     total += await metric.fn(retrievedData, relevantData);
   }
