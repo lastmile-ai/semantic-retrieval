@@ -18,9 +18,8 @@
   ],
   "author": "LastMile AI",
   "license": "MIT",
-  "files": [
-    "dist"
-  ],
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "test": "NODE_OPTIONS='--experimental-vm-modules' jest --runInBand",
