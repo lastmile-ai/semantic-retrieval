@@ -1,4 +1,5 @@
 import logging
+from uuid import uuid4
 
 
 LOGGER_FMT = "[%(levelname)s] %(asctime)s %(filename)s:%(lineno)d: %(message)s"
@@ -25,3 +26,7 @@ def text_file_write(path: str, contents: str):
         # TODO [P1] deal with this
         logger.critical("exn=" + str(e))
         return ""
+
+
+def make_run_id():
+    return uuid4().hex

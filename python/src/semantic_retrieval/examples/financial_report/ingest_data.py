@@ -3,7 +3,7 @@ import logging
 import sys
 from typing import List
 
-from semantic_retrieval.common.core import LOGGER_FMT
+from semantic_retrieval.common.core import LOGGER_FMT, make_run_id
 from semantic_retrieval.examples.financial_report.config import (
     Config,
     get_config,
@@ -42,6 +42,7 @@ from semantic_retrieval.transformation.embeddings.openai_embeddings import (
 )
 
 import semantic_retrieval.document_parsers.multi_document_parser as mdp
+from semantic_retrieval.utils.callbacks import CallbackManager
 
 
 logger = logging.getLogger(__name__)
@@ -60,15 +61,17 @@ async def main(argv: List[str]):
 
 
 async def run_ingest(config: Config):
+    callback_manager = CallbackManager.default()
+    run_id = make_run_id()
     # Create a new FileSystem instance
-    fileSystem = FileSystem(config.data_root)
+    fileSystem = FileSystem(config.data_root, callback_manager=callback_manager)
 
     # Load documents using the FileSystem instance
-    rawDocuments = fileSystem.load_documents()
+    rawDocuments = await fileSystem.load_documents(run_id)
     print(f"RAW DOCUMENTS: {rawDocuments}")
 
     # Initialize an in-memory metadata DB
-    metadata_db = InMemoryDocumentMetadataDB()
+    metadata_db = InMemoryDocumentMetadataDB(callback_manager=CallbackManager.default())
 
     # Parse the raw documents
     parsedDocuments = await mdp.parse_documents(
@@ -77,24 +80,28 @@ async def run_ingest(config: Config):
             metadata_db=metadata_db,
             access_control_policy_factory=AlwaysAllowDocumentAccessPolicyFactory(),
         ),
+        callback_manager=callback_manager,
+        run_id=run_id,
     )
 
     # Initialize a document transformer
-    # TODO [P1] set parameters better
-    stcc = SeparatorTextChunkConfig(
+    separator_text_chunk_config = SeparatorTextChunkConfig(
         chunk_size_limit=500,
         chunk_overlap=100,
     )
+
+    # TODO [P1] set parameters better
     documentTransformer = SeparatorTextChunker(
-        stcc=stcc,
+        separator_text_chunk_config=separator_text_chunk_config,
         params=SeparatorTextChunkerParams(
-            separator_text_chunk_config=stcc,
+            separator_text_chunk_config=separator_text_chunk_config,
         ),
+        callback_manager=callback_manager,
     )
 
     # Transform the parsed documents
     transformedDocuments = await documentTransformer.transform_documents(
-        parsedDocuments
+        parsedDocuments, run_id=run_id
     )
 
     # Generate a new namespace using UUID
@@ -111,7 +118,9 @@ async def run_ingest(config: Config):
 
     openai_embedding_config = OpenAIEmbeddingsConfig(api_key=config.openai_key)
 
-    embeddings = OpenAIEmbeddings(openai_embedding_config)
+    embeddings = OpenAIEmbeddings(
+        openai_embedding_config, callback_manager=callback_manager
+    )
 
     pineconeVectorDB = await PineconeVectorDB.from_documents(  # type: ignore [fixme TODO]
         transformedDocuments,
