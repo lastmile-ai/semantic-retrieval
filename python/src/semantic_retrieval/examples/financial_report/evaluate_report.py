@@ -1,116 +1,73 @@
 import asyncio
 import logging
 import sys
-import re
-from typing import List, Tuple
+from typing import List
 
 
 import pandas as pd
 
 from semantic_retrieval.common.core import LOGGER_FMT
+from semantic_retrieval.evaluation.lib import (
+    eval_res_to_df,
+    evaluate,
+)
 
 from semantic_retrieval.examples.financial_report.config import (
+    Config,
     get_config,
     set_up_script,
 )
 
-import pandas as pd
 
+import pandas as pd
+from semantic_retrieval.examples.financial_report.eval_test_config import TEST_CASES
+
+from semantic_retrieval.examples.financial_report import lib as fr_lib
+from semantic_retrieval.evaluation import lib as evaluation_lib
+
+from semantic_retrieval.evaluation import metrics
+from semantic_retrieval.functional.functional import result_reduce_list_separate
 
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(format=LOGGER_FMT)
 
+ROOT_DATA_DIR = "examples/example_data/financial_report/"
 
-async def main(argv: List[str]): # type: ignore
-    loggers = [logger]
+
+async def run_evaluate_report(config: Config):
+    evaluation_params_list = [
+        await fr_lib.test_case_to_sample_eval_params(tc, ROOT_DATA_DIR)
+        for tc in TEST_CASES
+    ]
+
+    # Helper function to pretty print all the results
+    def _print(df: pd.DataFrame) -> None:
+        return print(df.set_index(["name", "interpretation"]))
+
+    # Separate out the valid test params from the error ones.
+    evaluation_params_valid, evaluation_params_errs = result_reduce_list_separate(
+        evaluation_params_list
+    )
+
+    print(f"Evaluation params with errors: {evaluation_params_errs}")
+
+    # Run `evaluate()` on the valid params.
+    eval_res = evaluate(evaluation_params_valid)
+
+    # Print results
+    df_eval_res = eval_res.map(eval_res_to_df)
+    df_eval_res.map(_print)
+
+
+async def main(argv: List[str]):  # type: ignore
+    loggers = [logger, metrics.logger, fr_lib.logger, evaluation_lib.logger]
 
     args = set_up_script(argv, loggers)
     config = get_config(args)
     logger.debug("CONFIG:\n")
     logger.debug(str(config))
-    print("Hello world")
-    print("Move of this script is moved to financial_report_eval.ipynb.")
-    # return await run_evaluate_report(config)
-
-
-
-def parse_raw_re(s_out: str) -> List[Tuple[str, str, str, str, str]]:
-    try:
-        return re.findall(
-            # r"([A-Z]+)[.*]*([ \$])([\d,\.]+)( *)(million|billion)?",
-            r"([A-Z]+)['\)].*\n",
-            s_out,
-            flags=re.IGNORECASE,
-        )
-    except Exception as e:
-        # TODO [P1] deal with this
-        logger.warning("parse output exn, returning empty list, exn=", str(e))
-        return []
-
-
-def parse_re_output_to_df(re_output: List[Tuple[str, str, str, str, str]]):
-    out = []
-    for row in re_output:
-        # ticker, _, number, _, units = row
-        ticker = row
-        out.append({"ticker": ticker})
-        continue
-        number_parsed = float(number.replace(",", ""))
-        convert_factor = 1
-
-        if units.lower().startswith("b"):
-            convert_factor = 1000
-
-        out.append(
-            {"ticker": ticker, "value_raw": number, "value_millions": int(number_parsed * convert_factor)}
-        )
-    return pd.DataFrame.from_records(out)
-
-
-def gen_output_to_df(s_out: str) -> pd.DataFrame:
-    return parse_re_output_to_df(parse_raw_re(s_out))
-
-
-# def path_muncher(output_path: str, ground_truth_path: str) -> SampleEvalDataset:
-#     logger.debug("HERE" + output_path + "\n" + ground_truth_path)
-#     df_gt = pd.read_csv(ground_truth_path)
-#     logger.debug(f"GT={df_gt}")
-
-#     s_out = file_contents(output_path)
-#     re_output = parse_raw_re(s_out)
-#     df = parse_re_output_to_df(re_output)
-
-#     df_join = df.set_index("ticker").join(
-#         df_gt.set_index("ticker"), how="right", lsuffix="_output", rsuffix="_gt"
-#     )
-
-#     logger.info(f"Outputs and Ground truth:\n{df_join}")
-
-    # # TODO [P1] this better
-    # return SampleEvalDataset(
-    #     output=df_join.value_millions.tolist(),
-    #     ground_truth=df_join.net_earnings_millions_2022.tolist(),
-    # )
-
-
-# async def run_evaluate_report(
-#     config: Config,
-# ):
-#     path_output = resolve_path(config.data_root, config.sample_output_path)
-
-#     path_ground_truth = resolve_path(
-#         config.data_root, config.ticker_eval_ground_truth_path
-#     )
-#     logger.info(f"Starting evaluation\n{path_ground_truth=}\n{path_output=}")
-#     accuracy_pct = 100 * evaluate_sample_local_filesystem(
-#         path_output,
-#         path_ground_truth,
-#         path_muncher,
-#         accuracy_metric,
-#     )
-
-#     print(f"Accuracy: {accuracy_pct:.2f}%")
+    return await run_evaluate_report(config)
 
 
 if __name__ == "__main__":

@@ -1,8 +1,26 @@
-from typing import Awaitable, Callable, Sequence, Set, Tuple, TypeVar
+import logging
+from typing import (
+    Any,
+    Awaitable,
+    Callable,
+    Dict,
+    Generic,
+    NewType,
+    Protocol,
+    Sequence,
+    Set,
+    TypeVar,
+)
 
 import pandas as pd
+from pydantic import root_validator
+from result import Ok, Result
 from semantic_retrieval.common import types
-from semantic_retrieval.common.core import file_contents
+from semantic_retrieval.common.core import LOGGER_FMT
+from dataclasses import dataclass
+
+logger = logging.getLogger(__name__)
+logging.basicConfig(format=LOGGER_FMT)
 
 
 T = TypeVar("T")
@@ -22,101 +40,91 @@ IDSetPairEvalDataPathMuncher = Callable[[str, str], Awaitable[IDSetPairEvalDatas
 NumericalEvalDataPathMuncher = Callable[[str, str], Awaitable[NumericalEvalDataset]]
 
 
-class LocalFileSystemGenLLMEvalDataset(types.Record):
-    names: Sequence[str]
-    input_paths: Sequence[str]
-    final_output_path: Sequence[str]
+class EvaluationMetric(types.Record):
+    name: str
+    best_value: float
+    worst_value: float
 
-    @staticmethod
-    def from_list(list_tuples: Sequence[Tuple[str, str, str]]):
-        names = []
-        input_paths = []
-        final_output_path = []
-        for name, rrp, fop in list_tuples:
-            names.append(name)
-            input_paths.append(rrp)
-            final_output_path.append(fop)
 
-        return LocalFileSystemGenLLMEvalDataset(
-            names=names, input_paths=input_paths, final_output_path=final_output_path
+IDSet = NewType("IDSet", Set[str])
+
+T_OutputDatum = TypeVar("T_OutputDatum", contravariant=True)
+
+
+class SampleEvaluationResult(types.Record, Generic[T_OutputDatum]):
+    name: str
+    value: float
+    interpretation: EvaluationMetric
+
+    @root_validator(pre=True)
+    def check_value_range(cls, values: Dict[str, Any]) -> Dict[str, Any]:
+        wv, bv = (
+            values["interpretation"].worst_value,
+            values["interpretation"].best_value,
+        )
+        value = values["value"]
+        if wv == bv:
+            raise ValueError("best_value and worst_value cannot be equal")
+        if wv < bv and not wv <= value <= bv:
+            raise ValueError(f"value {value} is not in range [{wv}, {bv}] (inclusive)")
+        if wv > bv and not wv >= value >= bv:
+            raise ValueError(f"value {value} is not in range [{bv}, {wv}] (inclusive)")
+
+        return values
+
+
+class SampleEvaluationFunction(Protocol, Generic[T_OutputDatum]):
+    def __call__(
+        self, output_datum: T_OutputDatum
+    ) -> SampleEvaluationResult[T_OutputDatum]:
+        return SampleEvaluationResult(
+            name="example",
+            value=0.0,
+            interpretation=EvaluationMetric(
+                name="example", best_value=1.0, worst_value=0.0
+            ),
         )
 
 
-class LocalFileSystemIDSetPairEvalDatasetConfig(types.Record):
-    """
-    Container struct for the logic you need to run eval
-    on a local dataset, where the structured data is a pair of ID sets
-    """
-
-    fn_path_muncher: IDSetPairEvalDataPathMuncher
-    metric: Callable[[IDSetPairEvalDataset], float]
+class DatasetEvaluationResult(Generic[T_OutputDatum], types.Record):
+    results: Sequence[SampleEvaluationResult[T_OutputDatum]]
 
 
-class LocalFileSystemNumericalEvalDatasetConfig(types.Record):
-    """
-    Container struct for the logic you need to run eval
-    on a local dataset, where the structured data is a
-    pair of numerical arrays
-    """
+@dataclass
+class SampleEvaluationParams(Generic[T_OutputDatum]):
+    output_sample: T_OutputDatum
+    evaluation_fn: SampleEvaluationFunction[T_OutputDatum]
 
-    fn_path_muncher: NumericalEvalDataPathMuncher
-    metric: Callable[[NumericalEvalDataset], float]
+    def __str__(self) -> str:
+        return f"\nSampleEvaluationParams:\n\t{self.output_sample=}\n\t{self.evaluation_fn=}"
 
 
-LocalFileSystemEvalDatasetConfig = (
-    LocalFileSystemIDSetPairEvalDatasetConfig
-    | LocalFileSystemNumericalEvalDatasetConfig
-)
-
-
-async def evaluate_sample_local_filesystem(
-    path_output: str,
-    path_ground_truth: str,
-    local_filesystem_eval_dataset_config: LocalFileSystemEvalDatasetConfig,
-) -> float:
-    match local_filesystem_eval_dataset_config:
-        # Code happens to be the same in the two branches.
-        # These types should actually be one generic type,
-        # But that's not well-supported, e.g. bounded generics.
-        case LocalFileSystemIDSetPairEvalDatasetConfig(metric=m, fn_path_muncher=pm):
-            dataset_for_sample = await pm(path_ground_truth, path_output)
-            return m(dataset_for_sample)
-        case LocalFileSystemNumericalEvalDatasetConfig(metric=m, fn_path_muncher=pm):
-            dataset_for_sample = await pm(path_ground_truth, path_output)
-            return m(dataset_for_sample)
-
-
-def local_filesystem_dataset_to_df(dataset: LocalFileSystemGenLLMEvalDataset):
-    records = [
-        {
-            "name": name,
-            "data_input": file_contents(rrp),
-            "data_output": file_contents(fop),
-        }
-        for name, rrp, fop in zip(
-            dataset.names, dataset.input_paths, dataset.final_output_path
-        )
-    ]
-    return pd.DataFrame.from_records(records)
-
-
-async def evaluate_llm_eval_dataset_local_filesystem(
-    llm_eval_dataset: LocalFileSystemGenLLMEvalDataset,
-    eval_configs: Sequence[LocalFileSystemEvalDatasetConfig],
-):
+def evaluate(
+    evaluation_params_list: Sequence[SampleEvaluationParams[T_OutputDatum]],
+) -> Result[DatasetEvaluationResult[T_OutputDatum], str]:
     results = []
-    for name, ip, op, cfg in zip(
-        llm_eval_dataset.names,
-        llm_eval_dataset.input_paths,
-        llm_eval_dataset.final_output_path,
-        eval_configs,
-    ):
-        value = await evaluate_sample_local_filesystem(op, ip, cfg)
-        results.append(
+
+    for eval_params in evaluation_params_list:
+        sample, evaluation_fn = eval_params.output_sample, eval_params.evaluation_fn
+        res_ = evaluation_fn(sample)
+        logger.debug(f"{res_=}")
+        results.append(res_)
+
+    return Ok(DatasetEvaluationResult(results=results))
+
+
+def eval_res_to_df(
+    eval_res: DatasetEvaluationResult[
+        T_OutputDatum  # pyright: ignore[reportInvalidTypeVarUse]
+    ],
+):
+    records = []
+    for sample_res in eval_res.results:
+        records.append(
             {
-                "name": name,
-                "value": value,
+                "name": sample_res.name,
+                "value": sample_res.value,
+                "interpretation": sample_res.interpretation.name,
             }
         )
-
-    return pd.DataFrame.from_records(results)
+    return pd.DataFrame.from_records(records)
