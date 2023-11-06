@@ -8,7 +8,7 @@ import pandas as pd
 from result import Ok, Result
 from semantic_retrieval.access_control.access_function import always_allow
 from semantic_retrieval.access_control.access_identity import AuthenticatedIdentity
-from semantic_retrieval.common.core import LOGGER_FMT, file_contents
+from semantic_retrieval.common.core import LOGGER_FMT, file_contents, make_run_id
 from semantic_retrieval.evaluation.lib import (
     IDSet,
     IDSetPairEvalDataset,
@@ -21,6 +21,7 @@ from semantic_retrieval.examples.financial_report.financial_report_document_retr
 from semantic_retrieval.retrieval.csv_retriever import CSVRetriever
 
 from semantic_retrieval.evaluation import metrics
+from semantic_retrieval.utils.callbacks import CallbackManager
 
 
 logger = logging.getLogger(__name__)
@@ -78,8 +79,11 @@ async def test_3_4_data_muncher(
 
     async def portfolio_data_muncher(path: str) -> Result[IDSet, str]:
         portfolio = await CSVRetriever(
-            path, AuthenticatedIdentity.mock(), always_allow()
-        ).retrieve_data()
+            path,
+            AuthenticatedIdentity.mock(),
+            always_allow(),
+            callback_manager=CallbackManager.default(),
+        ).retrieve_data(make_run_id())
 
         return portfolio.map(_key_set)
 

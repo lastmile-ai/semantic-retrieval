@@ -1,9 +1,10 @@
-import asyncio
 from typing import Awaitable, Callable, List, Protocol, TypeVar
 
 from result import Err, Ok, Result
+from semantic_retrieval.common.types import CallbackEvent
 
 from semantic_retrieval.functional.functional import result_reduce_list_separate
+from semantic_retrieval.utils.callbacks import CallbackManager, run_thunk_safe
 
 
 T = TypeVar("T")
@@ -31,13 +32,11 @@ async def user_access_check(
     viewer_auth_id: str,
     timeout: int = 1,
 ) -> bool:
-    try:
-        user_coro = user_check(resource_auth_id, viewer_auth_id)
-        task = asyncio.create_task(user_coro)
-        return await asyncio.wait_for(task, timeout=timeout)
-    except BaseException as e:  # type: ignore
-        # TODO log
-        return False
+    async def _thunk() -> bool:
+        return await user_check(resource_auth_id, viewer_auth_id)
+
+    res_allow = await run_thunk_safe(_thunk(), timeout)
+    return res_allow.unwrap_or(False)
 
 
 async def get_data_access_checked(
@@ -50,7 +49,7 @@ async def get_data_access_checked(
     if await user_access_check(user_access_function, resource_auth_id, viewer_auth_id):
         return Ok(get_data_unsafe(params))
     else:
-        return Err("Access denied")
+        return Err(f"Access denied: {resource_auth_id=}, {viewer_auth_id=}")
 
 
 async def get_data_access_checked_list(
@@ -59,6 +58,8 @@ async def get_data_access_checked_list(
     get_data_unsafe: Callable[[T], List[U]],
     resource_auth_id_fn: Callable[[U], Awaitable[str]],
     viewer_auth_id: str,
+    run_id: str,
+    cm: CallbackManager,
 ):
     data_list_unchecked = get_data_unsafe(params)
     data_list_checked = [
@@ -72,6 +73,20 @@ async def get_data_access_checked_list(
         for item in data_list_unchecked
     ]
 
-    allowed, _denied = result_reduce_list_separate(data_list_checked)
+    allowed, denied = result_reduce_list_separate(data_list_checked)
     # TODO [P1]: log denied
+
+    await cm.run_callbacks(
+        CallbackEvent(
+            name="get_data_access_checked_list",
+            data=dict(
+                params=params,
+                resource_auth_id_fn=resource_auth_id_fn,
+                viewer_auth_id=viewer_auth_id,
+                allowed=allowed,
+                denied=denied,
+            ),
+            run_id=run_id,
+        ),
+    )
     return allowed
