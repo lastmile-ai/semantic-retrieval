@@ -1,5 +1,5 @@
 import json
-from typing import Dict, List, NewType, Optional
+from typing import Any, Dict, List, NewType, Optional
 
 from result import Err, Ok, Result
 from semantic_retrieval.common.types import CallbackEvent
@@ -10,6 +10,7 @@ from semantic_retrieval.document.metadata.document_metadata_db import (
     DocumentMetadataQuery,
 )
 from semantic_retrieval.utils.callbacks import CallbackManager, Traceable
+from semantic_retrieval.utils.interop import from_canonical_field
 
 
 DocumentMetadataMap = NewType("DocumentMetadataMap", Dict[str, DocumentMetadata])
@@ -58,15 +59,19 @@ class InMemoryDocumentMetadataDB(DocumentMetadataDB, Traceable):
     async def persist(self, file_path: str):
         with open(file_path, "w") as file:
             file.write(
-                json.dumps(
-                    {d_id: dmd.model_dump_json() for d_id, dmd in self.metadata.items()}
-                )
+                json.dumps({d_id: dmd.to_dict() for d_id, dmd in self.metadata.items()})
             )
 
     @staticmethod
     async def from_json_file(
         file_path: str,
     ) -> Result["InMemoryDocumentMetadataDB", str]:
+        def _dmd_deser(dmd_ser: str) -> Dict[str, Any]:
+            return {
+                from_canonical_field(field): value
+                for field, value in json.loads(dmd_ser).items()
+            }
+
         with open(file_path, "r") as file:
             json_data = file.read()
             the_map_ser: Dict[str, str] = json.loads(json_data)
@@ -76,7 +81,7 @@ class InMemoryDocumentMetadataDB(DocumentMetadataDB, Traceable):
 
             the_map: DocumentMetadataMap = DocumentMetadataMap(
                 {
-                    d_id: DocumentMetadata(**json.loads(dmd_ser))
+                    d_id: DocumentMetadata(**_dmd_deser(dmd_ser))
                     for d_id, dmd_ser in the_map_ser.items()
                 }
             )

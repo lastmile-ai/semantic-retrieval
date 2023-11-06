@@ -1,4 +1,5 @@
 from functools import partial
+import logging
 from typing import Any, Dict, List
 
 import pinecone
@@ -8,6 +9,7 @@ from semantic_retrieval.access_control.access_function import (
     get_data_access_checked_list,
 )
 from semantic_retrieval.access_control.access_identity import AuthenticatedIdentity
+from semantic_retrieval.common.core import LOGGER_FMT
 from semantic_retrieval.common.types import CallbackEvent, Record
 from semantic_retrieval.data_store.vector_dbs.vector_db import (
     VectorDB,
@@ -23,6 +25,10 @@ from semantic_retrieval.transformation.embeddings.embeddings import (
     VectorEmbedding,
 )
 from semantic_retrieval.utils.callbacks import CallbackManager, Traceable
+from semantic_retrieval.utils.interop import canonical_field
+
+logger = logging.getLogger(__name__)
+logging.basicConfig(format=LOGGER_FMT)
 
 
 class PineconeVectorDBConfig(VectorDBConfig):
@@ -117,19 +123,33 @@ class PineconeVectorDB(VectorDB, Traceable):
         self,
         documents: List[Document],
     ):
+        print(f"{self.config.api_key=}")
         pinecone.init(api_key=self.config.api_key, environment=self.config.environment)
         index = pinecone.Index(self.config.index_name)
 
         embedding_creator = self.embeddings
 
+        logger.info("Getting embeddings")
         embeddings_list = await embedding_creator.transform_documents(documents)
+
+        logger.info("Upserting to Pinecone")
 
         # TODO [P0]: Update this to batch to get faster performance
         # Use this for batching to pinecone
         # https://docs.pinecone.io/docs/insert-data#batching-upserts
         for idx, embedding in enumerate(embeddings_list):
-            metadata = {"text": embedding.text}
+            metadata = {
+                "text": embedding.text,
+                canonical_field("document_id"): (embedding.metadata or {})[
+                    "document_id"
+                ],
+                canonical_field("fragment_id"): (embedding.metadata or {})[
+                    "fragment_id"
+                ],
+            }
             vectors_chunk = embedding.vector
+            # logger.debug(f"{vectors_chunk=}")
+            logger.debug(f"{metadata=}")
             index.upsert(namespace=self.config.namespace, vectors=[(f"vec{idx}", vectors_chunk, metadata)])  # type: ignore
 
         await self.callback_manager.run_callbacks(
@@ -158,6 +178,7 @@ class PineconeVectorDB(VectorDB, Traceable):
 
         vec = await _get_query_vector()
 
+        print(f"{self.config.api_key=}")
         pinecone.init(api_key=self.config.api_key, environment=self.config.environment)
         index = pinecone.Index(self.config.index_name)
 
@@ -176,7 +197,7 @@ class PineconeVectorDB(VectorDB, Traceable):
             vector_embedding: VectorEmbedding,
         ) -> str:
             md = vector_embedding.metadata or {}
-            doc_id = md.get("documentId", "")
+            doc_id = md.get(canonical_field("document_id"), "")
             return doc_id
 
         query_res = await get_data_access_checked_list(
@@ -197,6 +218,7 @@ class PineconeVectorDB(VectorDB, Traceable):
                     query=query,
                     query_res=query_res,
                     params=query_params,
+                    n_res=len(query_res),
                 ),
                 run_id=run_id,
             )
