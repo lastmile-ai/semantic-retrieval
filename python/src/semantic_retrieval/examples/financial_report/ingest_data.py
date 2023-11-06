@@ -2,11 +2,16 @@ import asyncio
 import logging
 import sys
 from typing import List
+from semantic_retrieval.access_control.access_function import always_allow
+from semantic_retrieval.access_control.access_identity import AuthenticatedIdentity
 
 from semantic_retrieval.common.core import LOGGER_FMT, make_run_id
+from semantic_retrieval.data_store.vector_dbs import pinecone_vector_db
 from semantic_retrieval.examples.financial_report.config import (
     Config,
     get_config,
+    get_metadata_db_path,
+    resolve_path,
     set_up_script,
 )
 
@@ -50,7 +55,7 @@ logging.basicConfig(format=LOGGER_FMT)
 
 
 async def main(argv: List[str]):
-    loggers = [logger]
+    loggers = [logger, pinecone_vector_db.logger]
 
     args = set_up_script(argv, loggers)
     config = get_config(args)
@@ -64,16 +69,22 @@ async def run_ingest(config: Config):
     callback_manager = CallbackManager.default()
     run_id = make_run_id()
     # Create a new FileSystem instance
-    fileSystem = FileSystem(config.data_root, callback_manager=callback_manager)
+    fs_path = resolve_path(config.data_root, config.path_10ks)
+
+    logger.info("Creating a new FileSystem instance")
+    fileSystem = FileSystem(fs_path, callback_manager=callback_manager)
 
     # Load documents using the FileSystem instance
+    logger.info("Loading documents")
     rawDocuments = await fileSystem.load_documents(run_id)
-    print(f"RAW DOCUMENTS: {rawDocuments}")
+    logger.debug(f"RAW DOCUMENTS: {rawDocuments}")
 
     # Initialize an in-memory metadata DB
+    logger.info("Initializing an in-memory metadata DB")
     metadata_db = InMemoryDocumentMetadataDB(callback_manager=CallbackManager.default())
 
     # Parse the raw documents
+    logger.info("Parsing the raw documents")
     parsedDocuments = await mdp.parse_documents(
         rawDocuments,
         ParserConfig(
@@ -100,13 +111,12 @@ async def run_ingest(config: Config):
     )
 
     # Transform the parsed documents
+    logger.info("Transforming the parsed documents")
     transformedDocuments = await documentTransformer.transform_documents(
         parsedDocuments, run_id=run_id
     )
 
     # Generate a new namespace using UUID
-    namespace = "ns123"
-    print(f"NAMESPACE: {namespace}")
 
     # Create a PineconeVectorDB instance and index the transformed documents
     pinecone_vectordb_config = PineconeVectorDBConfig(
@@ -122,15 +132,24 @@ async def run_ingest(config: Config):
         openai_embedding_config, callback_manager=callback_manager
     )
 
-    pineconeVectorDB = await PineconeVectorDB.from_documents(  # type: ignore [fixme TODO]
+    logger.info("Creating a new PineconeVectorDB instance")
+    _pineconeVectorDB = await PineconeVectorDB.from_documents(
         transformedDocuments,
         pinecone_vectordb_config,
         embeddings,
         metadata_db,
+        # We will give permission to everything for the ingestion step.
+        # We can use always_allow() and mock viewer identity for this.
+        user_access_function=always_allow(),
+        viewer_identity=AuthenticatedIdentity.mock(),
+        callback_manager=callback_manager,
     )
 
     # TODO [P1]: validate state of pineconeVectorDB
-    print(f"{pineconeVectorDB=}")
+    # print(f"{pineconeVectorDB=}")
+    # print(f"{metadata_db.metadata.keys()=}")
+
+    _metadata_persist_res = await metadata_db.persist(get_metadata_db_path(config))
 
 
 if __name__ == "__main__":

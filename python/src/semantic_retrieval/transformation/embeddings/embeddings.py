@@ -10,6 +10,7 @@ from semantic_retrieval.common.json_types import JSONObject
 
 from semantic_retrieval.document.document import Document, DocumentFragment
 from semantic_retrieval.utils.callbacks import CallbackManager, Traceable
+from semantic_retrieval.utils.interop import canonical_field
 
 
 class VectorEmbedding(Attributable):
@@ -21,8 +22,8 @@ class VectorEmbedding(Attributable):
         "max": 0,
     }  # Number of dimensions in the vector, and min/max values for each dimension.
     metadata: Optional[Dict[Any, Any]] = {
-        "document_id": "",
-        "fragmentId": "",
+        canonical_field("document_id"): "",
+        canonical_field("fragment_id"): "",
         "retrievalScore": 0.0,
     }  # Metadata
 
@@ -60,7 +61,7 @@ class DocumentEmbeddingsTransformer(EmbeddingsTransformer, Traceable):
         metadata = {
             **(fragment.metadata or {}),
             "document_id": fragment.document_id,
-            "fragmentId": fragment.fragment_id,
+            "fragment_id": fragment.fragment_id,
         }
 
         return await self.embed(text, model_handle=model_handle, metadata=metadata)
