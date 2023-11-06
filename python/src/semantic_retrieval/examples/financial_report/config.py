@@ -19,13 +19,14 @@ class Config(Record):
     # DO NOT UPSERT
     # Remote paths / IDs
     namespace: str = "ea4bcf44-e0f3-46ff-bf66-5b1f9e7502df"
-    index_name: str = "test-financial-report"
+    index_name: str = "examples"
     pinecone_environment: str = "asia-southeast1-gcp-free"
 
     # Local paths
     # TODO [P1]: double check this: data_root is relative to cwd.
     data_root: str = "examples/example_data/financial_report"
-    metadata_db_path: str = "artifacts/metadata_db_py_v2.json"
+    path_10ks: str = "10ks"
+    metadata_db_name: str = "the_metadata_db"
     portfolio_csv_dir: str = "portfolios"
 
     # Misc
@@ -123,3 +124,9 @@ def set_up_script(argv: Sequence[str], loggers: List[logging.Logger]):
     set_log_level(config.log_level, loggers)
 
     return args
+
+
+def get_metadata_db_path(config: Config):
+    file = f"{config.metadata_db_name}_{config.namespace}_{config.index_name}_{config.pinecone_environment}.json"
+    path = os.path.join("artifacts", file)
+    return resolve_path(config.data_root, path)
