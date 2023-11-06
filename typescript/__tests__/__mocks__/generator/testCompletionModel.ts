@@ -1,26 +1,24 @@
 import {
   CompletionModel,
   CompletionModelParams,
+  CompletionModelResponse,
 } from "../../../src/generator/completion-models/completionModel";
 import { CallbackManager } from "../../../src/utils/callbacks";
 
-export type TestCompletionRequestParams = { prompt: string };
-export type TestCompletionResponse = { completion: string };
+export interface TestCompletionModelParams
+  extends CompletionModelParams<{ prompt: string }> {}
 
-export type TestCompletionModelParams =
-  CompletionModelParams<TestCompletionRequestParams>;
+export interface TestCompletionModelResponse
+  extends CompletionModelResponse<{ completion: string }> {}
 
-export class TestCompletionModel extends CompletionModel<
-  TestCompletionRequestParams,
-  TestCompletionResponse
-> {
+export class TestCompletionModel extends CompletionModel {
   constructor(callbackManager?: CallbackManager) {
     super(callbackManager);
   }
 
   async run(
     params: TestCompletionModelParams
-  ): Promise<TestCompletionResponse> {
+  ): Promise<TestCompletionModelResponse> {
     await this.callbackManager?.runCallbacks({
       name: "onRunCompletionRequest",
       params,
@@ -36,6 +34,6 @@ export class TestCompletionModel extends CompletionModel<
       response,
     });
 
-    return response;
+    return { data: response };
   }
 }

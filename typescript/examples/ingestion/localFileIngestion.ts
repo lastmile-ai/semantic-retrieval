@@ -2,7 +2,7 @@
 import { AccessPassport } from "../../src/access-control/accessPassport";
 import { AlwaysAllowDocumentAccessPolicyFactory } from "../../src/access-control/alwaysAllowDocumentAccessPolicyFactory";
 import { PineconeVectorDB } from "../../src/data-store/vector-DBs/pineconeVectorDB";
-import { InMemoryDocumentMetadataDB } from "../../src/document/metadata/InMemoryDocumentMetadataDB";
+import { InMemoryDocumentMetadataDB } from "../../src/document/metadata/inMemoryDocumentMetadataDB";
 import { FileSystem } from "../../src/ingestion/data-sources/fs/fileSystem";
 import * as MultiDocumentParser from "../../src/ingestion/document-parsers/multiDocumentParser";
 import { OpenAIChatModel } from "../../src/generator/completion-models/openai/openAIChatModel";
