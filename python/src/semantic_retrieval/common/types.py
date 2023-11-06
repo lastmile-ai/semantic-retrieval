@@ -1,11 +1,11 @@
 # Don't rely on the generic type. Wrong annotation might be missed.
 # Use `Any` to signal that uncertainty explicitly.
 import time
-from typing import Any, Awaitable, Callable, Optional, TypeVar
+from typing import Any, Awaitable, Callable, Generator, Optional, TypeVar
 
 import numpy.typing as npt
 from pydantic import BaseModel, ConfigDict
-
+from result import Result
 
 # TODO [P1]: is this useful?
 NPA = npt.NDArray[Any]
@@ -24,6 +24,10 @@ Q = TypeVar("Q")
 
 # Canonical typevar for params
 P = TypeVar("P")
+
+# Covariant type (for Result, etc.)
+TR = TypeVar("TR", covariant=True)
+E = TypeVar("E", covariant=True)
 
 
 class Record(BaseModel):
@@ -52,3 +56,5 @@ class CallbackResult(Record):
 # Any CallbackResults returned will be stored in the CallbackManager.
 # The user can then access these results.
 Callback = Callable[[CallbackEvent], Awaitable[Optional[CallbackResult]]]
+
+DoResult = Generator[Result[TR, E], TR, Result[TR, E]]
