@@ -4,10 +4,6 @@ import {
 } from "../../data-store/vector-DBs/vectorDB";
 import { VectorDBDocumentRetriever } from "../../retrieval/vector-DBs/vectorDBDocumentRetriever";
 import {
-  CompletionModel,
-  ModelResponse,
-} from "../completion-models/completionModel";
-import {
   RAGCompletionGenerator,
   RAGCompletionGeneratorParams,
 } from "./ragCompletionGenerator";
@@ -17,9 +13,7 @@ export interface VectorDBRAGCompletionGeneratorParams
   retrievalQuery?: VectorDBBaseQuery;
 }
 
-export class VectorDBRAGCompletionGenerator<
-  M extends CompletionModel<ModelResponse<M>>,
-> extends RAGCompletionGenerator<M, VectorDBDocumentRetriever> {
+export class VectorDBRAGCompletionGenerator extends RAGCompletionGenerator<VectorDBDocumentRetriever> {
   async getRetrievalQuery(
     params: VectorDBRAGCompletionGeneratorParams
   ): Promise<VectorDBTextQuery> {

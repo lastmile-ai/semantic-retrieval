@@ -4,9 +4,8 @@ import { Document } from "../../document/document";
 import { DocumentRetriever } from "../../retrieval/documentRetriever";
 import { LLMCompletionGenerator } from "../completionGenerator";
 import {
-  CompletionModel,
   CompletionModelParams,
-  ModelResponse,
+  CompletionModelResponse,
 } from "../completion-models/completionModel";
 import { RetrieverParams, RetrieverQuery } from "../../retrieval/retriever";
 
@@ -26,9 +25,8 @@ export const DEFAULT_RAG_TEMPLATE =
  * be leveraged for modifying the prompt prior to completion generation by the model
  */
 export abstract class RAGCompletionGenerator<
-  M extends CompletionModel<ModelResponse<M>>,
   R extends DocumentRetriever<RetrieverParams<R>, Document[]>,
-> extends LLMCompletionGenerator<M> {
+> extends LLMCompletionGenerator {
   /**
    * Construct the query for the underlying retriever using the given parameters
    * @param params The parameters to use for constructing the query
@@ -46,7 +44,7 @@ export abstract class RAGCompletionGenerator<
    */
   async run(
     params: RAGCompletionGeneratorParams<R>
-  ): Promise<ModelResponse<M>> {
+  ): Promise<CompletionModelResponse> {
     const { accessPassport, prompt, retriever, ...modelParams } = params;
 
     const queryPrompt =
