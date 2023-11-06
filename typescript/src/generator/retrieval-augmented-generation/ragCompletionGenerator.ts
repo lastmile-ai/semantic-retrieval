@@ -7,10 +7,10 @@ import {
   CompletionModelParams,
   CompletionModelResponse,
 } from "../completion-models/completionModel";
-import { RetrieverParams, RetrieverQuery } from "../../retrieval/retriever";
+import { RetrieverQuery } from "../../retrieval/retriever";
 
 export interface RAGCompletionGeneratorParams<
-  R extends DocumentRetriever<RetrieverParams<R>, Document[]>,
+  R extends DocumentRetriever<Document[]>,
   P = unknown,
 > extends CompletionModelParams<P> {
   retriever: R;
@@ -26,16 +26,15 @@ export const DEFAULT_RAG_TEMPLATE =
  * be leveraged for modifying the prompt prior to completion generation by the model
  */
 export abstract class RAGCompletionGenerator<
-  R extends DocumentRetriever<RetrieverParams<R>, Document[]>,
+  R extends DocumentRetriever<Document[]>,
+  P extends RAGCompletionGeneratorParams<R> = RAGCompletionGeneratorParams<R>,
 > extends LLMCompletionGenerator {
   /**
    * Construct the query for the underlying retriever using the given parameters
    * @param params The parameters to use for constructing the query
    * @returns A promise that resolves to the query in valid format for the retriever
    */
-  abstract getRetrievalQuery(
-    params: RAGCompletionGeneratorParams<R>
-  ): Promise<RetrieverQuery<R>>;
+  abstract getRetrievalQuery(params: P): Promise<RetrieverQuery<R>>;
 
   /**
    * Performs completion generation using the given parameters and returns the generated
@@ -43,9 +42,7 @@ export abstract class RAGCompletionGenerator<
    * @param params The parameters to use for generating the completion
    * @returns A promise that resolves to the generated completion data
    */
-  async run(
-    params: RAGCompletionGeneratorParams<R>
-  ): Promise<CompletionModelResponse> {
+  async run(params: P): Promise<CompletionModelResponse> {
     const { accessPassport, prompt, retriever, ...modelParams } = params;
 
     const queryPrompt =
@@ -54,7 +51,7 @@ export abstract class RAGCompletionGenerator<
     const contextDocs = await retriever.retrieveData({
       accessPassport,
       query: await this.getRetrievalQuery(params),
-    } as RetrieverParams<R>);
+    });
 
     const contextChunksPromises = [];
     for (const doc of contextDocs) {

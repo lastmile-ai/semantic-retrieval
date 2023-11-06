@@ -8,13 +8,13 @@ export type CSVRetrieverQuery = {
   primaryKeyColumn: string;
 };
 
+export interface CSVRetrieverQueryParams
+  extends BaseRetrieverQueryParams<CSVRetrieverQuery> {}
+
 /**
  * Retrieve structured data from a CSV file as a JSON object for use in completion generation.
  */
-export class CSVRetriever<R extends JSONObject> extends BaseRetriever<
-  BaseRetrieverQueryParams<CSVRetrieverQuery>,
-  R
-> {
+export class CSVRetriever<R extends JSONObject> extends BaseRetriever {
   filePath: string;
 
   constructor(filePath: string) {
@@ -26,9 +26,7 @@ export class CSVRetriever<R extends JSONObject> extends BaseRetriever<
    * @param params The retriever query params to use for the query.
    * @returns A promise that resolves to the retrieved data.
    */
-  async retrieveData(
-    params: BaseRetrieverQueryParams<CSVRetrieverQuery>
-  ): Promise<R> {
+  async retrieveData(params: CSVRetrieverQueryParams): Promise<R> {
     const csvString = await (await fs.readFile(this.filePath)).toString();
     const rows = await Papa.parse<R>(csvString, {
       header: true,
@@ -36,12 +34,13 @@ export class CSVRetriever<R extends JSONObject> extends BaseRetriever<
     }).data;
 
     const retrievedData: JSONObject = {};
+    const primaryKeyColumn = params.query.primaryKeyColumn;
 
     for (const row of rows) {
-      const { [params.query.primaryKeyColumn]: key, ...restRow } = row;
+      const { [primaryKeyColumn]: key, ...restRow } = row;
       if (key == null) {
         throw new Error(
-          `Primary key column ${params.query.primaryKeyColumn} missing from row`
+          `Primary key column ${primaryKeyColumn} missing from row`
         );
       }
       const keyVal = typeof key === "string" ? key : JSON.stringify(key);

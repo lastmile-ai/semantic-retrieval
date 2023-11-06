@@ -34,8 +34,9 @@ async function createIndex() {
 
   return await PineconeVectorDB.fromDocuments(transformedDocuments, {
     // Make sure this matches your Pinecone index name & it has 1536 dimensions for openai embeddings
-    indexName: "test",
+    indexName: "examples",
     embeddings: new OpenAIEmbeddings(),
+    namespace: "localFileIngestion",
     metadataDB,
   });
 }
@@ -47,7 +48,7 @@ async function main() {
 
   const res = await generator.run({
     accessPassport: new AccessPassport(), // not necessary in this case, but include for example
-    prompt: "How do I use parameters in a workbook?",
+    prompt: "What are some interesting use cases for Artificial Intelligence?",
     retriever,
   });
   console.log(JSON.stringify(res));
