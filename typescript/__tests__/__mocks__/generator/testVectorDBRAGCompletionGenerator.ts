@@ -7,7 +7,7 @@ import { TestCompletionModel } from "./testCompletionModel";
 
 export class TestVectorDBRAGCompletionGenerator extends VectorDBRAGCompletionGenerator<TestCompletionModel> {
   async getRetrievalQuery(
-    params: VectorDBRAGCompletionGeneratorParams<TestCompletionModel>
+    params: VectorDBRAGCompletionGeneratorParams
   ): Promise<VectorDBTextQuery> {
     const query = {
       topK: 1,

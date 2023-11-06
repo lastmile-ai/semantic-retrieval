@@ -4,14 +4,11 @@ import { CallbackManager } from "../../../utils/callbacks";
 import { AIConfigRuntime, Output } from "aiconfig";
 import type { JSONObject } from "aiconfig/dist/common";
 
-export interface AIConfigPromptParams extends CompletionModelParams<never> {
+export interface AIConfigPromptParams extends CompletionModelParams {
   params: JSONObject;
 }
 
-export class AIConfigCompletion extends CompletionModel<
-  never,
-  Output | Output[]
-> {
+export class AIConfigCompletion extends CompletionModel<Output | Output[]> {
   private aiConfig: AIConfigRuntime;
 
   constructor(aiConfigFilePath: string, callbackManager?: CallbackManager) {

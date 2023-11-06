@@ -9,18 +9,16 @@ import { type ClientOptions as OpenAIClientOptions, OpenAI } from "openai";
 import { CompletionModel, CompletionModelParams } from "../completionModel";
 import { CallbackManager } from "../../../utils/callbacks";
 
-export type OpenAIChatModelParams =
-  CompletionModelParams<ChatCompletionCreateParams>;
+export interface OpenAIChatModelParams extends CompletionModelParams {
+  completionParams: ChatCompletionCreateParams;
+}
 
 export interface OpenAIChatModelConfig extends OpenAIClientOptions {
   callbackManager?: CallbackManager;
   defaultModel?: string;
 }
 
-export class OpenAIChatModel extends CompletionModel<
-  ChatCompletionCreateParams,
-  ChatCompletion
-> {
+export class OpenAIChatModel extends CompletionModel<ChatCompletion> {
   private client: OpenAI;
   private defaultModel = "gpt-3.5-turbo";
 

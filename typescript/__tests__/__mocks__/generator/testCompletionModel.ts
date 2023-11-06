@@ -7,13 +7,11 @@ import { CallbackManager } from "../../../src/utils/callbacks";
 export type TestCompletionRequestParams = { prompt: string };
 export type TestCompletionResponse = { completion: string };
 
-export type TestCompletionModelParams =
-  CompletionModelParams<TestCompletionRequestParams>;
+export interface TestCompletionModelParams extends CompletionModelParams {
+  completionParams: TestCompletionRequestParams;
+}
 
-export class TestCompletionModel extends CompletionModel<
-  TestCompletionRequestParams,
-  TestCompletionResponse
-> {
+export class TestCompletionModel extends CompletionModel<TestCompletionResponse> {
   constructor(callbackManager?: CallbackManager) {
     super(callbackManager);
   }
