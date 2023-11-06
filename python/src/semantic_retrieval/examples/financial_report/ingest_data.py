@@ -102,18 +102,22 @@ async def run_ingest(config: Config):
     print(f"NAMESPACE: {namespace}")
 
     # Create a PineconeVectorDB instance and index the transformed documents
-    pcvdbcfg = PineconeVectorDBConfig(
+    pinecone_vectordb_config = PineconeVectorDBConfig(
         index_name=config.index_name,
         namespace=config.namespace,
         api_key=config.pinecone_key,
         environment=config.pinecone_environment,
     )
 
-    openaiembcfg = OpenAIEmbeddingsConfig(api_key=config.openai_key)
+    openai_embedding_config = OpenAIEmbeddingsConfig(api_key=config.openai_key)
 
-    embeddings = OpenAIEmbeddings(openaiembcfg)
-    pineconeVectorDB = await PineconeVectorDB.from_documents(
-        transformedDocuments, pcvdbcfg, embeddings, metadata_db
+    embeddings = OpenAIEmbeddings(openai_embedding_config)
+
+    pineconeVectorDB = await PineconeVectorDB.from_documents(  # type: ignore [fixme TODO]
+        transformedDocuments,
+        pinecone_vectordb_config,
+        embeddings,
+        metadata_db,
     )
 
     # TODO [P1]: validate state of pineconeVectorDB

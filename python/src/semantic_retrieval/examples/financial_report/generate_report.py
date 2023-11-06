@@ -1,15 +1,22 @@
 import asyncio
+from functools import partial
 import json
 import logging
 import os
+import re
 import sys
 from typing import List
 
-from semantic_retrieval.common.core import LOGGER_FMT
-from semantic_retrieval.examples.financial_report.access_control.identities import AdvisorIdentity
+import pandas as pd
+from semantic_retrieval.access_control.access_function import AccessFunction
+from semantic_retrieval.access_control.access_identity import AuthenticatedIdentity
+
+from semantic_retrieval.common.core import LOGGER_FMT, file_contents
+from semantic_retrieval.document.metadata.document_metadata import DocumentMetadata
+from semantic_retrieval.document.metadata.document_metadata_db import DocumentMetadataDB
 
 import semantic_retrieval.examples.financial_report.financial_report_generator as frg
-from result import Err, Ok
+from result import Err, Ok, Result
 from semantic_retrieval.common.types import Record
 from semantic_retrieval.data_store.vector_dbs.pinecone_vector_db import (
     PineconeVectorDBConfig,
@@ -65,9 +72,9 @@ async def run_generate_report(config: Config):
             print(f"Error loading metadataDB: {msg}")
             return -1
         case Ok(metadata_db):
-            openaiembcfg = OpenAIEmbeddingsConfig(api_key=config.openai_key)
+            openai_embedding_config = OpenAIEmbeddingsConfig(api_key=config.openai_key)
 
-            pcvdbcfg = PineconeVectorDBConfig(
+            pinecone_vectordb_config = PineconeVectorDBConfig(
                 index_name=config.index_name,
                 namespace=config.namespace,
                 api_key=config.pinecone_key,
@@ -79,51 +86,152 @@ async def run_generate_report(config: Config):
             portfolio_csv_path = os.path.join(
                 config.portfolio_csv_dir, portfolio_csv_name
             )
+
+            # TODO [P1]: This is where we would authenticate the viewer.
+            viewer_identity = AuthenticatedIdentity(viewer_auth_id=config.viewer_role)
+            portfolio_access_function: AccessFunction = validate_portfolio_access
             portfolio_retriever = CSVRetriever(
-                resolve_path(config.data_root, portfolio_csv_path)
+                file_path=resolve_path(config.data_root, portfolio_csv_path),
+                viewer_identity=viewer_identity,
+                user_access_function=portfolio_access_function,
             )
 
-            portfolio: PortfolioData = await portfolio_retriever.retrieve_data(None)  # type: ignore [fixme]
-            logger.info("\nPortfolio:\n" + json.dumps(portfolio, indent=2))
+            res_portfolio: Result[
+                pd.DataFrame, str
+            ] = await portfolio_retriever.retrieve_data()
 
-            viewer_identity = AdvisorIdentity(client="client_a")
+            match res_portfolio:
+                case Err(msg):
+                    print(f"Error loading portfolio: {msg}")
+                case Ok(df_portfolio):
+                    report = await _generate_report_for_portfolio(
+                        df_portfolio,
+                        pinecone_vectordb_config=pinecone_vectordb_config,
+                        openai_embedding_config=openai_embedding_config,
+                        metadata_db=metadata_db,
+                        config=config,
+                        viewer_identity=viewer_identity,
+                    )
+
+                    # TODO [P1]: Save res to disk
+                    print("Report:\n")
+                    print(report.unwrap_or_else(lambda err: f"Error: {err}"))
 
 
+async def _generate_report_for_portfolio(
+    df_portfolio: pd.DataFrame,
+    pinecone_vectordb_config: PineconeVectorDBConfig,
+    openai_embedding_config: OpenAIEmbeddingsConfig,
+    metadata_db: InMemoryDocumentMetadataDB,
+    viewer_identity: AuthenticatedIdentity,
+    config: Config,
+) -> Result[str, str]:
+    portfolio = portfolio_df_to_dict(df_portfolio)
+    logger.info("\nPortfolio:\n" + json.dumps(portfolio, indent=2))
 
-            retriever = FinancialReportDocumentRetriever(
-                viewer_identity,
-                config.client_name,
-                vector_db_config=pcvdbcfg,
-                embeddings_config=openaiembcfg,
-                portfolio=portfolio,  # type: ignore [fixme]
-                metadata_db=metadata_db,
+    access_function_10k: AccessFunction = partial(
+        validate_10k_access,
+        metadata_db=metadata_db,
+    )
+    retriever = FinancialReportDocumentRetriever(
+        vector_db_config=pinecone_vectordb_config,
+        embeddings_config=openai_embedding_config,
+        portfolio=portfolio,
+        metadata_db=metadata_db,
+        viewer_identity=viewer_identity,
+        user_access_function=access_function_10k,
+    )
+
+    generator = FinancialReportGenerator()
+
+    retrieval_query = config.retrieval_query
+
+    system_prompt = (
+        "INSTRUCTIONS:\n"
+        "You are a helpful assistant. "
+        "Rearrange the context to answer the question. "
+        "Output your response following the requested structure. "
+        "Do not include Any words that do not appear in the context. "
+    )
+    res = await generator.run(
+        portfolio,
+        system_prompt,
+        retrieval_query,
+        structure_prompt=config.structure_prompt,
+        data_extraction_prompt=config.data_extraction_prompt,
+        top_k=config.top_k,
+        overfetch_factor=config.overfetch_factor,
+        retriever=retriever,
+    )
+
+    return Ok(res)
+
+
+def portfolio_df_to_dict(df: pd.DataFrame) -> PortfolioData:
+    return PortfolioData(
+        df.set_index("Company")
+        .astype(float)
+        .fillna(0)
+        .query("Shares > 0")["Shares"]
+        .to_dict()
+    )
+
+
+async def validate_portfolio_access(resource_auth_id: str, viewer_auth_id: str) -> bool:
+    # In production, this function could do an IAM lookup, DB access, etc.
+    # For this simulation, we read from a local JSON file.
+
+    # In this case, the resource_auth_id is the csv path
+    # and the viewer_auth_id is the advisor name.
+    basename = os.path.basename(resource_auth_id)
+    re_client_name = re.search(r"(.*)_portfolio.csv", basename)
+    if not re_client_name:
+        return False
+
+    client_name = re_client_name.groups()[0]
+
+    # User can look this up in real DB.
+    path = "python/src/semantic_retrieval/examples/financial_report/access_control/iam_simulation_db.json"
+    db_iam_simulation = json.loads(file_contents(path))["advisors"]
+
+    return db_iam_simulation.get(client_name, None) == viewer_auth_id
+
+
+async def validate_10k_access(
+    resource_auth_id: str, viewer_auth_id: str, metadata_db: DocumentMetadataDB
+) -> bool:
+    def _validate_10k_access_with_metadata(
+        resource_auth_id: str,
+        viewer_auth_id: str,
+        metadata: DocumentMetadata,
+    ):
+        uri = metadata.uri
+        ticker_re = re.search(r".*_([A-Z\.]+)\..*", uri)
+        if not ticker_re:
+            return False
+        ticker = str(ticker_re.groups()[0])
+        # if ticker_re else ""
+        # print(f"{out=}")
+
+        logger.debug(
+            f"validate_10k_access({resource_auth_id=}, {viewer_auth_id=}, {ticker=}"
+        )
+        path = "python/src/semantic_retrieval/examples/financial_report/access_control/iam_simulation_db.json"
+        db_iam_simulation = json.loads(file_contents(path))["access_10ks"]
+        return ticker in db_iam_simulation.get(viewer_auth_id, [])
+
+    res_metadata = await metadata_db.get_metadata(resource_auth_id)
+
+    match res_metadata:
+        case Err(_msg):
+            # TODO log
+            return False
+        case Ok(metadata):
+            return _validate_10k_access_with_metadata(
+                metadata=metadata,
+                viewer_auth_id=viewer_auth_id,
+                resource_auth_id=resource_auth_id,
             )
-
-            generator = FinancialReportGenerator()
-
-            retrieval_query = config.retrieval_query
-
-            system_prompt = (
-                "INSTRUCTIONS:\n"
-                "You are a helpful assistant. "
-                "Rearrange the context to answer the question. "
-                "Output your response following the requested structure. "
-                "Do not include Any words that do not appear in the context. "
-            )
-            res = await generator.run(
-                portfolio,
-                system_prompt,
-                retrieval_query,
-                structure_prompt=config.structure_prompt,
-                data_extraction_prompt=config.data_extraction_prompt,
-                top_k=config.top_k,
-                overfetch_factor=config.overfetch_factor,
-                retriever=retriever,
-            )
-
-            # TODO [P1]: Save res to disk
-            print("Report:\n")
-            print(res)
 
 
 if __name__ == "__main__":

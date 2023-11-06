@@ -12,3 +12,4 @@ semantic_retrieval.egg-info
 .virtual_documents
 .ipynb_checkpoints
 **scratch**
+python/build

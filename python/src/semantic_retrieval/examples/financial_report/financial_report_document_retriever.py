@@ -3,6 +3,8 @@ import re
 from typing import Dict, List, NewType
 
 from result import Err, Ok, Result
+from semantic_retrieval.access_control.access_function import AccessFunction
+from semantic_retrieval.access_control.access_identity import AuthenticatedIdentity
 from semantic_retrieval.common.core import LOGGER_FMT
 from semantic_retrieval.common.types import Record
 from semantic_retrieval.data_store.vector_dbs.pinecone_vector_db import (
@@ -12,7 +14,7 @@ from semantic_retrieval.data_store.vector_dbs.pinecone_vector_db import (
 from semantic_retrieval.data_store.vector_dbs.vector_db import VectorDBTextQuery
 from semantic_retrieval.document.metadata.document_metadata import DocumentMetadata
 from semantic_retrieval.document.metadata.document_metadata_db import DocumentMetadataDB
-from semantic_retrieval.examples.financial_report.access_control.identities import AdvisorIdentity, ClientIdentity, FinancialReportIdentity
+
 from semantic_retrieval.retrieval.csv_retriever import CSVRetriever
 from semantic_retrieval.transformation.embeddings.embeddings import VectorEmbedding
 from semantic_retrieval.transformation.embeddings.openai_embeddings import (
@@ -33,39 +35,35 @@ class FinancialReportData(Record):
 PortfolioData = NewType("PortfolioData", Dict[str, int])
 
 
-def validate_access(viewer_identity: FinancialReportIdentity, client_name: str) -> bool:
-    match viewer_identity:
-        case AdvisorIdentity(client=client):
-            return client == client_name
-        case ClientIdentity(name=name):
-            return name == client_name
-        
-
 class FinancialReportDocumentRetriever:
     vector_db: PineconeVectorDB
-    portfolio_retriever: CSVRetriever[PortfolioData]
+    portfolio_retriever: CSVRetriever
     metadata_db: DocumentMetadataDB
 
     def __init__(
         self,
-        viewer_identity: FinancialReportIdentity,
-        client_name: str,
         vector_db_config: PineconeVectorDBConfig,
         embeddings_config: OpenAIEmbeddingsConfig,
-        portfolio: CSVRetriever[PortfolioData],
+        portfolio: PortfolioData,
         metadata_db: DocumentMetadataDB,
+        user_access_function: AccessFunction,
+        viewer_identity: AuthenticatedIdentity,
     ) -> None:
         embeddings = OpenAIEmbeddings(embeddings_config)
+
+        self.viewer_identity = viewer_identity
+        self.user_access_function = user_access_function
+
+        self.portfolio = portfolio
+        self.metadata_db = metadata_db
 
         self.vector_db = PineconeVectorDB(
             vector_db_config,
             embeddings=embeddings,
             metadata_db=metadata_db,
+            user_access_function=self.user_access_function,
+            viewer_identity=self.viewer_identity,
         )
-        self.portfolio = portfolio
-        self.metadata_db = metadata_db
-        self.viewer_identity = viewer_identity
-        self.client_name = client_name
 
     async def retrieve_data(
         self,
@@ -75,12 +73,6 @@ class FinancialReportDocumentRetriever:
         top_k: int,
         overfetch_factor: float = 1.0,
     ) -> Result[List[FinancialReportData], str]:
-        if not validate_access(self.viewer_identity, self.client_name):
-            return Err(f"access denied {self.client_name=}, Role={self.viewer_identity}")
-        else:
-            logger.info(f"\nAccess granted for {self.client_name}, Role={self.viewer_identity}")    
-
-
         vdbq = VectorDBTextQuery(
             mode="text",
             topK=int(overfetch_factor * top_k),
