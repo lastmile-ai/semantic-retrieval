@@ -1,0 +1,7 @@
+// Exclude __tests__ from compiled dist/
+{
+  "extends": "./tsconfig.json",
+  "exclude": [
+    "__tests__"
+  ]
+}

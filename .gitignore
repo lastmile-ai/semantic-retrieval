@@ -1,6 +1,6 @@
-node_modules
-dist
-tsconfig.tsbuildinfo
+typescript/node_modules
+typescript/dist
+typescript/tsconfig.tsbuildinfo
 .env
 
 python/build
