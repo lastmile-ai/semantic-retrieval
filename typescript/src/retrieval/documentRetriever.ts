@@ -19,11 +19,7 @@ import { DocumentMetadataDB } from "../document/metadata/documentMetadataDB";
  * handling is required (e.g. if the underlying source can perform optimized RBAC), but the quality
  * and correctness of the access control logic is the responsibility of the retriever implementation.
  */
-export abstract class DocumentRetriever<
-  P extends BaseRetrieverQueryParams<Q>,
-  R,
-  Q = P extends BaseRetrieverQueryParams<infer RQ> ? RQ : never,
-> extends BaseRetriever<P, R, Q> {
+export abstract class DocumentRetriever<R = unknown> extends BaseRetriever<R> {
   metadataDB: DocumentMetadataDB;
 
   constructor(
@@ -40,7 +36,7 @@ export abstract class DocumentRetriever<
    * @returns A promise that resolves to array of retrieved DocumentFragments.
    */
   protected abstract getFragmentsUnsafe(
-    _params: BaseRetrieverQueryParams<Q>
+    _params: BaseRetrieverQueryParams
   ): Promise<DocumentFragment[]>;
 
   /**
@@ -190,7 +186,7 @@ export abstract class DocumentRetriever<
    * @param params The retriever query params to use for the query.
    * @returns A promise that resolves to the retrieved data.
    */
-  async retrieveData(params: P): Promise<R> {
+  async retrieveData(params: BaseRetrieverQueryParams): Promise<R> {
     // By default, just perform a single query to the underlying source and filter the results
     // on access control checks, if applicable
     const unsafeFragments = await this.getFragmentsUnsafe(params);
