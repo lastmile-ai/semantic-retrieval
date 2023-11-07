@@ -35,7 +35,7 @@ export type FinancialReportDocumentRetrieverConfig = {
 };
 
 export class FinancialReportDocumentRetriever
-  extends BaseRetriever<FinancialReportQuery, FinancialReportData>
+  extends BaseRetriever
   implements FinancialReportDocumentRetrieverConfig
 {
   documentRetriever: VectorDBDocumentRetriever;

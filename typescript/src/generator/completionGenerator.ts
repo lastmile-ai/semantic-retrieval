@@ -5,7 +5,9 @@ import { CompletionModel } from "./completion-models/completionModel";
  * A CompletionGenerator generates some response resulting from completion requests to
  * one or more CompletionModels.
  */
-export abstract class CompletionGenerator<P, R> implements Traceable {
+export abstract class CompletionGenerator<P = unknown, R = unknown>
+  implements Traceable
+{
   callbackManager?: CallbackManager;
 
   constructor(callbackManager?: CallbackManager) {
@@ -25,20 +27,16 @@ export abstract class CompletionGenerator<P, R> implements Traceable {
  * LLM Completion Generators are used for generating some completion response from an
  * LLM Completion Model based on input parameters and any applicable internal logic.
  */
-export abstract class LLMCompletionGenerator<
-    M extends CompletionModel<MP, MR>,
-    P,
-    R,
-    MP = M extends CompletionModel<infer Param, infer _MR> ? Param : never,
-    MR = M extends CompletionModel<MP, infer Result> ? Result : never,
-  >
+export abstract class LLMCompletionGenerator<P = unknown, R = unknown>
   extends CompletionGenerator<P, R>
   implements Traceable
 {
-  model: M;
+  model: CompletionModel;
 
-  constructor(model: M, callbackManager?: CallbackManager) {
+  constructor(model: CompletionModel, callbackManager?: CallbackManager) {
     super(callbackManager);
     this.model = model;
   }
+
+  abstract run(params: P): Promise<R>;
 }

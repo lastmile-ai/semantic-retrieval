@@ -90,7 +90,7 @@ export type QueryVectorDBEvent = {
 export type RetrievedFragmentPolicyCheckFailedEvent = {
   name: "onRetrievedFragmentPolicyCheckFailed";
   fragment: DocumentFragment;
-  policy: ResourceAccessPolicy;
+  policy: ResourceAccessPolicy | null;
 };
 
 export type RetrieverFilterAccessibleFragmentsEvent = {
@@ -120,21 +120,20 @@ export type GetFragmentsEvent = {
 
 export type RunCompletionRequestEvent = {
   name: "onRunCompletionRequest";
-  params: CompletionModelParams<any>;
+  params: CompletionModelParams;
 };
 
 export type RunCompletionResponseEvent = {
   name: "onRunCompletionResponse";
-  params: CompletionModelParams<any>;
+  params: CompletionModelParams;
   response: any;
 };
 
-export type RunCompletionGenerationEvent<P extends CompletionModelParams<any>> =
-  {
-    name: "onRunCompletionGeneration";
-    params: P;
-    response: any;
-  };
+export type RunCompletionGenerationEvent = {
+  name: "onRunCompletionGeneration";
+  params: any;
+  response: any;
+};
 
 export type GetRAGCompletionRetrievalQueryEvent = {
   name: "onGetRAGCompletionRetrievalQuery";
@@ -165,7 +164,7 @@ type CallbackEvent =
   | GetFragmentsEvent
   | RunCompletionRequestEvent
   | RunCompletionResponseEvent
-  | RunCompletionGenerationEvent<any>
+  | RunCompletionGenerationEvent
   | GetRAGCompletionRetrievalQueryEvent;
 
 type Callback<T extends CallbackEvent> = (
@@ -196,7 +195,7 @@ interface CallbackMapping {
   onGetFragments?: Callback<GetFragmentsEvent>[];
   onRunCompletionRequest?: Callback<RunCompletionRequestEvent>[];
   onRunCompletionResponse?: Callback<RunCompletionResponseEvent>[];
-  onRunCompletionGeneration?: Callback<RunCompletionGenerationEvent<any>>[];
+  onRunCompletionGeneration?: Callback<RunCompletionGenerationEvent>[];
   onGetRAGCompletionRetrievalQuery?: Callback<GetRAGCompletionRetrievalQueryEvent>[];
 }
 

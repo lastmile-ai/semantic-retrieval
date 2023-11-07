@@ -2,34 +2,37 @@ import { AccessPassport } from "../access-control/accessPassport";
 import { DocumentMetadataDB } from "../document/metadata/documentMetadataDB";
 import { CallbackManager, Traceable } from "../utils/callbacks";
 
-export type BaseRetrieverQueryParams<Q> = {
+export interface BaseRetrieverQueryParams<Q = unknown> {
   accessPassport?: AccessPassport;
   query: Q;
-};
+}
 
-export type RetrieverParams<R> = R extends BaseRetriever<infer RP, infer _RR>
-  ? RP
-  : never;
-
-export type RetrieverResponse<R> = R extends BaseRetriever<infer _RQ, infer RR>
+export type RetrieverResponse<R> = R extends BaseRetriever<infer RR>
   ? RR
   : never;
 
-export type RetrieverQuery<R> = R extends BaseRetriever<
-  infer _RP,
-  infer _RR,
-  infer RQ
+export type RetrieverParams<R> = R extends BaseRetriever<infer _RR, infer RP>
+  ? RP
+  : never;
+
+export type RetrieverParamsQuery<P> = P extends BaseRetrieverQueryParams<
+  infer Q
 >
-  ? RQ
+  ? Q
+  : never;
+
+export type RetrieverQuery<R> = R extends BaseRetriever<infer _RR, infer RP>
+  ? RP extends BaseRetrieverQueryParams<infer QP>
+    ? QP
+    : never
   : never;
 
 /**
  * Abstract base class for retrieving data R from from an underlying source based on query Q.
  */
 export abstract class BaseRetriever<
-  P extends BaseRetrieverQueryParams<Q>,
-  R,
-  Q = P extends BaseRetrieverQueryParams<infer RQ> ? RQ : never,
+  R = unknown,
+  P extends BaseRetrieverQueryParams = BaseRetrieverQueryParams,
 > implements Traceable
 {
   metadataDB?: DocumentMetadataDB;

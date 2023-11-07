@@ -44,6 +44,7 @@ export abstract class BaseDocumentTransformer
           uri: originalDocumentMetadata?.uri ?? transformedDocument.documentId,
           metadata: {
             ...originalDocumentMetadata?.metadata,
+            ...transformedDocument.metadata,
             transformer: this.constructor.name,
             originalDocumentId: document.documentId,
           },

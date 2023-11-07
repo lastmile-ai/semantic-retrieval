@@ -57,14 +57,14 @@ program.option(
   "-p, --pinecone_index [PINECONE_INDEX]",
   // Make sure this matches your Pinecone index name & it has 1536 dimensions for openai embeddings
   "specify the name of the pinecone index to ingest the documents into",
-  "test-financial-report" // default pinecone index name
+  "examples" // default pinecone index name
 );
 
 program.option(
   "-n, --pinecone_namespace [PINECONE_NAMESPACE]",
   // Make sure this matches the namespace created from ingest_data script
   "specify the namespace in the pinecone index containing document embeddings",
-  "ea4bcf44-e0f3-46ff-bf66-5b1f9e7502df" // default pinecone namespace from 'good' ingest_data run
+  "4865204e-9059-4de1-ab56-7a63c1705b2f" // default pinecone namespace from 'good' ingest_data run
 );
 
 program.option(
@@ -155,10 +155,8 @@ async function main() {
   });
 
   console.log("Writing report to disk...");
-  await fs.writeFile("examples/typescript/financial_report/report.txt", report);
-  console.log(
-    "Report written to examples/typescript/financial_report/report.txt"
-  );
+  await fs.writeFile("examples/financial_report/report.txt", report);
+  console.log("Report written to examples/financial_report/report.txt");
 }
 
 function getLoggingCallbackManager(verboseLogging: boolean) {
@@ -173,7 +171,7 @@ function getLoggingCallbackManager(verboseLogging: boolean) {
       },
     ],
     onRunCompletionGeneration: [
-      async (event: RunCompletionGenerationEvent<any>) => {
+      async (event: RunCompletionGenerationEvent) => {
         if (verboseLogging) {
           console.log("Generated completion: ", event.response);
         } else {
@@ -204,7 +202,7 @@ function getLoggingCallbackManager(verboseLogging: boolean) {
         console.log("Fragment policy check failed: ", {
           fragmentId: event.fragment.fragmentId,
           documentId: event.fragment.documentId,
-          policy: event.policy.policy,
+          policy: event.policy?.policy ?? "No policy specified",
         });
       },
     ],

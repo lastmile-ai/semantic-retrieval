@@ -25,7 +25,7 @@ program.option(
   "-p, --pinecone_index [PINECONE_INDEX]",
   // Make sure this matches your Pinecone index name & it has 1536 dimensions for openai embeddings
   "specify the name of the pinecone index to ingest the documents into",
-  "test-financial-report" // default pinecone index name
+  "examples" // default pinecone index name
 );
 
 program.parse(process.argv);
@@ -63,9 +63,7 @@ async function main() {
   );
 
   // Persist metadataDB to disk for loading in the other scripts
-  await metadataDB.persist(
-    "examples/typescript/financial_report/metadataDB.json"
-  );
+  await metadataDB.persist("examples/financial_report/metadataDB.json");
 
   console.log("Persisted metadataDB to disk");
 
