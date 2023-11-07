@@ -3,7 +3,7 @@ black
 flake8
 pytest
 pydantic>=2.1
-openai
+openai==0.28.1
 python-dotenv
 pytest-asyncio
 pyright

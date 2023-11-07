@@ -18,8 +18,9 @@ from semantic_retrieval.document_parsers.multi_document_parser import (
 from semantic_retrieval.ingestion.data_sources.fs.file_system import FileSystem
 
 import semantic_retrieval.document_parsers.multi_document_parser as mdp
+from semantic_retrieval.utils.callbacks import CallbackManager
 
-metadata_db = InMemoryDocumentMetadataDB()
+metadata_db = InMemoryDocumentMetadataDB(callback_manager=CallbackManager.default())
 
 
 class AlwaysDenyPolicy(ResourceAccessPolicy):
@@ -49,15 +50,20 @@ async def test_access_policies():
     always_deny_policy = AlwaysDenyPolicy()
     always_accept_policy = AlwaysAllowAccessPolicy()
 
+    cm = CallbackManager.default()
     # Get ingested documents to be able to test the policies - TODO [P1]: This should either be helper or mocked
-    file_system = FileSystem("examples/example_data/financial_report")
-    raw_documents = file_system.load_documents()
+    file_system = FileSystem(
+        "examples/example_data/financial_report/10ks",
+        callback_manager=cm,
+    )
+    raw_documents = await file_system.load_documents()
 
     ingested_documents = await mdp.parse_documents(
         raw_documents,
         parser_config=ParserConfig(
             metadata_db=metadata_db, access_control_policy_factory=None
         ),
+        callback_manager=cm,
     )
 
     assert always_deny_policy.policy == "always_deny"
