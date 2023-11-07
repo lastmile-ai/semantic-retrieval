@@ -78,6 +78,7 @@ def _make_emb_request(
                     "document_id": fragments[idx].document_id,
                     "fragment_id": fragments[idx].fragment_id,
                     "model": model,
+                    "text": fragments[idx].text,
                 },
             )
         )
@@ -162,7 +163,6 @@ class OpenAIEmbeddings(DocumentEmbeddingsTransformer, Traceable):
         fragments: List[EmbedFragmentData],
         model_handle: Optional[ModelHandle],
         max_tokens_per_call: int,
-        run_id: Optional[str],
     ) -> List[VectorEmbedding]:
         model_handle = model_handle or OpenAIEmbeddingsHandle()
         # input = [fragment.text for fragment in fragments]
@@ -210,7 +210,6 @@ class OpenAIEmbeddings(DocumentEmbeddingsTransformer, Traceable):
         self,
         documents: List[Document],
         model_handle: Optional[ModelHandle] = None,
-        run_id: Optional[str] = None,
     ) -> List[VectorEmbedding]:
         fragments = flatten_list([document.fragments for document in documents])
         list_embed_fragment_data = [
@@ -225,7 +224,6 @@ class OpenAIEmbeddings(DocumentEmbeddingsTransformer, Traceable):
             list_embed_fragment_data,
             model_handle,
             self.max_encoding_length,
-            run_id=run_id,
         )
 
         await self.callback_manager.run_callbacks(
@@ -239,40 +237,3 @@ class OpenAIEmbeddings(DocumentEmbeddingsTransformer, Traceable):
         )
 
         return embeddings
-
-    async def create_embeddings(
-        self, fragments: List[EmbedFragmentData]
-    ) -> List[VectorEmbedding]:
-        model_handle = OpenAIEmbeddingsHandle()
-
-        input = [fragment.text for fragment in fragments]
-
-        # TODO [P0]: This is very slow... need to batch this & make this async (acreate)
-        embeddings = model_handle.creator.acreate(input=input, model=self.model)  # type: ignore
-
-        vector_embeddings: List[VectorEmbedding] = []
-        for idx, embedding in enumerate(embeddings["data"]):
-            vector_embeddings.append(
-                VectorEmbedding(
-                    vector=embedding["embedding"],
-                    text=fragments[idx].text,
-                    attributes={},
-                    metadata={
-                        "document_id": fragments[idx].document_id,
-                        "fragment_id": fragments[idx].fragment_id,
-                        "model": self.model,
-                    },
-                )
-            )
-
-        await self.callback_manager.run_callbacks(
-            CallbackEvent(
-                name="openai_embeddings_created",
-                data=dict(
-                    n_fragments=len(fragments),
-                    n_embeddings=len(vector_embeddings),
-                ),
-            )
-        )
-
-        return vector_embeddings
