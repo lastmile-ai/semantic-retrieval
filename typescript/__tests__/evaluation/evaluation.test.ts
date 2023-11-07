@@ -22,6 +22,7 @@ import {
   calculateRetrievedFragmentRecall,
   calculateRetrievedFragmentPrecision,
 } from "../../src/evaluation/document";
+import { AlwaysAllowAccessPolicy } from "../../src";
 
 const mockQuery = jest.fn();
 
@@ -104,6 +105,17 @@ const DOCUMENT_A_METADATA = {
   attributes: {},
 };
 
+const DOCUMENT_B_METADATA = {
+  documentId: "test-document-id-B",
+  document: getTestDocument({
+    documentId: "test-document-id-B",
+    fragments: [],
+  }),
+  uri: "test-uri-B",
+  metadata: {},
+  attributes: {},
+};
+
 const DOCUMENT_C_METADATA = {
   documentId: "test-document-id-C",
   document: getTestDocument({
@@ -123,12 +135,18 @@ describe("Retrieval evaluation metrics", () => {
         metadata: {
           test: "test metadata for document A",
         },
+        accessPolicies: [new AlwaysAllowAccessPolicy()],
+      },
+      "test-document-id-B": {
+        ...DOCUMENT_B_METADATA,
+        accessPolicies: [new AlwaysAllowAccessPolicy()],
       },
       "test-document-id-C": {
         ...DOCUMENT_C_METADATA,
         metadata: {
           test: "test metadata for document C",
         },
+        accessPolicies: [new AlwaysAllowAccessPolicy()],
         attributes: { type: "webpage" },
       },
     });
