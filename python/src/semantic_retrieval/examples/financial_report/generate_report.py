@@ -230,7 +230,7 @@ async def validate_10k_access(
 
     match res_metadata:
         case Err(_msg):
-            # TODO log
+            # TODO [P1] log
             return False
         case Ok(metadata):
             return _validate_10k_access_with_metadata(

@@ -21,7 +21,7 @@ T = TypeVar("T")
 
 
 def accuracy_metric(dataset: NumericalEvalDataset) -> float:
-    return accuracy_score(dataset.ground_truth, dataset.output)  # type: ignore [fixme]
+    return float(accuracy_score(dataset.ground_truth, dataset.output))
 
 
 def jaccard_similarity(s1: IDSet, s2: IDSet):
