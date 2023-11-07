@@ -11,7 +11,7 @@ import pandas as pd
 from semantic_retrieval.access_control.access_function import AccessFunction
 from semantic_retrieval.access_control.access_identity import AuthenticatedIdentity
 
-from semantic_retrieval.common.core import LOGGER_FMT, file_contents
+from semantic_retrieval.common.core import LOGGER_FMT, file_contents, text_file_write
 from semantic_retrieval.document.metadata.document_metadata import DocumentMetadata
 from semantic_retrieval.document.metadata.document_metadata_db import DocumentMetadataDB
 
@@ -94,9 +94,7 @@ async def run_generate_report(config: Config):
 
             logger.info(f"Client name: {config.client_name}")
             portfolio_csv_name = f"{config.client_name}_portfolio.csv"
-            portfolio_csv_path = os.path.join(
-                config.portfolio_csv_dir, portfolio_csv_name
-            )
+            portfolio_csv_path = os.path.join(config.portfolio_csv_dir, portfolio_csv_name)
 
             # TODO [P1]: This is where we would authenticate the viewer.
             viewer_identity = AuthenticatedIdentity(viewer_auth_id=config.viewer_role)
@@ -108,9 +106,7 @@ async def run_generate_report(config: Config):
                 callback_manager=callback_manager,
             )
 
-            res_portfolio: Result[
-                pd.DataFrame, str
-            ] = await portfolio_retriever.retrieve_data()
+            res_portfolio: Result[pd.DataFrame, str] = await portfolio_retriever.retrieve_data()
 
             match res_portfolio:
                 case Err(msg):
@@ -126,9 +122,9 @@ async def run_generate_report(config: Config):
                         callback_manager=callback_manager,
                     )
 
-                    # TODO [P1]: Save res to disk
-                    print("Report:\n")
-                    print(report.unwrap_or_else(lambda err: f"Error: {err}"))
+                    str_report = report.unwrap_or_else(lambda err: f"Error: {err}")  # type: ignore
+                    res_write = text_file_write(config.sample_output_path, str_report)
+                    print(f"\n\nReport written to {config.sample_output_path}, {res_write=}")
 
 
 async def _generate_report_for_portfolio(
@@ -225,9 +221,7 @@ async def validate_10k_access(
         # if ticker_re else ""
         # print(f"{out=}")
 
-        logger.debug(
-            f"validate_10k_access({resource_auth_id=}, {viewer_auth_id=}, {ticker=}"
-        )
+        logger.debug(f"validate_10k_access({resource_auth_id=}, {viewer_auth_id=}, {ticker=}")
         path = "python/src/semantic_retrieval/examples/financial_report/access_control/iam_simulation_db.json"
         db_iam_simulation = json.loads(file_contents(path))["access_10ks"]
         return ticker in db_iam_simulation.get(viewer_auth_id, [])
