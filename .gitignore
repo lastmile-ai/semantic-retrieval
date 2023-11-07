@@ -15,4 +15,5 @@ semantic_retrieval.egg-info
 .ipynb_checkpoints
 **scratch**
 python/build
+python/dist
 callback_data.json

@@ -2,12 +2,14 @@ from abc import ABC, abstractmethod
 from typing import Any, Dict, List, Optional
 
 from semantic_retrieval.common.base import Attributable
+from semantic_retrieval.common.types import CallbackEvent
 
 from semantic_retrieval.transformation.transformer import Transformer
 
 from semantic_retrieval.common.json_types import JSONObject
 
 from semantic_retrieval.document.document import Document, DocumentFragment
+from semantic_retrieval.utils.callbacks import CallbackManager, Traceable
 
 
 class VectorEmbedding(Attributable):
@@ -46,9 +48,10 @@ class EmbeddingsTransformer(Transformer):
         pass
 
 
-class DocumentEmbeddingsTransformer(EmbeddingsTransformer):
-    def __init__(self, dimensions: int):
+class DocumentEmbeddingsTransformer(EmbeddingsTransformer, Traceable):
+    def __init__(self, dimensions: int, callback_manager: CallbackManager):
         super().__init__(dimensions)
+        self.callback_manager = callback_manager
 
     async def embed_fragment(
         self, fragment: DocumentFragment, model_handle: Optional[ModelHandle]
@@ -68,6 +71,16 @@ class DocumentEmbeddingsTransformer(EmbeddingsTransformer):
         embeddings = []
         for fragment in document.fragments:
             embeddings.append(await self.embed_fragment(fragment, model_handle))
+
+        await self.callback_manager.run_callbacks(
+            CallbackEvent(
+                name="document_embeddings_document_transformed",
+                data=dict(
+                    document=document,
+                    embeddings=embeddings,
+                ),
+            )
+        )
         return embeddings
 
     @abstractmethod

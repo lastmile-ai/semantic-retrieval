@@ -5,10 +5,12 @@ from semantic_retrieval.document.metadata.in_memory_document_metadata_db import 
 )
 import tempfile
 
+from semantic_retrieval.utils.callbacks import CallbackManager
+
 
 @pytest.mark.asyncio
 async def test_in_memory_db():
-    db = InMemoryDocumentMetadataDB()
+    db = InMemoryDocumentMetadataDB(callback_manager=CallbackManager.default())
 
     await db.set_metadata(
         "test",

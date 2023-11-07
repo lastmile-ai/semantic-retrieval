@@ -7,5 +7,5 @@ from typing import Any
 
 class DataSource(ABC):
     @abstractmethod
-    def load_documents(self, filters: Any, limit: int) -> list[RawDocument]:
+    async def load_documents(self, filters: Any, limit: int) -> list[RawDocument]:
         pass
