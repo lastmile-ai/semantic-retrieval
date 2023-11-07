@@ -37,7 +37,7 @@ async def run_thunk_safe(thunk: Coroutine[Any, Any, T], timeout: int) -> Result[
         res = await asyncio.wait_for(task, timeout=timeout)
         return Ok(res)
     except BaseException as e:  # type: ignore
-        # TODO log
+        # TODO [P1] log
         return Err(str(e))
 
 
