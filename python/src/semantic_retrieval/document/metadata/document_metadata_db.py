@@ -24,5 +24,7 @@ class DocumentMetadataDB(ABC):
         pass
 
     @abstractmethod
-    async def query_document_ids(self, query: DocumentMetadataQuery) -> List[str]:
+    async def query_document_ids(
+        self, query: DocumentMetadataQuery, run_id: str
+    ) -> List[str]:
         pass

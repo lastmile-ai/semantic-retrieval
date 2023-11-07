@@ -1,7 +1,7 @@
 from uuid import uuid4
 from hashlib import md5
 from typing import List, Optional
-from semantic_retrieval.common.types import Record
+from semantic_retrieval.common.types import CallbackEvent, Record
 
 from semantic_retrieval.document.metadata.document_metadata_db import DocumentMetadataDB
 
@@ -14,29 +14,31 @@ from semantic_retrieval.document.document import (
     DocumentFragmentType,
     TransformedDocument,
 )
+from semantic_retrieval.utils.callbacks import CallbackManager, Traceable
 
 
 class TextChunkConfig(Record):
     chunk_size_limit: int
     chunk_overlap: int
-    # size_fn: Callable[[Any], int]
 
 
 class TextChunkTransformerParams:
     metadata_db: Optional[DocumentMetadataDB]
-    # text_chunk_config: TextChunkConfig
 
 
 async def _len(x: str) -> int:
     return len(x)
 
 
-class TextChunkTransformer(BaseDocumentTransformer):
-    def __init__(self, params: Optional[TextChunkTransformerParams] = None):
+class TextChunkTransformer(BaseDocumentTransformer, Traceable):
+    def __init__(
+        self, params: TextChunkTransformerParams, callback_manager: CallbackManager
+    ):
         self.params = params
         self.size_fn = _len
         self.chunk_size_limit = 500
         self.chunk_overlap = 100
+        self.callback_manager = callback_manager
 
     async def chunk_text(self, text: str) -> List[str]:
         raise NotImplementedError("This method must be implemented in a derived class")
@@ -99,15 +101,16 @@ class TextChunkTransformer(BaseDocumentTransformer):
             attributes={},
         )
 
-        # TODO [P0]: callback
-        # event = TransformDocumentEvent(
-        #     name="onTransformDocument",
-        #     originalDocument=document,
-        #     transformedDocument=transformed_document,  # type: ignore [fixme]
-        # )
-
-        # if self.callback_manager:
-        #     await self.callback_manager.run_callbacks(event)
+        await self.callback_manager.run_callbacks(
+            CallbackEvent(
+                name="text_chunk_transform_document",
+                data=dict(
+                    original_document=document,
+                    transformed_document=transformed_document,
+                    original_fragments_data=original_fragments_data,
+                ),
+            )
+        )
 
         return transformed_document
 
@@ -196,6 +199,17 @@ class TextChunkTransformer(BaseDocumentTransformer):
 
         if len(current_sub_chunks) > 0:
             chunk = self.join_sub_chunks(current_sub_chunks, separator)
+
+        await self.callback_manager.run_callbacks(
+            CallbackEvent(
+                name="merge_sub_chunks",
+                data=dict(
+                    sub_chunks=sub_chunks,
+                    separator=separator,
+                    chunks=chunks,
+                ),
+            )
+        )
 
         # TODO [P1] is this correct?
         return chunks
