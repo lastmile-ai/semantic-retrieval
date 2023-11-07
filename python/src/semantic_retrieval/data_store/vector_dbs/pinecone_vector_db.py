@@ -8,7 +8,7 @@ from semantic_retrieval.access_control.access_function import (
     get_data_access_checked_list,
 )
 from semantic_retrieval.access_control.access_identity import AuthenticatedIdentity
-from semantic_retrieval.common.types import Record
+from semantic_retrieval.common.types import CallbackEvent, Record
 from semantic_retrieval.data_store.vector_dbs.vector_db import (
     VectorDB,
     VectorDBConfig,
@@ -22,6 +22,7 @@ from semantic_retrieval.transformation.embeddings.embeddings import (
     DocumentEmbeddingsTransformer,
     VectorEmbedding,
 )
+from semantic_retrieval.utils.callbacks import CallbackManager, Traceable
 
 
 class PineconeVectorDBConfig(VectorDBConfig):
@@ -53,7 +54,7 @@ class QueryParams:
         self.vector = vector
 
 
-class PineconeVectorDB(VectorDB):
+class PineconeVectorDB(VectorDB, Traceable):
     def __init__(
         self,
         config: PineconeVectorDBConfig,
@@ -61,12 +62,14 @@ class PineconeVectorDB(VectorDB):
         metadata_db: DocumentMetadataDB,
         user_access_function: AccessFunction,
         viewer_identity: AuthenticatedIdentity,
+        callback_manager: CallbackManager,
     ):
         self.config = config
         self.embeddings = embeddings
         self.metadata_db = metadata_db
         self.user_access_function = user_access_function
         self.viewer_identity = viewer_identity
+        self.callback_manager = callback_manager
 
     @classmethod
     async def from_documents(
@@ -77,15 +80,36 @@ class PineconeVectorDB(VectorDB):
         metadata_db: DocumentMetadataDB,
         user_access_function: AccessFunction,
         viewer_identity: AuthenticatedIdentity,
+        callback_manager: CallbackManager,
     ):
         instance = cls(
-            config, embeddings, metadata_db, user_access_function, viewer_identity
+            config,
+            embeddings,
+            metadata_db,
+            user_access_function,
+            viewer_identity,
+            callback_manager,
         )
         await instance.add_documents(documents)
+
+        await callback_manager.run_callbacks(
+            CallbackEvent(
+                name="pinecone_vector_db_created",
+                data=dict(
+                    vector_db=instance,
+                    config=config,
+                    embeddings=embeddings,
+                    metadata_db=metadata_db,
+                    user_access_function=user_access_function,
+                    viewer_identity=viewer_identity,
+                    documents=documents,
+                ),
+            )
+        )
         return instance
 
     def sanitize_metadata(self, unsanitized_metadata: Record):
-        # TODO [P0]
+        # TODO [P1]
         pass
 
     async def add_documents(
@@ -106,6 +130,17 @@ class PineconeVectorDB(VectorDB):
             metadata = {"text": embedding.text}
             vectors_chunk = embedding.vector
             index.upsert(namespace=self.config.namespace, vectors=[(f"vec{idx}", vectors_chunk, metadata)])  # type: ignore
+
+        await self.callback_manager.run_callbacks(
+            CallbackEvent(
+                name="pinecone_vector_db_documents_added",
+                data=dict(
+                    vector_db=self,
+                    documents=documents,
+                    embeddings=embeddings_list,
+                ),
+            )
+        )
 
     async def query(self, query: VectorDBQuery) -> List[VectorEmbedding]:
         async def _get_query_vector():
@@ -136,19 +171,34 @@ class PineconeVectorDB(VectorDB):
         )
 
         async def _resource_auth_id_fn(
-            vector_embedding: VectorEmbedding, metdata_db: DocumentMetadataDB
+            vector_embedding: VectorEmbedding,
         ) -> str:
             md = vector_embedding.metadata or {}
             doc_id = md.get("documentId", "")
             return doc_id
 
-        return await get_data_access_checked_list(
+        query_res = await get_data_access_checked_list(
             query_params,
             self.user_access_function,
             _run_query,
-            partial(_resource_auth_id_fn, metdata_db=self.metadata_db),
+            partial(_resource_auth_id_fn),
             self.viewer_identity.viewer_auth_id,
+            cm=self.callback_manager,
         )
+
+        await self.callback_manager.run_callbacks(
+            CallbackEvent(
+                name="pinecone_vector_db_query",
+                data=dict(
+                    vector_db=self,
+                    query=query,
+                    query_res=query_res,
+                    params=query_params,
+                ),
+            )
+        )
+
+        return query_res
 
 
 def _run_query(query_params: QueryParams) -> List[VectorEmbedding]:
@@ -166,8 +216,7 @@ def _run_query(query_params: QueryParams) -> List[VectorEmbedding]:
         match: ScoredVector,
     ) -> VectorEmbedding:
         return VectorEmbedding(
-            # TODO [P1] ??
-            vector=match.values[:10],
+            vector=match.values,
             metadata=match.metadata,
             text=match.metadata["text"],
         )

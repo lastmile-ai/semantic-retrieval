@@ -10,11 +10,17 @@ from semantic_retrieval.examples.financial_report.financial_report_document_retr
 
 import openai
 
+from semantic_retrieval.utils.callbacks import CallbackManager, Traceable
+
+
 logger = logging.getLogger(__name__)
 logging.basicConfig(format=LOGGER_FMT)
 
 
-class FinancialReportGenerator:
+class FinancialReportGenerator(Traceable):
+    def __init__(self, callback_manager: CallbackManager) -> None:
+        self.callback_manager = callback_manager
+
     async def run(
         self,
         # access_passport,
@@ -36,14 +42,13 @@ class FinancialReportGenerator:
 
         if res_retrieved_data.is_err():
             raise Exception(res_retrieved_data.err())
-        
-        retrieved_data  = res_retrieved_data.unwrap()
+
+        retrieved_data = res_retrieved_data.unwrap()
 
         logger.debug("Raw retrieved data:")
         logger.debug(json.dumps([rd.model_dump() for rd in retrieved_data], indent=2))
 
         retrieved_data_processed = process_retrieved_data(portfolio, retrieved_data)
-
 
         system_content = system_prompt
 
@@ -83,6 +88,7 @@ def process_retrieved_data(
 
 
 def _generate(system_content: str, user_content: str) -> str:
+    # TODO [P0.5]: implement with aiconfig
     system = {
         "role": "system",
         "content": system_content,
