@@ -1,6 +1,6 @@
 import logging
 import re
-from typing import Dict, List, NewType
+from typing import List
 
 from result import Err, Ok, Result
 from semantic_retrieval.access_control.access_function import AccessFunction
@@ -14,6 +14,7 @@ from semantic_retrieval.data_store.vector_dbs.pinecone_vector_db import (
 from semantic_retrieval.data_store.vector_dbs.vector_db import VectorDBTextQuery
 from semantic_retrieval.document.metadata.document_metadata import DocumentMetadata
 from semantic_retrieval.document.metadata.document_metadata_db import DocumentMetadataDB
+from semantic_retrieval.examples.financial_report.lib.common import PortfolioData
 
 from semantic_retrieval.retrieval.csv_retriever import CSVRetriever
 from semantic_retrieval.transformation.embeddings.embeddings import VectorEmbedding
@@ -32,9 +33,6 @@ logging.basicConfig(format=LOGGER_FMT)
 class FinancialReportData(Record):
     company: str
     details: str
-
-
-PortfolioData = NewType("PortfolioData", Dict[str, int])
 
 
 class FinancialReportDocumentRetriever(Traceable):
