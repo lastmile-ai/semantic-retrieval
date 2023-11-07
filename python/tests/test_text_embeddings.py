@@ -6,6 +6,7 @@ from semantic_retrieval.transformation.embeddings.openai_embeddings import (
     OpenAIEmbeddings,
     OpenAIEmbeddingsConfig,
 )
+from semantic_retrieval.utils.callbacks import CallbackManager
 
 
 class _MockResult:
@@ -25,7 +26,7 @@ class MockModelHandle(ModelHandle):
 @pytest.mark.asyncio
 async def test_openai_emb_query():
     cfg = OpenAIEmbeddingsConfig(api_key="mock_key")
-    e = OpenAIEmbeddings(cfg)
+    e = OpenAIEmbeddings(cfg, callback_manager=CallbackManager.default())
 
     model_handle = MockModelHandle()
     res = await e.embed("hello world", model_handle=model_handle)

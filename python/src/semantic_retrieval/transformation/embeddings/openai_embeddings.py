@@ -1,12 +1,10 @@
 import os
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Dict, List, Optional
 import openai
 
 from tiktoken import encoding_for_model
 from semantic_retrieval.common.json_types import JSONObject
-from semantic_retrieval.common.types import Record
-
-# from openai import OpenAI, EmbeddingsResponse
+from semantic_retrieval.common.types import CallbackEvent, Record
 
 from semantic_retrieval.transformation.embeddings.embeddings import (
     DocumentEmbeddingsTransformer,
@@ -15,6 +13,7 @@ from semantic_retrieval.transformation.embeddings.embeddings import (
 )
 
 from semantic_retrieval.document.document import Document
+from semantic_retrieval.utils.callbacks import CallbackManager, Traceable
 
 
 class EmbedFragmentData(Record):
@@ -28,7 +27,7 @@ class OpenAIEmbeddingsConfig(Record):
 
 
 class OpenAIEmbeddingsHandle(ModelHandle):
-    creator: Callable[[Any], Any] = openai.Embedding
+    creator: Any = openai.Embedding
 
 
 DEFAULT_MODEL = "text-embedding-ada-002"
@@ -38,14 +37,20 @@ MODEL_DIMENSIONS = {
 }
 
 
-class OpenAIEmbeddings(DocumentEmbeddingsTransformer):
+class OpenAIEmbeddings(DocumentEmbeddingsTransformer, Traceable):
     model = DEFAULT_MODEL
 
     # TODO [P1]: Handle this for other models when they are supported
     max_encoding_length = 8191
 
-    def __init__(self, config: OpenAIEmbeddingsConfig):
-        super().__init__(MODEL_DIMENSIONS[DEFAULT_MODEL])
+    def __init__(
+        self, config: OpenAIEmbeddingsConfig, callback_manager: CallbackManager
+    ):
+        super().__init__(
+            MODEL_DIMENSIONS[DEFAULT_MODEL], callback_manager=callback_manager
+        )
+
+        self.callback_manager = callback_manager
 
         api_key = config.api_key if config else os.getenv("OPENAI_API_KEY")
         if not api_key:
@@ -77,7 +82,7 @@ class OpenAIEmbeddings(DocumentEmbeddingsTransformer):
         # TODO [P1] type this better
         embedding_res: Dict[Any, Any] = model_handle.creator.create(input=[text], model=self.model).to_dict_recursive()  # type: ignore
         # TODO: [P1] include usage
-        # TODO: [P0] metadata
+        # TODO: [P0.5] metadata
         return VectorEmbedding(
             vector=embedding_res["data"][0]["embedding"],
             text=text,
@@ -90,7 +95,9 @@ class OpenAIEmbeddings(DocumentEmbeddingsTransformer):
             attributes={},
         )
 
-    async def transform_documents(self, documents: List[Document]) -> List[VectorEmbedding]:  # type: ignore [fixme]
+    async def transform_documents(
+        self, documents: List[Document], model_handle: Optional[ModelHandle] = None
+    ) -> List[VectorEmbedding]:
         # TODO [P0]: Update this to batch embeddings instead of creating one at a time
         # Use this to batch create embeddings with openai - https://platform.openai.com/docs/api-reference/embeddings/create
         # See: https://github.com/run-llama/llama_index/blob/408923fafbcefdabfd76c8fa609b570fe80b1b2f/llama_index/embeddings/base.py#L231
@@ -113,6 +120,16 @@ class OpenAIEmbeddings(DocumentEmbeddingsTransformer):
                 )
 
                 embeddings.extend(vec_embeddings)
+
+        await self.callback_manager.run_callbacks(
+            CallbackEvent(
+                name="openai_embeddings_documents_transformed",
+                data=dict(
+                    documents=documents,
+                    embeddings=embeddings,
+                ),
+            )
+        )
 
         return embeddings
 
@@ -138,5 +155,15 @@ class OpenAIEmbeddings(DocumentEmbeddingsTransformer):
                     },
                 )
             )
+
+        await self.callback_manager.run_callbacks(
+            CallbackEvent(
+                name="openai_embeddings_created",
+                data=dict(
+                    fragments=fragments,
+                    embeddings=vector_embeddings,
+                ),
+            )
+        )
 
         return vector_embeddings

@@ -44,6 +44,8 @@ from semantic_retrieval.transformation.embeddings.openai_embeddings import (
 
 import semantic_retrieval.examples.financial_report.financial_report_document_retriever as frdr
 
+from semantic_retrieval.utils import callbacks as lib_callbacks
+
 logger = logging.getLogger(__name__)
 logging.basicConfig(format=LOGGER_FMT)
 
@@ -53,7 +55,7 @@ class FinancialReport(Record):
 
 
 async def main(argv: List[str]):
-    loggers = [logger, frg.logger, frdr.logger]
+    loggers = [logger, frg.logger, frdr.logger, lib_callbacks.logger]
 
     args = set_up_script(argv, loggers)
     config = get_config(args)
@@ -66,6 +68,14 @@ async def main(argv: List[str]):
 async def run_generate_report(config: Config):
     metadata_path = resolve_path(config.data_root, config.metadata_db_path)
     res_metadata_db = await InMemoryDocumentMetadataDB.from_json_file(metadata_path)
+
+    callback_manager = lib_callbacks.CallbackManager(
+        [
+            lib_callbacks.to_json(
+                "examples/example_data/financial_report/artifacts/callback_data.json"
+            )
+        ]
+    )
 
     match res_metadata_db:
         case Err(msg):
@@ -94,6 +104,7 @@ async def run_generate_report(config: Config):
                 file_path=resolve_path(config.data_root, portfolio_csv_path),
                 viewer_identity=viewer_identity,
                 user_access_function=portfolio_access_function,
+                callback_manager=callback_manager,
             )
 
             res_portfolio: Result[
@@ -111,6 +122,7 @@ async def run_generate_report(config: Config):
                         metadata_db=metadata_db,
                         config=config,
                         viewer_identity=viewer_identity,
+                        callback_manager=callback_manager,
                     )
 
                     # TODO [P1]: Save res to disk
@@ -125,6 +137,7 @@ async def _generate_report_for_portfolio(
     metadata_db: InMemoryDocumentMetadataDB,
     viewer_identity: AuthenticatedIdentity,
     config: Config,
+    callback_manager: lib_callbacks.CallbackManager,
 ) -> Result[str, str]:
     portfolio = portfolio_df_to_dict(df_portfolio)
     logger.info("\nPortfolio:\n" + json.dumps(portfolio, indent=2))
@@ -140,9 +153,10 @@ async def _generate_report_for_portfolio(
         metadata_db=metadata_db,
         viewer_identity=viewer_identity,
         user_access_function=access_function_10k,
+        callback_manager=callback_manager,
     )
 
-    generator = FinancialReportGenerator()
+    generator = FinancialReportGenerator(callback_manager=callback_manager)
 
     retrieval_query = config.retrieval_query
 
