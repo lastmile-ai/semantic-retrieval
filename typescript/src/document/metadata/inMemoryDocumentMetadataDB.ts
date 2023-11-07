@@ -1,4 +1,5 @@
 import { DocumentMetadata } from "./documentMetadata";
+import { Document } from "../document";
 import {
   DocumentMetadataDB,
   DocumentMetadataDBQuery,
@@ -78,6 +79,20 @@ export class InMemoryDocumentMetadataDB implements DocumentMetadataDB {
   ): Promise<InMemoryDocumentMetadataDB> {
     const json = await (await fs.readFile(filePath)).toString();
     const map = JSON.parse(json, deserializer);
+    (Object.values(map) as DocumentMetadata[]).forEach((metadata) => {
+      if (!metadata.document) {
+        metadata.document = {
+          documentId: metadata.documentId,
+          collectionId: metadata.collectionId,
+          fragments: [],
+          serialize: async () => {
+            throw new Error(
+              "Unable to serialize document with partial data from metadataDB"
+            );
+          },
+        } as Document;
+      }
+    });
     return new InMemoryDocumentMetadataDB(map);
   }
 }
