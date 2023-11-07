@@ -22,6 +22,7 @@ from semantic_retrieval.transformation.embeddings.openai_embeddings import (
     OpenAIEmbeddingsConfig,
 )
 from semantic_retrieval.utils.callbacks import CallbackManager, Traceable
+from semantic_retrieval.utils.interop import canonical_field
 
 
 logger = logging.getLogger(__name__)
@@ -91,10 +92,11 @@ class FinancialReportDocumentRetriever(Traceable):
         knn = await self.vector_db.query(vectordb_text_query)
 
         def _get_doc_id(result: VectorEmbedding) -> str:
+            logger.debug(f"{(result.metadata or {}).keys()=}")
             if result.metadata is None:
                 return ""
             else:
-                return result.metadata["documentId"]
+                return result.metadata[canonical_field("document_id")]
 
         retrieved_doc_ids = {_get_doc_id(result) for result in knn}
 
