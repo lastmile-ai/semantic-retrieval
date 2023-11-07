@@ -8,7 +8,6 @@ from semantic_retrieval.document_parsers.multi_document_parser import (
     ParserConfig,
 )
 from semantic_retrieval.transformation.document.text.separator_text_chunker import (
-    SeparatorTextChunkConfig,
     SeparatorTextChunker,
     SeparatorTextChunkerParams,
 )
@@ -44,15 +43,13 @@ async def test_create_index():
         callback_manager=cm,
     )
 
-    separator_text_chunk_config = SeparatorTextChunkConfig(
-        chunk_size_limit=500,
-        chunk_overlap=100,
-    )
-
     documentTransformer = SeparatorTextChunker(
-        separator_text_chunk_config=separator_text_chunk_config,
         params=SeparatorTextChunkerParams(
-            separator_text_chunk_config=separator_text_chunk_config,
+            separator=" ",
+            strip_new_lines=True,
+            chunk_size_limit=500,
+            chunk_overlap=100,
+            document_metadata_db=metadata_db,
         ),
         callback_manager=cm,
     )

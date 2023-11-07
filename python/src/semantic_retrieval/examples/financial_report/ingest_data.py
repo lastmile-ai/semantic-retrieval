@@ -31,7 +31,6 @@ from semantic_retrieval.access_control.always_allow_document_access_policy_facto
 
 
 from semantic_retrieval.transformation.document.text.separator_text_chunker import (
-    SeparatorTextChunkConfig,
     SeparatorTextChunker,
     SeparatorTextChunkerParams,
 )
@@ -101,16 +100,13 @@ async def run_ingest(config: Config):
     )
 
     # Initialize a document transformer
-    separator_text_chunk_config = SeparatorTextChunkConfig(
-        chunk_size_limit=500,
-        chunk_overlap=100,
-    )
-
-    # TODO [P1] set parameters better
     documentTransformer = SeparatorTextChunker(
-        separator_text_chunk_config=separator_text_chunk_config,
         params=SeparatorTextChunkerParams(
-            separator_text_chunk_config=separator_text_chunk_config,
+            separator=" ",
+            strip_new_lines=True,
+            chunk_size_limit=500,
+            chunk_overlap=100,
+            document_metadata_db=metadata_db,
         ),
         callback_manager=callback_manager,
     )
@@ -121,8 +117,6 @@ async def run_ingest(config: Config):
     )
 
     # Generate a new namespace using UUID
-    namespace = "ns123"
-    print(f"NAMESPACE: {namespace}")
 
     # Create a PineconeVectorDB instance and index the transformed documents
     pinecone_vectordb_config = PineconeVectorDBConfig(

@@ -145,17 +145,24 @@ class PineconeVectorDB(VectorDB, Traceable):
         logger.info(f"Upserting {len(embeddings_list)} to Pinecone")
 
         def _ve_to_pcv(ve: VectorEmbedding, idx: int) -> PCVector:
+            md = ve.metadata or {}
+            # logger.debug(f'VE DOC ID={md.get("document_id", "no doc ID")=}')
+            md_canonical = {canonical_field(f): v for f, v in md.items()}
+            logger.debug(f"{md_canonical.keys()=}")
             return PCVector(
                 id=f"vec{idx}",
                 vector=ve.vector,
-                metadata=ve.metadata or {},
+                metadata=md_canonical,
             )
 
         _upsert_results = _batch_upsert(
-            [_ve_to_pcv(ve, idx) for idx, ve in enumerate(embeddings_list)],
-            self.config.index_name,
-            30,
-            100,
+            vectors_iterable=[
+                _ve_to_pcv(ve, idx) for idx, ve in enumerate(embeddings_list)
+            ],
+            index_name=self.config.index_name,
+            namespace=self.config.namespace,
+            pool_threads=30,
+            batch_size=100,
         )
 
         await self.callback_manager.run_callbacks(
@@ -258,17 +265,23 @@ def _run_query(query_params: QueryParams) -> List[VectorEmbedding]:
 def _batch_upsert(
     vectors_iterable: Iterable[PCVector],
     index_name: str,
+    namespace: str,
     pool_threads: int,
     batch_size: int,
 ) -> List[pinecone.UpsertResponse]:
     with pinecone.Index(index_name, pool_threads=pool_threads) as index:
+        logger.debug(f"[batch upsert] {index_name=}")
+        the_vectors = list(vectors_iterable)
+        logger.debug("the vectors=" + str([tv.metadata.keys()] for tv in the_vectors))
         # Send requests in parallel
         async_results = [
             index.upsert(
-                vectors=[v.as_tuple() for v in ids_vectors_chunk], async_req=True
+                vectors=[v.as_tuple() for v in ids_vectors_chunk],
+                async_req=True,
+                namespace=namespace,
             )
             for ids_vectors_chunk in unflatten_iterable(
-                vectors_iterable, chunk_size=batch_size
+                the_vectors, chunk_size=batch_size
             )
         ]
         # Wait for and retrieve responses (this raises in case of error)

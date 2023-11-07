@@ -23,6 +23,8 @@ class TextChunkConfig(Record):
 
 
 class TextChunkTransformerParams:
+    separator: str = " "
+    strip_new_lines: bool = True
     metadata_db: Optional[DocumentMetadataDB]
 
 
@@ -31,10 +33,7 @@ async def _len(x: str) -> int:
 
 
 class TextChunkTransformer(BaseDocumentTransformer, Traceable):
-    def __init__(
-        self, params: TextChunkTransformerParams, callback_manager: CallbackManager
-    ):
-        self.params = params
+    def __init__(self, callback_manager: CallbackManager):
         self.size_fn = _len
         self.chunk_size_limit = 500
         self.chunk_overlap = 100
