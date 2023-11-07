@@ -16,8 +16,10 @@ from semantic_retrieval.transformation.document.text.separator_text_chunker impo
 import semantic_retrieval.document_parsers.multi_document_parser as mdp
 from dotenv import load_dotenv
 
+from semantic_retrieval.utils.callbacks import CallbackManager
 
-metadata_db = InMemoryDocumentMetadataDB()
+
+metadata_db = InMemoryDocumentMetadataDB(callback_manager=CallbackManager.default())
 
 
 @pytest.mark.asyncio
@@ -29,36 +31,35 @@ async def test_create_index():
     cwd = os.path.normpath(os.getcwd())
     root_dir = os.path.join(cwd, "..") if cwd.endswith("python") else cwd
     full_path = os.path.join(root_dir, rel_path_from_python_root)
-    file_system = FileSystem(full_path)
-    raw_documents = file_system.load_documents()
+
+    cm = CallbackManager.default()
+    file_system = FileSystem(full_path, callback_manager=cm)
+    raw_documents = await file_system.load_documents()
 
     parsed_documents = await mdp.parse_documents(
         raw_documents,
         parser_config=ParserConfig(
             metadata_db=metadata_db, access_control_policy_factory=None
         ),
+        callback_manager=cm,
     )
 
-    stcc = SeparatorTextChunkConfig(
+    separator_text_chunk_config = SeparatorTextChunkConfig(
         chunk_size_limit=500,
         chunk_overlap=100,
     )
 
     documentTransformer = SeparatorTextChunker(
-        stcc=stcc,
+        separator_text_chunk_config=separator_text_chunk_config,
         params=SeparatorTextChunkerParams(
-            separator_text_chunk_config=stcc,
-            # text_chunk_config=TextChunkConfig(
-            #     chunk_size_limit=500,
-            #     chunk_overlap=100,
-            # ),
-            # metadata_db=metadata_db,
+            separator_text_chunk_config=separator_text_chunk_config,
         ),
+        callback_manager=cm,
     )
 
     # Transform the parsed documents
     _transformed_documents = await documentTransformer.transform_documents(
-        parsed_documents
+        parsed_documents,
     )
 
     # TODO [P1]: Commenting out for now to get tests to pass, will add back in later - want to ship to have notebook ready

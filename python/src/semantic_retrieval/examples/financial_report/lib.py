@@ -21,6 +21,7 @@ from semantic_retrieval.examples.financial_report.financial_report_document_retr
 from semantic_retrieval.retrieval.csv_retriever import CSVRetriever
 
 from semantic_retrieval.evaluation import metrics
+from semantic_retrieval.utils.callbacks import CallbackManager
 
 
 logger = logging.getLogger(__name__)
@@ -78,7 +79,10 @@ async def test_3_4_data_muncher(
 
     async def portfolio_data_muncher(path: str) -> Result[IDSet, str]:
         portfolio = await CSVRetriever(
-            path, AuthenticatedIdentity.mock(), always_allow()
+            path,
+            AuthenticatedIdentity.mock(),
+            always_allow(),
+            callback_manager=CallbackManager.default(),
         ).retrieve_data()
 
         return portfolio.map(_key_set)
