@@ -202,7 +202,7 @@ function getLoggingCallbackManager(verboseLogging: boolean) {
         console.log("Fragment policy check failed: ", {
           fragmentId: event.fragment.fragmentId,
           documentId: event.fragment.documentId,
-          policy: event.policy.policy,
+          policy: event.policy?.policy ?? "No policy specified",
         });
       },
     ],

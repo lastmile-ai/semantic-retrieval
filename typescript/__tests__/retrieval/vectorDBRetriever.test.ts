@@ -7,10 +7,7 @@ import { VectorEmbedding } from "../../src/transformation/embeddings/embeddings"
 import { VectorDBTextQuery } from "../../src/data-store/vector-DBs/vectorDB";
 import { AccessPassport } from "../../src/access-control/accessPassport";
 import { ResourceAccessPolicy } from "../../src/access-control/resourceAccessPolicy";
-import {
-  getTestDocument,
-  getTestDocumentFragment,
-} from "../__utils__/testDocumentUtils";
+import { getTestDocument } from "../__utils__/testDocumentUtils";
 import { AlwaysAllowAccessPolicy } from "../../src/access-control/policies/alwaysAllowAccessPolicy";
 
 const mockQuery = jest.fn();
@@ -130,6 +127,11 @@ describe("retrieveDocuments retrieves correct data", () => {
         metadata: {
           test: "test metadata for document A",
         },
+        accessPolicies: [new AlwaysAllowAccessPolicy()],
+      },
+      "test-document-id-B": {
+        ...DOCUMENT_B_METADATA,
+        accessPolicies: [new AlwaysAllowAccessPolicy()],
       },
       "test-document-id-C": {
         ...DOCUMENT_C_METADATA,
@@ -137,6 +139,7 @@ describe("retrieveDocuments retrieves correct data", () => {
           test: "test metadata for document C",
         },
         attributes: { type: "webpage" },
+        accessPolicies: [new AlwaysAllowAccessPolicy()],
       },
     });
 

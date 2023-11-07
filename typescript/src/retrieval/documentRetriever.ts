@@ -59,30 +59,37 @@ export abstract class DocumentRetriever<R = unknown> extends BaseRetriever {
           fragment.documentId
         );
 
-        // If there is no metadata for the document, assume that the document is accessible
-        if (metadata && metadata.accessPolicies && metadata.document) {
-          const policyChecks = await Promise.all(
-            metadata.accessPolicies.map(async (policy) => ({
-              policy,
-              passed: await policy.testDocumentReadPermission(
-                metadata.document!,
-                policy.resource
-                  ? accessPassport?.getIdentity(policy.resource)
-                  : undefined
-              ),
-            }))
-          );
+        // Default to hidden; only show fragments with explicitly-allowing policies
+        if (!(metadata && metadata.accessPolicies && metadata.document)) {
+          await this.callbackManager?.runCallbacks({
+            name: "onRetrievedFragmentPolicyCheckFailed",
+            fragment,
+            policy: null,
+          });
+          return null;
+        }
 
-          for (const check of policyChecks) {
-            if (!check.passed) {
-              await this.callbackManager?.runCallbacks({
-                name: "onRetrievedFragmentPolicyCheckFailed",
-                fragment,
-                policy: check.policy,
-              });
+        const policyChecks = await Promise.all(
+          metadata.accessPolicies.map(async (policy) => ({
+            policy,
+            passed: await policy.testDocumentReadPermission(
+              metadata.document!,
+              policy.resource
+                ? accessPassport?.getIdentity(policy.resource)
+                : undefined
+            ),
+          }))
+        );
 
-              return null;
-            }
+        for (const check of policyChecks) {
+          if (!check.passed) {
+            await this.callbackManager?.runCallbacks({
+              name: "onRetrievedFragmentPolicyCheckFailed",
+              fragment,
+              policy: check.policy,
+            });
+
+            return null;
           }
         }
 
