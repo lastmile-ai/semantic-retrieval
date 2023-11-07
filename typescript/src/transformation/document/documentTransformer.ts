@@ -35,10 +35,22 @@ export abstract class BaseDocumentTransformer
       const transformedDocument = await this.transformDocument(document);
       const originalDocumentMetadata =
         await this.documentMetadataDB?.getMetadata(document.documentId);
+
+      // Pre-transformed doc may have source documents from previous transformations
+      let sourceDocumentIds = originalDocumentMetadata?.sourceDocumentIds;
+      if (
+        (sourceDocumentIds == null || sourceDocumentIds.length === 0) &&
+        originalDocumentMetadata?.rawDocument != null
+      ) {
+        // Pre-transformed doc was ingested from a raw document so it is the 'source' document
+        sourceDocumentIds = [document.documentId];
+      }
+
       await this.documentMetadataDB?.setMetadata(
         transformedDocument.documentId,
         {
-          ...originalDocumentMetadata,
+          ...originalDocumentMetadata, // TODO: Probably only need a subset (e.g. accessPolicies), excluding rawDocument
+          sourceDocumentIds,
           documentId: transformedDocument.documentId,
           document: transformedDocument,
           uri: originalDocumentMetadata?.uri ?? transformedDocument.documentId,

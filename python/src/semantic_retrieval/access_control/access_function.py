@@ -73,7 +73,6 @@ async def get_data_access_checked_list(
     ]
 
     allowed, denied = result_reduce_list_separate(data_list_checked)
-    # TODO [P1]: log denied
 
     await cm.run_callbacks(
         CallbackEvent(
@@ -82,8 +81,8 @@ async def get_data_access_checked_list(
                 params=params,
                 resource_auth_id_fn=resource_auth_id_fn,
                 viewer_auth_id=viewer_auth_id,
-                allowed=allowed,
-                denied=denied,
+                n_allowed=len(allowed),
+                n_denied=len(denied),
             ),
         ),
     )

@@ -1,5 +1,7 @@
+from dataclasses import dataclass
 from functools import partial
-from typing import Any, Dict, List
+import logging
+from typing import Any, Dict, Iterable, List
 
 import pinecone
 from pinecone import ScoredVector
@@ -8,6 +10,7 @@ from semantic_retrieval.access_control.access_function import (
     get_data_access_checked_list,
 )
 from semantic_retrieval.access_control.access_identity import AuthenticatedIdentity
+from semantic_retrieval.common.core import LOGGER_FMT, unflatten_iterable
 from semantic_retrieval.common.types import CallbackEvent, Record
 from semantic_retrieval.data_store.vector_dbs.vector_db import (
     VectorDB,
@@ -23,6 +26,10 @@ from semantic_retrieval.transformation.embeddings.embeddings import (
     VectorEmbedding,
 )
 from semantic_retrieval.utils.callbacks import CallbackManager, Traceable
+from semantic_retrieval.utils.interop import canonical_field
+
+logger = logging.getLogger(__name__)
+logging.basicConfig(format=LOGGER_FMT)
 
 
 class PineconeVectorDBConfig(VectorDBConfig):
@@ -30,6 +37,16 @@ class PineconeVectorDBConfig(VectorDBConfig):
     api_key: str
     environment: str
     namespace: str
+
+
+@dataclass
+class PCVector:
+    id: str
+    vector: List[float]
+    metadata: Dict[str, Any]
+
+    def as_tuple(self):
+        return (self.id, self.vector, self.metadata)
 
 
 class QueryParams:
@@ -98,11 +115,11 @@ class PineconeVectorDB(VectorDB, Traceable):
                 data=dict(
                     vector_db=instance,
                     config=config,
-                    embeddings=embeddings,
+                    embeddings_transformer=embeddings,
                     metadata_db=metadata_db,
                     user_access_function=user_access_function,
                     viewer_identity=viewer_identity,
-                    documents=documents,
+                    n_documents=len(documents),
                 ),
             )
         )
@@ -116,28 +133,47 @@ class PineconeVectorDB(VectorDB, Traceable):
         self,
         documents: List[Document],
     ):
+        print(f"{self.config.api_key=}")
         pinecone.init(api_key=self.config.api_key, environment=self.config.environment)
-        index = pinecone.Index(self.config.index_name)
+        # index = pinecone.Index(self.config.index_name)
 
         embedding_creator = self.embeddings
 
+        logger.info("Getting embeddings")
         embeddings_list = await embedding_creator.transform_documents(documents)
 
-        # TODO [P0]: Update this to batch to get faster performance
-        # Use this for batching to pinecone
-        # https://docs.pinecone.io/docs/insert-data#batching-upserts
-        for idx, embedding in enumerate(embeddings_list):
-            metadata = {"text": embedding.text}
-            vectors_chunk = embedding.vector
-            index.upsert(namespace=self.config.namespace, vectors=[(f"vec{idx}", vectors_chunk, metadata)])  # type: ignore
+        logger.info(f"Upserting {len(embeddings_list)} to Pinecone")
+
+        def _ve_to_pcv(ve: VectorEmbedding, idx: int) -> PCVector:
+            md = ve.metadata or {}
+            # logger.debug(f'VE DOC ID={md.get("document_id", "no doc ID")=}')
+            md_canonical = {canonical_field(f): v for f, v in md.items()}
+            logger.debug(f"{md_canonical.keys()=}")
+            return PCVector(
+                id=f"vec{idx}",
+                vector=ve.vector,
+                metadata=md_canonical,
+            )
+
+        _upsert_results = _batch_upsert(
+            vectors_iterable=[
+                _ve_to_pcv(ve, idx) for idx, ve in enumerate(embeddings_list)
+            ],
+            index_name=self.config.index_name,
+            namespace=self.config.namespace,
+            pool_threads=30,
+            batch_size=100,
+        )
 
         await self.callback_manager.run_callbacks(
             CallbackEvent(
                 name="pinecone_vector_db_documents_added",
                 data=dict(
                     vector_db=self,
-                    documents=documents,
-                    embeddings=embeddings_list,
+                    n_documents=len(documents),
+                    n_embeddings=len(embeddings_list),
+                    n_upsert_batchs=len(_upsert_results),
+                    first_upsert_res=_upsert_results[0],
                 ),
             )
         )
@@ -156,6 +192,7 @@ class PineconeVectorDB(VectorDB, Traceable):
 
         vec = await _get_query_vector()
 
+        print(f"{self.config.api_key=}")
         pinecone.init(api_key=self.config.api_key, environment=self.config.environment)
         index = pinecone.Index(self.config.index_name)
 
@@ -174,7 +211,7 @@ class PineconeVectorDB(VectorDB, Traceable):
             vector_embedding: VectorEmbedding,
         ) -> str:
             md = vector_embedding.metadata or {}
-            doc_id = md.get("documentId", "")
+            doc_id = md.get(canonical_field("document_id"), "")
             return doc_id
 
         query_res = await get_data_access_checked_list(
@@ -192,8 +229,9 @@ class PineconeVectorDB(VectorDB, Traceable):
                 data=dict(
                     vector_db=self,
                     query=query,
-                    query_res=query_res,
+                    # query_res=query_res,
                     params=query_params,
+                    n_res=len(query_res),
                 ),
             )
         )
@@ -222,3 +260,34 @@ def _run_query(query_params: QueryParams) -> List[VectorEmbedding]:
         )
 
     return list(map(_response_record_to_vector_embedding, query_response.matches))
+
+
+def _batch_upsert(
+    vectors_iterable: Iterable[PCVector],
+    index_name: str,
+    namespace: str,
+    pool_threads: int,
+    batch_size: int,
+) -> List[pinecone.UpsertResponse]:
+    with pinecone.Index(index_name, pool_threads=pool_threads) as index:
+        logger.debug(f"[batch upsert] {index_name=}")
+        the_vectors = list(vectors_iterable)
+        logger.debug("the vectors=" + str([tv.metadata.keys()] for tv in the_vectors))
+        # Send requests in parallel
+        async_results = [
+            index.upsert(
+                vectors=[v.as_tuple() for v in ids_vectors_chunk],
+                async_req=True,
+                namespace=namespace,
+            )
+            for ids_vectors_chunk in unflatten_iterable(
+                the_vectors, chunk_size=batch_size
+            )
+        ]
+        # Wait for and retrieve responses (this raises in case of error)
+        results = []
+        for i, async_result in enumerate(async_results):
+            results.append(async_result)
+            logger.debug(f"upsert_res={i}, {async_result=}")
+
+        return results

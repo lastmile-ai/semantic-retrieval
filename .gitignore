@@ -6,6 +6,8 @@ typescript/lastmileai-semantic-retrieval-v0.0.1.tgz
 .env
 
 python/build
+python/dist
+python/**/*.egg-info/
 __pycache__/
 .mypy_cache/
 .pytest_cache/
@@ -17,3 +19,4 @@ semantic_retrieval.egg-info
 python/build
 python/dist
 callback_data.json
+examples/example_data/financial_report/artifacts/the_metadata_db*

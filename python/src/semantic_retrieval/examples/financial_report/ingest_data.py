@@ -2,11 +2,16 @@ import asyncio
 import logging
 import sys
 from typing import List
+from semantic_retrieval.access_control.access_function import always_allow
+from semantic_retrieval.access_control.access_identity import AuthenticatedIdentity
 
 from semantic_retrieval.common.core import LOGGER_FMT
+from semantic_retrieval.data_store.vector_dbs import pinecone_vector_db
 from semantic_retrieval.examples.financial_report.config import (
     Config,
     get_config,
+    get_metadata_db_path,
+    resolve_path,
     set_up_script,
 )
 
@@ -26,7 +31,6 @@ from semantic_retrieval.access_control.always_allow_document_access_policy_facto
 
 
 from semantic_retrieval.transformation.document.text.separator_text_chunker import (
-    SeparatorTextChunkConfig,
     SeparatorTextChunker,
     SeparatorTextChunkerParams,
 )
@@ -35,6 +39,7 @@ from semantic_retrieval.data_store.vector_dbs.pinecone_vector_db import (
     PineconeVectorDB,
     PineconeVectorDBConfig,
 )
+from semantic_retrieval.transformation.embeddings import openai_embeddings
 
 from semantic_retrieval.transformation.embeddings.openai_embeddings import (
     OpenAIEmbeddings,
@@ -43,6 +48,7 @@ from semantic_retrieval.transformation.embeddings.openai_embeddings import (
 
 import semantic_retrieval.document_parsers.multi_document_parser as mdp
 from semantic_retrieval.utils.callbacks import CallbackManager
+from semantic_retrieval.utils import callbacks as lib_callbacks
 
 
 logger = logging.getLogger(__name__)
@@ -50,7 +56,7 @@ logging.basicConfig(format=LOGGER_FMT)
 
 
 async def main(argv: List[str]):
-    loggers = [logger]
+    loggers = [logger, pinecone_vector_db.logger, openai_embeddings.logger]
 
     args = set_up_script(argv, loggers)
     config = get_config(args)
@@ -61,15 +67,26 @@ async def main(argv: List[str]):
 
 
 async def run_ingest(config: Config):
-    callback_manager = CallbackManager.default()
+    callback_manager = lib_callbacks.CallbackManager(
+        [
+            lib_callbacks.to_json(
+                "examples/example_data/financial_report/artifacts/callback_data.json"
+            )
+        ]
+    )
     # Create a new FileSystem instance
-    fileSystem = FileSystem(config.data_root, callback_manager=callback_manager)
+    fs_path = resolve_path(
+        config.data_root,
+        config.path_10ks,
+    )
+    fileSystem = FileSystem(fs_path, callback_manager=callback_manager)
 
     # Load documents using the FileSystem instance
     rawDocuments = await fileSystem.load_documents()
     print(f"RAW DOCUMENTS: {rawDocuments}")
 
     # Initialize an in-memory metadata DB
+    logger.info("Initializing an in-memory metadata DB")
     metadata_db = InMemoryDocumentMetadataDB(callback_manager=CallbackManager.default())
 
     # Parse the raw documents
@@ -83,16 +100,13 @@ async def run_ingest(config: Config):
     )
 
     # Initialize a document transformer
-    separator_text_chunk_config = SeparatorTextChunkConfig(
-        chunk_size_limit=500,
-        chunk_overlap=100,
-    )
-
-    # TODO [P1] set parameters better
     documentTransformer = SeparatorTextChunker(
-        separator_text_chunk_config=separator_text_chunk_config,
         params=SeparatorTextChunkerParams(
-            separator_text_chunk_config=separator_text_chunk_config,
+            separator=" ",
+            strip_new_lines=True,
+            chunk_size_limit=500,
+            chunk_overlap=100,
+            document_metadata_db=metadata_db,
         ),
         callback_manager=callback_manager,
     )
@@ -103,8 +117,6 @@ async def run_ingest(config: Config):
     )
 
     # Generate a new namespace using UUID
-    namespace = "ns123"
-    print(f"NAMESPACE: {namespace}")
 
     # Create a PineconeVectorDB instance and index the transformed documents
     pinecone_vectordb_config = PineconeVectorDBConfig(
@@ -120,15 +132,26 @@ async def run_ingest(config: Config):
         openai_embedding_config, callback_manager=callback_manager
     )
 
-    pineconeVectorDB = await PineconeVectorDB.from_documents(  # type: ignore [fixme TODO]
+    pineconeVectorDB = await PineconeVectorDB.from_documents(
         transformedDocuments,
         pinecone_vectordb_config,
         embeddings,
         metadata_db,
+        # Give permission for ingestion.
+        user_access_function=always_allow(),
+        # Doesn't matter in this case.
+        viewer_identity=AuthenticatedIdentity.mock(),
+        callback_manager=callback_manager,
     )
 
-    # TODO [P1]: validate state of pineconeVectorDB
+    metadata_db_path = get_metadata_db_path(config)
+
+    logger.info("Persisting metadata DB: " + metadata_db_path)
+    md_persist = await metadata_db.persist(metadata_db_path)
+
+    # TODO [P1]: validate state of pineconeVectorDB and metadata db
     print(f"{pineconeVectorDB=}")
+    print(f"{md_persist=}")
 
 
 if __name__ == "__main__":

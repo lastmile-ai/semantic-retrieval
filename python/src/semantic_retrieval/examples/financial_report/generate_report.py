@@ -27,6 +27,7 @@ from semantic_retrieval.document.metadata.in_memory_document_metadata_db import 
 from semantic_retrieval.examples.financial_report.config import (
     Config,
     get_config,
+    get_metadata_db_path,
     resolve_path,
     set_up_script,
 )
@@ -66,8 +67,8 @@ async def main(argv: List[str]):
 
 
 async def run_generate_report(config: Config):
-    metadata_path = resolve_path(config.data_root, config.metadata_db_path)
-    res_metadata_db = await InMemoryDocumentMetadataDB.from_json_file(metadata_path)
+    metadata_db_path = get_metadata_db_path(config)
+    res_metadata_db = await InMemoryDocumentMetadataDB.from_json_file(metadata_db_path)
 
     callback_manager = lib_callbacks.CallbackManager(
         [
@@ -187,6 +188,10 @@ async def validate_portfolio_access(resource_auth_id: str, viewer_auth_id: str) 
 
     # In this case, the resource_auth_id is the csv path
     # and the viewer_auth_id is the advisor name.
+
+    if "admin" in viewer_auth_id:
+        return True
+
     basename = os.path.basename(resource_auth_id)
     re_client_name = re.search(r"(.*)_portfolio.csv", basename)
     if not re_client_name:
@@ -204,6 +209,9 @@ async def validate_portfolio_access(resource_auth_id: str, viewer_auth_id: str) 
 async def validate_10k_access(
     resource_auth_id: str, viewer_auth_id: str, metadata_db: DocumentMetadataDB
 ) -> bool:
+    if "admin" in viewer_auth_id:
+        return True
+
     def _validate_10k_access_with_metadata(
         resource_auth_id: str,
         viewer_auth_id: str,

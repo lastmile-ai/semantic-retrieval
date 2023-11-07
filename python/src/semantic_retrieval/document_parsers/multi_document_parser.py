@@ -33,11 +33,11 @@ async def parse_documents(
         ingested_document = (await parser.parse(document)).unwrap()
 
         if parser_config.metadata_db is not None:
-            access_policies = []
-            if parser_config.access_control_policy_factory:
-                access_policies = await parser_config.access_control_policy_factory.get_access_policies(
-                    document
-                )
+            # access_policies = []
+            # if parser_config.access_control_policy_factory:
+            #     access_policies = await parser_config.access_control_policy_factory.get_access_policies(
+            #         document
+            #     )
 
             await parser_config.metadata_db.set_metadata(
                 document.document_id,
@@ -47,7 +47,7 @@ async def parse_documents(
                     mime_type=document.mime_type,
                     metadata={},
                     attributes={},
-                    access_policies=access_policies,
+                    # access_policies=access_policies,
                 ),
             )
 

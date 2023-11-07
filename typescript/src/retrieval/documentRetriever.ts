@@ -69,11 +69,17 @@ export abstract class DocumentRetriever<R = unknown> extends BaseRetriever {
           return null;
         }
 
+        // TODO: Should we force-check source document policies here before the document itself? Since we
+        // default to hidden, we would require different policies for the source document and any later
+        // documents that don't have access to the rawDocument to check the source (e.g. source document has
+        // policy based on source but transformed document has policy not based on source)
+
         const policyChecks = await Promise.all(
           metadata.accessPolicies.map(async (policy) => ({
             policy,
             passed: await policy.testDocumentReadPermission(
               metadata.document!,
+              this.metadataDB!,
               policy.resource
                 ? accessPassport?.getIdentity(policy.resource)
                 : undefined
