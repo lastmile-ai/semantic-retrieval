@@ -21,6 +21,7 @@ from semantic_retrieval.transformation.embeddings.openai_embeddings import (
     OpenAIEmbeddings,
     OpenAIEmbeddingsConfig,
 )
+from semantic_retrieval.utils.callbacks import CallbackManager, Traceable
 
 
 logger = logging.getLogger(__name__)
@@ -35,10 +36,11 @@ class FinancialReportData(Record):
 PortfolioData = NewType("PortfolioData", Dict[str, int])
 
 
-class FinancialReportDocumentRetriever:
+class FinancialReportDocumentRetriever(Traceable):
     vector_db: PineconeVectorDB
     portfolio_retriever: CSVRetriever
     metadata_db: DocumentMetadataDB
+    callback_manager: CallbackManager
 
     def __init__(
         self,
@@ -48,14 +50,18 @@ class FinancialReportDocumentRetriever:
         metadata_db: DocumentMetadataDB,
         user_access_function: AccessFunction,
         viewer_identity: AuthenticatedIdentity,
+        callback_manager: CallbackManager,
     ) -> None:
-        embeddings = OpenAIEmbeddings(embeddings_config)
+        embeddings = OpenAIEmbeddings(
+            embeddings_config, callback_manager=callback_manager
+        )
 
         self.viewer_identity = viewer_identity
         self.user_access_function = user_access_function
 
         self.portfolio = portfolio
         self.metadata_db = metadata_db
+        self.callback_manager = callback_manager
 
         self.vector_db = PineconeVectorDB(
             vector_db_config,
@@ -63,6 +69,7 @@ class FinancialReportDocumentRetriever:
             metadata_db=metadata_db,
             user_access_function=self.user_access_function,
             viewer_identity=self.viewer_identity,
+            callback_manager=self.callback_manager,
         )
 
     async def retrieve_data(
@@ -73,7 +80,7 @@ class FinancialReportDocumentRetriever:
         top_k: int,
         overfetch_factor: float = 1.0,
     ) -> Result[List[FinancialReportData], str]:
-        vdbq = VectorDBTextQuery(
+        vectordb_text_query = VectorDBTextQuery(
             mode="text",
             topK=int(overfetch_factor * top_k),
             text=query,
@@ -81,7 +88,7 @@ class FinancialReportDocumentRetriever:
             metadata_filter={},
         )
 
-        knn = await self.vector_db.query(vdbq)
+        knn = await self.vector_db.query(vectordb_text_query)
 
         def _get_doc_id(result: VectorEmbedding) -> str:
             if result.metadata is None:
@@ -130,7 +137,7 @@ class FinancialReportDocumentRetriever:
         return Ok(out)
 
 
-def _uri_extract_ticker(uri: str):
+def _uri_extract_ticker(uri: str) -> Result[str, str]:
     try:
         return Ok(str(re.search(r"_([\w\.]+).md", uri).groups()[0]).upper())  # type: ignore [fixme]
     except Exception as e:

@@ -1,6 +1,7 @@
 from typing import Any, List, Optional, Callable
 
 from result import Err, Ok, Result
+from semantic_retrieval.common.types import CallbackEvent
 from semantic_retrieval.ingestion.data_sources.data_source import DataSource
 from semantic_retrieval.document.document import RawDocument, RawDocumentChunk
 
@@ -13,7 +14,7 @@ from langchain.document_loaders import (
     Docx2txtLoader,
 )
 
-from semantic_retrieval.utils.callbacks import CallbackManager
+from semantic_retrieval.utils.callbacks import CallbackManager, Traceable
 import os
 import hashlib
 import uuid
@@ -69,18 +70,18 @@ class FileSystemRawDocument(RawDocument):
         return []
 
 
-class FileSystem(DataSource):
+class FileSystem(DataSource, Traceable):
     name: str = "FileSystem"
     path: str
     collection_id: Optional[str] = None
-    callback_manager: Optional[CallbackManager] = None
+    callback_manager: CallbackManager
     file_loaders: dict[str, Callable[[str], BaseLoader]] = DEFAULT_FILE_LOADERS
 
     def __init__(
         self,
         path: str,
+        callback_manager: CallbackManager,
         collection_id: Optional[str] = None,
-        callback_manager: Optional[CallbackManager] = None,
         file_loaders: Optional[dict[str, Callable[[str], BaseLoader]]] = None,
     ):
         self.path = path
@@ -92,7 +93,8 @@ class FileSystem(DataSource):
     def check_stats(self):
         return os.path.isdir(self.path), os.path.isfile(self.path)
 
-    def load_file(self, path: str, collection_id: str) -> FileSystemRawDocument | None:
+    async def load_file(self, path: str, collection_id: str) -> FileSystemRawDocument:
+        # TODO [P1] exception handling
         file_name_with_ext = os.path.basename(path)
         file_name = os.path.splitext(file_name_with_ext)[0]
         # TODO [P1]: This should be done outside of python
@@ -112,16 +114,26 @@ class FileSystem(DataSource):
             )
         )
 
+        await self.callback_manager.run_callbacks(
+            CallbackEvent(
+                name="file_system_document_loaded",
+                data=dict(
+                    path=path,
+                    **fsrd_args,
+                ),
+            )
+        )
+
         return FileSystemRawDocument(**fsrd_args)
 
-    def load_documents(
+    async def load_documents(
         self, filters: Optional[Any] = None, limit: Optional[int] = None
     ) -> List[RawDocument]:
         # TODO [P1]: Filters & Limit are not implemented yet
 
         # Iterate through directory or just load a single file & make a list, handle error conditions like can't find file or directory
         isdir, isfile = self.check_stats()
-        raw_documents = []
+        raw_documents: List[RawDocument] = []
 
         if isdir:
             files = [f for f in os.listdir(self.path)]
@@ -131,19 +143,41 @@ class FileSystem(DataSource):
             for file in files:
                 subdir_path = os.path.join(self.path, file)
                 if os.path.isdir(subdir_path):
-                    subDir = FileSystem(subdir_path, collection_id)
-                    raw_documents.extend(subDir.load_documents())
+                    subDir = FileSystem(
+                        path=subdir_path,
+                        callback_manager=self.callback_manager,
+                        collection_id=collection_id,
+                    )
+                    raw_documents.extend(await subDir.load_documents())
                 elif os.path.isfile(subdir_path):
-                    raw_documents.append(self.load_file(subdir_path, collection_id))
+                    raw_documents.append(
+                        await self.load_file(subdir_path, collection_id)
+                    )
         elif isfile:
             collection_id = (
                 self.collection_id if self.collection_id else str(uuid.uuid4())
             )
-            raw_documents.append(self.load_file(self.path, collection_id))
+            raw_documents.append(
+                await self.load_file(
+                    self.path,
+                    collection_id,
+                )
+            )
         else:
             message = f"{self.path} is neither a file nor a directory."
             err = Exception(message)
 
             raise Exception(err)
+
+        await self.callback_manager.run_callbacks(
+            CallbackEvent(
+                name="file_system_documents_loaded",
+                data=dict(
+                    path=self.path,
+                    collection_id=self.collection_id,
+                    documents=raw_documents,
+                ),
+            )
+        )
 
         return raw_documents
