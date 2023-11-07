@@ -24,18 +24,15 @@ class DocumentRetriever(BaseRetriever[R, Q]):
         super().__init__(metadata_db, callback_manager)
         self.metadata_db = metadata_db
 
-    async def get_documents_for_fragments(self, fragments: List[DocumentFragment]):  # type: ignore [fixme]
-        # TODO [P1] impl
-        documents = []
-
-        return documents
+    async def get_documents_for_fragments(
+        self, fragments: List[DocumentFragment]
+    ) -> List[Document]:
+        raise NotImplementedError()
 
     @abstractmethod
-    async def process_documents(self, _documents: List[Document]) -> R:  # type: ignore [fixme]
+    async def process_documents(self, documents: List[Document]) -> R:
         pass
 
     @abstractmethod
-    async def retrieve_data(
-        self, params: BaseRetrieverQueryParams[Q]
-    ) -> Result[R, str]:
+    async def retrieve_data(self, params: BaseRetrieverQueryParams[Q]) -> Result[R, str]:
         pass

@@ -104,12 +104,8 @@ class OpenAIEmbeddings(DocumentEmbeddingsTransformer, Traceable):
     # TODO [P1]: Handle this for other models when they are supported
     max_encoding_length = 8191
 
-    def __init__(
-        self, config: OpenAIEmbeddingsConfig, callback_manager: CallbackManager
-    ):
-        super().__init__(
-            MODEL_DIMENSIONS[DEFAULT_MODEL], callback_manager=callback_manager
-        )
+    def __init__(self, config: OpenAIEmbeddingsConfig, callback_manager: CallbackManager):
+        super().__init__(MODEL_DIMENSIONS[DEFAULT_MODEL], callback_manager=callback_manager)
 
         self.callback_manager = callback_manager
 
@@ -143,7 +139,7 @@ class OpenAIEmbeddings(DocumentEmbeddingsTransformer, Traceable):
         # TODO [P1] type this better
         embedding_res: Dict[Any, Any] = model_handle.creator.create(input=[text], model=self.model).to_dict_recursive()  # type: ignore
         # TODO: [P1] include usage
-        # TODO: [P0.5] metadata
+        # TODO: [P1] metadata
         return VectorEmbedding(
             vector=embedding_res["data"][0]["embedding"],
             text=text,
@@ -187,9 +183,7 @@ class OpenAIEmbeddings(DocumentEmbeddingsTransformer, Traceable):
             )
             n_tokens_this_batch += n_tokens_frag
 
-        embeddings_for_batches = _emb_requests_thread_pool(
-            batches, self.model, model_handle
-        )
+        embeddings_for_batches = _emb_requests_thread_pool(batches, self.model, model_handle)
         out = flatten_list(embeddings_for_batches)
 
         await self.callback_manager.run_callbacks(

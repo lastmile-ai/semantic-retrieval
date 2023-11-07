@@ -30,10 +30,10 @@ class DocumentMetadata(Record):
                 "attributes": self.attributes,
                 # TODO [P1]: Need to make sure that these also end up being serializable when implemented
                 # Assuming that RawDocument, Document, DataSource and ResourceAccessPolicy have to_dict function
-                # "raw_document": self.raw_document.to_dict() if self.raw_document else None,  # type: ignore [fixme]
-                # "document": self.document.to_dict() if self.document else None,  # type: ignore [fixme]
+                # "raw_document": self.raw_document.to_dict() if self.raw_document else None,
+                # "document": self.document.to_dict() if self.document else None,
                 "collection_id": self.collection_id,
-                # "data_source": self.data_source.to_dict() if self.data_source else None,  # type: ignore [fixme]
+                # "data_source": self.data_source.to_dict() if self.data_source else None,
                 "name": self.name,
                 "mime_type": self.mime_type,
                 "hash": self.hash,
