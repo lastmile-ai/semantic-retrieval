@@ -7,13 +7,7 @@ from semantic_retrieval.access_control.access_identity import AuthenticatedIdent
 
 from semantic_retrieval.common.core import LOGGER_FMT
 from semantic_retrieval.data_store.vector_dbs import pinecone_vector_db
-from semantic_retrieval.examples.financial_report.config import (
-    Config,
-    get_config,
-    get_metadata_db_path,
-    resolve_path,
-    set_up_script,
-)
+from semantic_retrieval.examples.financial_report.lib import config
 
 from semantic_retrieval.ingestion.data_sources.fs.file_system import FileSystem
 from semantic_retrieval.document.metadata.in_memory_document_metadata_db import (
@@ -49,15 +43,15 @@ logging.basicConfig(format=LOGGER_FMT)
 async def main(argv: List[str]):
     loggers = [logger, pinecone_vector_db.logger, openai_embeddings.logger]
 
-    args = set_up_script(argv, loggers)
-    config = get_config(args)
+    args = config.set_up_script(argv, loggers)
+    config_instance = config.get_config(args)
     logger.debug("CONFIG:\n")
-    logger.debug(str(config))
+    logger.debug(str(config_instance))
 
-    return await run_ingest(config)
+    return await run_ingest(config_instance)
 
 
-async def run_ingest(config: Config):
+async def run_ingest(config_instance: config.Config):
     # Make callback manager that writes all events to local JSON file
     callback_manager = lib_callbacks.CallbackManager(
         [
@@ -75,26 +69,26 @@ async def run_ingest(config: Config):
     # Initialize an in-memory metadata DB
     logger.info("Initializing an in-memory metadata DB")
     # We'll write this to disk later for use in generation.
-    metadata_db_path = get_metadata_db_path(config)
+    metadata_db_path = config.get_metadata_db_path(config_instance)
     metadata_db = InMemoryDocumentMetadataDB(callback_manager=CallbackManager.default())
 
     # Create a new FileSystem instance
-    fs_path = resolve_path(config.data_root, config.path_10ks)
+    fs_path = config.resolve_path(config_instance.data_root, config_instance.path_10ks)
     file_system = FileSystem(fs_path, callback_manager=callback_manager)
 
     # Load documents using the FileSystem instance
     raw_documents = await file_system.load_documents()
 
     # Configure embeddings for representing the ingested chunks
-    openai_embedding_config = OpenAIEmbeddingsConfig(api_key=config.openai_key)
+    openai_embedding_config = OpenAIEmbeddingsConfig(api_key=config_instance.openai_key)
     embeddings = OpenAIEmbeddings(openai_embedding_config, callback_manager=callback_manager)
 
     # Create a PineconeVectorDB instance and index the transformed documents
     pinecone_vectordb_config = PineconeVectorDBConfig(
-        index_name=config.index_name,
-        namespace=config.namespace,
-        api_key=config.pinecone_key,
-        environment=config.pinecone_environment,
+        index_name=config_instance.index_name,
+        namespace=config_instance.namespace,
+        api_key=config_instance.pinecone_key,
+        environment=config_instance.pinecone_environment,
     )
 
     # Parse the raw documents
