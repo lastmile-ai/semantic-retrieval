@@ -18,7 +18,7 @@ import { InMemoryDocumentMetadataDB } from "../../src/document/metadata/inMemory
 import TestVectorDB from "../__mocks__/retrieval/testVectorDB";
 import { VectorDBTextQuery } from "../../src/data-store/vector-DBs/vectorDB";
 import { TestCompletionModel } from "../__mocks__/generator/testCompletionModel";
-import { TestVectorDBRAGCompletionGenerator } from "../__mocks__/generator/testVectorDBRAGCompletionGenerator";
+import { TestVectorDbRAGCompletionGenerator } from "../__mocks__/generator/testVectorDbRAGCompletionGenerator";
 
 describe("Callbacks", () => {
   test("Callback arg static type", async () => {
@@ -240,7 +240,7 @@ describe("Callbacks", () => {
     const callbackManager = new CallbackManager("rag-run-0", callbacks);
     const completionModel = new TestCompletionModel(callbackManager);
 
-    const generator = new TestVectorDBRAGCompletionGenerator(
+    const generator = new TestVectorDbRAGCompletionGenerator(
       completionModel,
       callbackManager
     );
