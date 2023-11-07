@@ -20,12 +20,14 @@ from semantic_retrieval.examples.financial_report.config import (
 
 
 import pandas as pd
-from semantic_retrieval.examples.financial_report.eval_test_config import TEST_CASES
 
-from semantic_retrieval.examples.financial_report import lib as fr_lib
 from semantic_retrieval.evaluation import lib as evaluation_lib
 
 from semantic_retrieval.evaluation import metrics
+from semantic_retrieval.examples.financial_report.lib.lib_eval import (
+    get_test_suite,
+    test_case_to_sample_eval_params,
+)
 from semantic_retrieval.functional.functional import result_reduce_list_separate
 
 
@@ -37,8 +39,7 @@ ROOT_DATA_DIR = "examples/example_data/financial_report/"
 
 async def run_evaluate_report(config: Config):
     evaluation_params_list = [
-        await fr_lib.test_case_to_sample_eval_params(tc, ROOT_DATA_DIR)
-        for tc in TEST_CASES
+        await test_case_to_sample_eval_params(tc, ROOT_DATA_DIR) for tc in get_test_suite()
     ]
 
     # Helper function to pretty print all the results
@@ -61,7 +62,7 @@ async def run_evaluate_report(config: Config):
 
 
 async def main(argv: List[str]):  # type: ignore
-    loggers = [logger, metrics.logger, fr_lib.logger, evaluation_lib.logger]
+    loggers = [logger, metrics.logger, evaluation_lib.logger]
 
     args = set_up_script(argv, loggers)
     config = get_config(args)

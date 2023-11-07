@@ -1,13 +1,13 @@
 # from typing import Any, Dict, TypeVar
 import argparse
-import json
 import logging
 import os
-from typing import List, Sequence, Type
+from typing import List, Sequence
 
 from dotenv import load_dotenv
 from semantic_retrieval.common.types import Record
-from semantic_retrieval.utils.configs.configs import combine_dicts, remove_nones
+from semantic_retrieval.utils.configs.configs import argparsify
+from semantic_retrieval.utils.logging import set_log_level
 
 
 class Config(Record):
@@ -33,7 +33,7 @@ class Config(Record):
     viewer_role: str = "advisor/jonathan"
     client_name: str = "sarmad"
     top_k: int = 10
-    overfetch_factor: float = 5.0
+    overfetch_factor: float = 20.0
 
     # make sure this is correct!
     chunk_size_limit: int = 500
@@ -41,9 +41,9 @@ class Config(Record):
     # assume 8k (GPT4) and leave room for the instruction and
     # generated output
     retrieved_context_limit: int = 4000
-    retrieval_query: str = "overall cash flow"
-    structure_prompt: str = "Numbered list, one security per list item,"
-    data_extraction_prompt: str = "data_extraction_prompt"
+    retrieval_query: str = "covid 19 impact"
+    # structure_prompt: str = "Numbered list, one security per list item,"
+    # data_extraction_prompt: str = "data_extraction_prompt"
 
     log_level: str = "WARNING"
 
@@ -51,57 +51,17 @@ class Config(Record):
     sample_output_path: str = "portfolio_10k_net_income_report.txt"
     ticker_eval_ground_truth_path: str = "ticker_numerical_eval_gt.csv"
 
-    def __repr__(self) -> str:
-        return json.dumps(self.model_dump(), indent=2)
-
-    def __str__(self) -> str:
-        return self.__repr__()
-
-
-def add_parser_argument(parser, field_name, field):  # type: ignore
-    field_name = field_name.replace("_", "-")
-    the_type = field.annotation
-    parser.add_argument(f"--{field_name}", type=the_type)
-
-
-def add_parser_arguments(parser, fields):  # type: ignore
-    for field_name, field in fields.items():
-        add_parser_argument(parser, field_name, field)
-
-
-def argparsify(r: Record | Type[Record]):
-    parser = argparse.ArgumentParser()
-    add_parser_arguments(parser, r.model_fields)
-    return parser
-
 
 def get_config(args: argparse.Namespace):
-    # TODO [P1] combine stuff cleaner
-    args_resolved = combine_dicts(
-        [
-            remove_nones(d)
-            for d in [
-                vars(args),
-                dict(
-                    openai_key=os.getenv("OPENAI_API_KEY"),
-                    pinecone_key=os.getenv("PINECONE_API_KEY"),
-                ),
-            ]
-        ]
+    args_dict = dict(
+        openai_key=os.getenv("OPENAI_API_KEY"),
+        pinecone_key=os.getenv("PINECONE_API_KEY"),
     )
-    return Config(**args_resolved)
+    for k, v in vars(args).items():
+        if v is not None:
+            args_dict[k] = v
 
-
-def set_log_level(log_level: int | str, loggers: List[logging.Logger]):
-    ll: int = -1
-    match log_level:
-        case int():
-            ll = int(log_level)
-        case str():
-            ll = getattr(logging, log_level.upper())
-
-    for logger_ in loggers:
-        logger_.setLevel(ll)
+    return Config(**args_dict)  # type: ignore
 
 
 def resolve_path(data_root: str, path: str) -> str:

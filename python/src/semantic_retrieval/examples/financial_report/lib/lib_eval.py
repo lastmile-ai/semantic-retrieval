@@ -14,10 +14,8 @@ from semantic_retrieval.evaluation.lib import (
     IDSetPairEvalDataset,
     SampleEvaluationParams,
 )
+from semantic_retrieval.examples.financial_report.lib.common import portfolio_df_to_dict
 
-from semantic_retrieval.examples.financial_report.financial_report_document_retriever import (
-    PortfolioData,
-)
 from semantic_retrieval.retrieval.csv_retriever import CSVRetriever
 
 from semantic_retrieval.evaluation import metrics
@@ -28,14 +26,36 @@ logger = logging.getLogger(__name__)
 logging.basicConfig(format=LOGGER_FMT)
 
 
-def portfolio_df_to_dict(df: pd.DataFrame) -> PortfolioData:
-    return PortfolioData(
-        df.set_index("Company")
-        .astype(float)
-        .fillna(0)
-        .query("Shares > 0")["Shares"]
-        .to_dict()
-    )
+def get_test_suite():
+    return [
+        (name, test_1_2_data_muncher, ip, op)
+        for name, ip, op in [
+            (
+                "net_income_vs_retrieved",
+                "artifacts/raw_retrieved_chunks_10k_net_income.json",
+                "artifacts/portfolio_10k_net_income_report.txt",
+            ),
+            (
+                "covid_vs_retrieved",
+                "artifacts/raw_retrieved_chunks_10k_covid.json",
+                "artifacts/portfolio_10k_covid_report.txt",
+            ),
+        ]
+    ] + [
+        (name, test_3_4_data_muncher, ip, op)
+        for name, ip, op in [
+            (
+                "net_income_e2e",
+                "portfolios/sarmad_portfolio.csv",
+                "artifacts/portfolio_10k_net_income_report.txt",
+            ),
+            (
+                "covid_e2e",
+                "portfolios/sarmad_portfolio.csv",
+                "artifacts/portfolio_10k_covid_report.txt",
+            ),
+        ]
+    ]
 
 
 def completion_model_output_portfolio_data_muncher(path: str) -> IDSet:
@@ -119,9 +139,7 @@ async def test_case_to_sample_eval_params(
     input_path = os.path.join(root_dir, input_path)
     output_path = os.path.join(root_dir, output_path)
     logger.info(f"\n\nPreparing test case {name}:\n{input_path=}\n{output_path=}")
-    idset_pair: Result[IDSetPairEvalDataset, str] = await muncher(
-        input_path, output_path
-    )
+    idset_pair: Result[IDSetPairEvalDataset, str] = await muncher(input_path, output_path)
     logger.debug(f"{name=}")
     logger.debug(f"{idset_pair=}")
 
@@ -129,9 +147,7 @@ async def test_case_to_sample_eval_params(
     # In this case, the data is the output ID set,
     # and the evaluation function is the closure that compares
     # that set to the reference set.
-    eval_params = idset_pair.map(
-        partial(metrics.id_set_pair_to_jaccard_params, name=name)
-    )
+    eval_params = idset_pair.map(partial(metrics.id_set_pair_to_jaccard_params, name=name))
 
     logger.info("\n\nCreated evaluation params for test case:\n\n")
     logger.info(eval_params.map_or("err", str))
