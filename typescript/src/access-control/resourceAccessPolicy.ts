@@ -1,5 +1,6 @@
 import { JSONObject } from "../common/jsonTypes";
 import { Document } from "../document/document";
+import { DocumentMetadataDB } from "../document/metadata/documentMetadataDB";
 import { AccessIdentity } from "./accessIdentity";
 
 /**
@@ -13,24 +14,15 @@ export interface ResourceAccessPolicy {
   /**
    * Tests whether the requestor has read permission for the specified document.
    * @param document - The document to test access for.
+   * @param metadataDB - The metadata database to use for access control.
    * @param requestor - The user identity access to the resource.
-   * @returns true if the user has read access to the document, false otherwise.
+   * @returns true if the user has read access to the document with respect to this policy, false otherwise.
    */
   testDocumentReadPermission: (
     document: Document,
-    requestor?: AccessIdentity,
+    metadataDB: DocumentMetadataDB,
+    requestor?: AccessIdentity
   ) => Promise<boolean>;
-
-  /**
-   * Tests whether the user has read permission for this IAM policy.
-   * This is used to test whether documents can be read by the requestor.
-   * @param requestor - The identity requesting access to the resource.
-   * @returns either a list of permissions that the user has for this scope, or false if the user has no permissions.
-   * @see https://cloud.google.com/resource-manager/reference/rest/v3/organizations/testIamPermissions and https://developers.google.com/drive/api/reference/rest/v3/permissions
-   */
-  testPolicyPermission: (
-    requestor: AccessIdentity,
-  ) => Promise<string[] | boolean>;
 }
 
 /**
@@ -43,7 +35,7 @@ export class ResourceAccessPolicyCache {
 
   get(
     policy: string,
-    requestor: AccessIdentity,
+    requestor: AccessIdentity
   ): string[] | boolean | undefined {
     return this.cache.get(JSON.stringify(requestor) + policy);
   }
@@ -51,7 +43,7 @@ export class ResourceAccessPolicyCache {
   set(
     policy: string,
     requestor: AccessIdentity,
-    permissions: string[] | boolean,
+    permissions: string[] | boolean
   ) {
     this.cache.set(JSON.stringify(requestor) + policy, permissions);
   }
