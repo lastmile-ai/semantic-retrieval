@@ -35,10 +35,21 @@ export abstract class BaseDocumentTransformer
       const transformedDocument = await this.transformDocument(document);
       const originalDocumentMetadata =
         await this.documentMetadataDB?.getMetadata(document.documentId);
+
+      let sourceDocumentIds;
+      if (originalDocumentMetadata?.rawDocument != null) {
+        // Pre-transformed doc was ingested from a raw document so it is the 'source' document
+        sourceDocumentIds = [document.documentId];
+      } else {
+        // Pre-transformed doc may have source documents from previous transformations
+        sourceDocumentIds = originalDocumentMetadata?.sourceDocumentIds;
+      }
+
       await this.documentMetadataDB?.setMetadata(
         transformedDocument.documentId,
         {
           ...originalDocumentMetadata,
+          sourceDocumentIds,
           documentId: transformedDocument.documentId,
           document: transformedDocument,
           uri: originalDocumentMetadata?.uri ?? transformedDocument.documentId,

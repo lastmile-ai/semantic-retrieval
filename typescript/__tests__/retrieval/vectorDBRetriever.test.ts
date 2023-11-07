@@ -81,7 +81,6 @@ const retrievedEmbeddings: VectorEmbedding[] = [
 const alwaysDenyPolicy: ResourceAccessPolicy = {
   policy: "always-deny",
   testDocumentReadPermission: async () => false,
-  testPolicyPermission: async () => false,
 };
 
 mockQuery.mockImplementation(async () => retrievedEmbeddings);
