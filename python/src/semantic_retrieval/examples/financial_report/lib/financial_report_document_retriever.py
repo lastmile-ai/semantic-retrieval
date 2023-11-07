@@ -6,7 +6,6 @@ from result import Err, Ok, Result
 from semantic_retrieval.access_control.access_function import AccessFunction
 from semantic_retrieval.access_control.access_identity import AuthenticatedIdentity
 from semantic_retrieval.common.core import LOGGER_FMT
-from semantic_retrieval.common.types import Record
 from semantic_retrieval.data_store.vector_dbs.pinecone_vector_db import (
     PineconeVectorDB,
     PineconeVectorDBConfig,
@@ -14,7 +13,10 @@ from semantic_retrieval.data_store.vector_dbs.pinecone_vector_db import (
 from semantic_retrieval.data_store.vector_dbs.vector_db import VectorDBTextQuery
 from semantic_retrieval.document.metadata.document_metadata import DocumentMetadata
 from semantic_retrieval.document.metadata.document_metadata_db import DocumentMetadataDB
-from semantic_retrieval.examples.financial_report.lib.common import PortfolioData
+from semantic_retrieval.examples.financial_report.lib.common import (
+    FinancialReportData,
+    PortfolioData,
+)
 
 from semantic_retrieval.retrieval.csv_retriever import CSVRetriever
 from semantic_retrieval.transformation.embeddings.embeddings import VectorEmbedding
@@ -28,11 +30,6 @@ from semantic_retrieval.utils.interop import canonical_field
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(format=LOGGER_FMT)
-
-
-class FinancialReportData(Record):
-    company: str
-    details: str
 
 
 class FinancialReportDocumentRetriever(Traceable):

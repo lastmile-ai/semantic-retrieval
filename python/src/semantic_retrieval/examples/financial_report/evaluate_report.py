@@ -10,17 +10,12 @@ from semantic_retrieval.evaluation.lib import (
     evaluate,
 )
 
-from semantic_retrieval.examples.financial_report.config import (
-    Config,
-    get_config,
-    set_up_script,
-)
-
+from semantic_retrieval.examples.financial_report.lib import config
 
 from semantic_retrieval.evaluation import lib as evaluation_lib
 
 from semantic_retrieval.evaluation import metrics
-from semantic_retrieval.examples.financial_report.lib.lib_eval import (
+from semantic_retrieval.examples.financial_report.lib.eval import (
     get_test_suite,
     test_case_to_sample_eval_params,
 )
@@ -32,7 +27,7 @@ logging.basicConfig(format=LOGGER_FMT)
 ROOT_DATA_DIR = "examples/example_data/financial_report/"
 
 
-async def run_evaluate_report(config: Config):
+async def run_evaluate_report(config_instance: config.Config):
     # Convert the raw test cases to evaluation params.
     # See lib_eval/test_case_to_sample_eval_params for more details.
     evaluation_params_list = [
@@ -59,11 +54,11 @@ async def run_evaluate_report(config: Config):
 async def main(argv: List[str]):
     loggers = [logger, metrics.logger, evaluation_lib.logger]
 
-    args = set_up_script(argv, loggers)
-    config = get_config(args)
+    args = config.set_up_script(argv, loggers)
+    config_instance = config.get_config(args)
     logger.debug("CONFIG:\n")
     logger.debug(str(config))
-    return await run_evaluate_report(config)
+    return await run_evaluate_report(config_instance)
 
 
 if __name__ == "__main__":
