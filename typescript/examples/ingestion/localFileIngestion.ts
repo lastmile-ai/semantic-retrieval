@@ -9,7 +9,7 @@ import { OpenAIChatModel } from "../../src/generator/completion-models/openai/op
 import { VectorDBDocumentRetriever } from "../../src/retrieval/vector-DBs/vectorDBDocumentRetriever";
 import { SeparatorTextChunker } from "../../src/transformation/document/text/separatorTextChunker";
 import { OpenAIEmbeddings } from "../../src/transformation/embeddings/openAIEmbeddings";
-import { VectorDBRAGCompletionGenerator } from "../../src/generator/retrieval-augmented-generation/vectorDBRAGCompletionGenerator";
+import { VectorDbRAGCompletionGenerator } from "../../src/generator/retrieval-augmented-generation/vectorDbRAGCompletionGenerator";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -44,7 +44,7 @@ async function createIndex() {
 async function main() {
   const vectorDB = await createIndex();
   const retriever = new VectorDBDocumentRetriever({ vectorDB, metadataDB });
-  const generator = new VectorDBRAGCompletionGenerator(new OpenAIChatModel());
+  const generator = new VectorDbRAGCompletionGenerator(new OpenAIChatModel());
 
   const res = await generator.run({
     accessPassport: new AccessPassport(), // not necessary in this case, but include for example
