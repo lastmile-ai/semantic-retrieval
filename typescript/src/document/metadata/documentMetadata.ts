@@ -7,6 +7,10 @@ export interface DocumentMetadata {
   rawDocument?: RawDocument;
   document?: Document;
 
+  // The ids of any root documents from the data sources from which this
+  // document was derived (after any number of transformations).
+  sourceDocumentIds?: string[];
+
   collectionId?: string;
 
   uri: string;

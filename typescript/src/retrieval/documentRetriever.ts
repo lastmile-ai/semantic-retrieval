@@ -74,6 +74,7 @@ export abstract class DocumentRetriever<R = unknown> extends BaseRetriever {
             policy,
             passed: await policy.testDocumentReadPermission(
               metadata.document!,
+              this.metadataDB!,
               policy.resource
                 ? accessPassport?.getIdentity(policy.resource)
                 : undefined
