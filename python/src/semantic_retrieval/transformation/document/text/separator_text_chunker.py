@@ -1,23 +1,21 @@
-from typing import List
+from dataclasses import dataclass
+from typing import List, Optional
 from semantic_retrieval.common.types import CallbackEvent
+from semantic_retrieval.document.metadata.document_metadata_db import DocumentMetadataDB
 
 from semantic_retrieval.transformation.document.text.text_chunk_transformer import (
-    TextChunkConfig,
     TextChunkTransformer,
-    TextChunkTransformerParams,
 )
 from semantic_retrieval.utils.callbacks import Traceable, CallbackManager
 
 
-class SeparatorTextChunkConfig(TextChunkConfig):
+@dataclass
+class SeparatorTextChunkerParams:
+    document_metadata_db: Optional[DocumentMetadataDB]
     separator: str = " "
     strip_new_lines: bool = True
-
-
-class SeparatorTextChunkerParams(TextChunkTransformerParams):
-    def __init__(self, separator_text_chunk_config: SeparatorTextChunkConfig) -> None:
-        super().__init__()
-        self.separator_text_chunk_config = separator_text_chunk_config
+    chunk_size_limit: int = 500
+    chunk_overlap: int = 100
 
 
 class SeparatorTextChunker(TextChunkTransformer, Traceable):
@@ -26,14 +24,16 @@ class SeparatorTextChunker(TextChunkTransformer, Traceable):
 
     def __init__(
         self,
-        separator_text_chunk_config: SeparatorTextChunkConfig,
-        params: TextChunkTransformerParams,
+        params: SeparatorTextChunkerParams,
         callback_manager: CallbackManager,
     ):
-        super().__init__(params, callback_manager=callback_manager)
-        self.separator = separator_text_chunk_config.separator
-        self.strip_new_lines = separator_text_chunk_config.strip_new_lines
-        pass
+        super().__init__(callback_manager=callback_manager)
+        self.callback_manager = callback_manager
+        self.document_metadata_db = params.document_metadata_db
+        self.separator = params.separator
+        self.strip_new_lines = params.strip_new_lines
+        self.chunk_size_limit = params.chunk_size_limit
+        self.chunk_overlap = params.chunk_overlap
 
     async def chunk_text(self, text: str) -> List[str]:
         text_to_chunk = text
