@@ -53,9 +53,7 @@ class FinancialReportDocumentRetriever(Traceable):
         viewer_identity: AuthenticatedIdentity,
         callback_manager: CallbackManager,
     ) -> None:
-        embeddings = OpenAIEmbeddings(
-            embeddings_config, callback_manager=callback_manager
-        )
+        embeddings = OpenAIEmbeddings(embeddings_config, callback_manager=callback_manager)
 
         self.viewer_identity = viewer_identity
         self.user_access_function = user_access_function
@@ -103,8 +101,7 @@ class FinancialReportDocumentRetriever(Traceable):
         logger.debug(f"{retrieved_doc_ids=}")
 
         metadata = {
-            doc_id: await self.metadata_db.get_metadata(doc_id)
-            for doc_id in retrieved_doc_ids
+            doc_id: await self.metadata_db.get_metadata(doc_id) for doc_id in retrieved_doc_ids
         }
 
         out: List[FinancialReportData] = []
@@ -127,10 +124,8 @@ class FinancialReportDocumentRetriever(Traceable):
                             logger.error(f"error ticker result: {msg=}")
                         case Ok(ticker):
                             logger.debug(f"{ticker=}")
-                            res_f_data = (
-                                _get_financial_report_data_with_ticker_if_in_portfolio(
-                                    portfolio, ticker, knn_result
-                                )
+                            res_f_data = _get_financial_report_data_with_ticker_if_in_portfolio(
+                                portfolio, ticker, knn_result
                             )
                             match res_f_data:
                                 case Err(msg):
@@ -143,10 +138,10 @@ class FinancialReportDocumentRetriever(Traceable):
 
 
 def _uri_extract_ticker(uri: str) -> Result[str, str]:
-    try:
-        return Ok(str(re.search(r"_([\w\.]+).md", uri).groups()[0]).upper())  # type: ignore [fixme]
-    except Exception as e:
-        return Err(f"exn,{e=}, {uri=}")
+    match = re.search(r"_([\w\.]+).md", uri)
+    if not match:
+        return Err(f"no match for {uri=}")
+    return Ok(str(match.groups()[0]).upper())
 
 
 def _get_financial_report_data_with_ticker_if_in_portfolio(

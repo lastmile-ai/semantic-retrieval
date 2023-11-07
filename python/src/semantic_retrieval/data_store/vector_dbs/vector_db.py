@@ -56,9 +56,7 @@ class VectorDB(Traceable):
 
     @classmethod
     @abstractmethod
-    def fromDocuments(
-        cls, documents: Sequence[Document], config: VectorDBConfig
-    ) -> "VectorDB":
+    def fromDocuments(cls, documents: Sequence[Document], config: VectorDBConfig) -> "VectorDB":
         pass
 
     @abstractmethod
