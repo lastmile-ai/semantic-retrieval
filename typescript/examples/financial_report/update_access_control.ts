@@ -3,8 +3,8 @@
 // Usage Example: npx ts-node examples/typescript/financial_report/update_access_control.ts -c AAPL -a AlwaysAllowAccessPolicy
 
 import { program } from "commander";
-import { AlwaysAllowAccessPolicy } from "../../../src/access-control/policies/alwaysAllowAccessPolicy";
-import { InMemoryDocumentMetadataDB } from "../../../src/document/metadata/inMemoryDocumentMetadataDB";
+import { AlwaysAllowAccessPolicy } from "../../src/access-control/policies/alwaysAllowAccessPolicy";
+import { InMemoryDocumentMetadataDB } from "../../src/document/metadata/inMemoryDocumentMetadataDB";
 import { SecretReportAccessPolicy } from "./components/access_control/secretReportAccessPolicy";
 
 program
@@ -44,12 +44,12 @@ async function main() {
 
   // Load the metadataDB persisted from ingest_data script
   const metadataDB = await InMemoryDocumentMetadataDB.fromJSONFile(
-    "examples/typescript/financial_report/metadataDB.json"
+    "examples/financial_report/metadataDB.json"
   );
 
   const relevantDocIds = await metadataDB.queryDocumentIds({
     type: "string_field",
-    fieldName: "name",
+    fieldName: "uri",
     fieldValue: company,
     matchType: "includes",
   });
@@ -67,9 +67,7 @@ async function main() {
   );
 
   // Persist metadataDB to disk for loading in the other scripts
-  await metadataDB.persist(
-    "examples/typescript/financial_report/metadataDB.json"
-  );
+  await metadataDB.persist("examples/financial_report/metadataDB.json");
 
   console.log(
     "Successfully updated access control for company report documents"

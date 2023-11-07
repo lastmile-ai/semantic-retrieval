@@ -69,7 +69,7 @@ export class FinancialReportDocumentRetriever
         company,
         documentIds: await this.metadataDB.queryDocumentIds({
           type: "string_field",
-          fieldName: "name",
+          fieldName: "uri",
           fieldValue: company,
           matchType: "includes",
         }),
