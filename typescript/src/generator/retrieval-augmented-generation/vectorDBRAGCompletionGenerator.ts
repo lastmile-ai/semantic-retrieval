@@ -8,14 +8,14 @@ import {
   RAGCompletionGeneratorParams,
 } from "./ragCompletionGenerator";
 
-export interface VectorDBRAGCompletionGeneratorParams
+export interface VectorDbRAGCompletionGeneratorParams
   extends RAGCompletionGeneratorParams<VectorDBDocumentRetriever> {
   retrievalQuery?: VectorDBBaseQuery;
 }
 
-export class VectorDBRAGCompletionGenerator extends RAGCompletionGenerator<VectorDBDocumentRetriever> {
+export class VectorDbRAGCompletionGenerator extends RAGCompletionGenerator<VectorDBDocumentRetriever> {
   async getRetrievalQuery(
-    params: VectorDBRAGCompletionGeneratorParams
+    params: VectorDbRAGCompletionGeneratorParams
   ): Promise<VectorDBTextQuery> {
     const { prompt, retrievalQuery } = params;
     const text = typeof prompt === "string" ? prompt : await prompt.toString();

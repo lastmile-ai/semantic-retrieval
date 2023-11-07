@@ -1,13 +1,12 @@
 import { VectorDBTextQuery } from "../../../src/data-store/vector-DBs/vectorDB";
 import {
-  VectorDBRAGCompletionGenerator,
-  VectorDBRAGCompletionGeneratorParams,
-} from "../../../src/generator/retrieval-augmented-generation/vectorDBRAGCompletionGenerator";
-import { TestCompletionModel } from "./testCompletionModel";
+  VectorDbRAGCompletionGenerator,
+  VectorDbRAGCompletionGeneratorParams,
+} from "../../../src/generator/retrieval-augmented-generation/vectorDbRAGCompletionGenerator";
 
-export class TestVectorDBRAGCompletionGenerator extends VectorDBRAGCompletionGenerator {
+export class TestVectorDbRAGCompletionGenerator extends VectorDbRAGCompletionGenerator {
   async getRetrievalQuery(
-    params: VectorDBRAGCompletionGeneratorParams
+    params: VectorDbRAGCompletionGeneratorParams
   ): Promise<VectorDBTextQuery> {
     const query = {
       topK: 1,
