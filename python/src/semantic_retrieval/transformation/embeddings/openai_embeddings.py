@@ -48,10 +48,6 @@ MODEL_DIMENSIONS = {
 
 from concurrent.futures import ThreadPoolExecutor
 
-openai.api_key = "your-api-key"
-
-texts = ["Hello, world!", "How are you?", "This is an example sentence."]
-
 
 def _make_emb_request(
     fragments: List[EmbedFragmentData],
@@ -66,7 +62,6 @@ def _make_emb_request(
 
     vector_embeddings: List[VectorEmbedding] = []
     for idx, embedding in enumerate(embeddings["data"]):
-        # logger.debug(f"{idx=}")
         vector_embeddings.append(
             VectorEmbedding(
                 vector=embedding["embedding"],
