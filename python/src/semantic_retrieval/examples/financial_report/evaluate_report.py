@@ -57,7 +57,7 @@ async def main(argv: List[str]):
     args = config.set_up_script(argv, loggers)
     config_instance = config.get_config(args)
     logger.debug("CONFIG:\n")
-    logger.debug(str(config))
+    logger.debug(str(config_instance))
     return await run_evaluate_report(config_instance)
 
 
