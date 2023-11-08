@@ -41,7 +41,7 @@ export class PineconeVectorDB extends VectorDB {
   namespace: Index<RecordMetadata>;
 
   constructor(config: PineconeVectorDBConfig) {
-    super(config.embeddings, config.metadataDB);
+    super(config.embeddings, config.metadataDB, config.callbackManager);
 
     const apiKey = config?.apiKey ?? getEnvVar("PINECONE_API_KEY");
     if (!apiKey) {

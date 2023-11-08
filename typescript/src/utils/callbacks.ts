@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { BaseDocumentLoader } from "langchain/dist/document_loaders/base";
 import { AccessIdentity } from "../access-control/accessIdentity";
 import { ResourceAccessPolicy } from "../access-control/resourceAccessPolicy";
 import { assertUnreachable } from "../common/core";
@@ -8,18 +9,29 @@ import type {
   RawDocument,
   Document,
   DocumentFragment,
+  RawDocumentChunk,
 } from "../document/document";
 import { CompletionModelParams } from "../generator/completion-models/completionModel";
 import { VectorEmbedding } from "../transformation/embeddings/embeddings";
+import { DataSource } from "../ingestion/data-sources/dataSource";
 
 export type LoadDocumentsSuccessEvent = {
   name: "onLoadDocumentsSuccess";
+  dataSource: DataSource;
   rawDocuments: RawDocument[];
 };
 
 export type LoadDocumentsErrorEvent = {
   name: "onLoadDocumentsError";
+  dataSource: DataSource;
   error: Error;
+};
+
+export type LoadChunkedContentEvent = {
+  name: "onLoadChunkedContent";
+  path: string;
+  loader: BaseDocumentLoader;
+  chunkedContent: RawDocumentChunk[];
 };
 
 export type DataSourceTestConnectionSuccessEvent = {
@@ -48,7 +60,7 @@ export type ParseSuccessEvent = {
   ingestedDocument: IngestedDocument;
 };
 
-export type TranformDocumentsEvent = {
+export type TransformDocumentsEvent = {
   name: "onTransformDocuments";
   transformedDocuments: Document[];
   originalDocuments: Document[];
@@ -144,12 +156,13 @@ export type GetRAGCompletionRetrievalQueryEvent = {
 type CallbackEvent =
   | LoadDocumentsSuccessEvent
   | LoadDocumentsErrorEvent
+  | LoadChunkedContentEvent
   | DataSourceTestConnectionSuccessEvent
   | DataSourceTestConnectionErrorEvent
   | ParseNextErrorEvent
   | ParseErrorEvent
   | ParseSuccessEvent
-  | TranformDocumentsEvent
+  | TransformDocumentsEvent
   | TransformDocumentEvent
   | ChunkTextEvent
   | RegisterAccessIdentityEvent
@@ -175,17 +188,18 @@ type Callback<T extends CallbackEvent> = (
 interface CallbackMapping {
   onLoadDocumentsSuccess?: Callback<LoadDocumentsSuccessEvent>[];
   onLoadDocumentsError?: Callback<LoadDocumentsErrorEvent>[];
+  onLoadChunkedContent?: Callback<LoadChunkedContentEvent>[];
   onDataSourceTestConnectionSuccess?: Callback<DataSourceTestConnectionSuccessEvent>[];
   onDataSourceTestConnectionError?: Callback<DataSourceTestConnectionErrorEvent>[];
   onParseNextError?: Callback<ParseNextErrorEvent>[];
   onParseError?: Callback<ParseErrorEvent>[];
   onParseSuccess?: Callback<ParseSuccessEvent>[];
-  onTransformDocuments?: Callback<TranformDocumentsEvent>[];
+  onTransformDocuments?: Callback<TransformDocumentsEvent>[];
   onTransformDocument?: Callback<TransformDocumentEvent>[];
   onChunkText?: Callback<ChunkTextEvent>[];
   onRegisterAccessIdentity?: Callback<RegisterAccessIdentityEvent>[];
   onGetAccessIdentity?: Callback<GetAccessIdentityEvent>[];
-  onAddDocumentToVectorDB?: Callback<AddDocumentsToVectorDBEvent>[];
+  onAddDocumentsToVectorDB?: Callback<AddDocumentsToVectorDBEvent>[];
   onQueryVectorDB?: Callback<QueryVectorDBEvent>[];
   onRetrievedFragmentPolicyCheckFailed?: Callback<RetrievedFragmentPolicyCheckFailedEvent>[];
   onRetrieverFilterAccessibleFragments?: Callback<RetrieverFilterAccessibleFragmentsEvent>[];
@@ -225,6 +239,12 @@ class CallbackManager {
           event,
           this.callbacks.onLoadDocumentsError,
           DEFAULT_CALLBACKS.onLoadDocumentsError
+        );
+      case "onLoadChunkedContent":
+        return await this.callback_helper(
+          event,
+          this.callbacks.onLoadChunkedContent,
+          DEFAULT_CALLBACKS.onLoadChunkedContent
         );
       case "onDataSourceTestConnectionSuccess":
         return await this.callback_helper(
@@ -289,8 +309,8 @@ class CallbackManager {
       case "onAddDocumentsToVectorDB":
         return await this.callback_helper(
           event,
-          this.callbacks.onAddDocumentToVectorDB,
-          DEFAULT_CALLBACKS.onAddDocumentToVectorDB
+          this.callbacks.onAddDocumentsToVectorDB,
+          DEFAULT_CALLBACKS.onAddDocumentsToVectorDB
         );
       case "onQueryVectorDB":
         return await this.callback_helper(
