@@ -95,7 +95,7 @@ async function main() {
 
   await vectorDB.addDocuments(transformedDocuments);
 
-  console.log("Ingestion complete");
+  console.log(`Ingestion to namespace ${namespace} complete!}`);
 }
 
 function getLoggingCallbackManager(verboseLogging: boolean) {
