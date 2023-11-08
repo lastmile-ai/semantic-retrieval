@@ -7,8 +7,7 @@ from semantic_retrieval.examples.financial_report.financial_report_document_retr
     FinancialReportDocumentRetriever,
     PortfolioData,
 )
-
-import openai
+from semantic_retrieval.generator.retrieval_augmented_generation.generator import generate
 
 from semantic_retrieval.utils.callbacks import CallbackManager, Traceable
 
@@ -32,7 +31,7 @@ class FinancialReportGenerator(Traceable):
         top_k: int,
         overfetch_factor: float,
         retriever: FinancialReportDocumentRetriever,
-    ):
+    ) -> str:
         res_retrieved_data = await retriever.retrieve_data(
             portfolio=portfolio,
             query=retrieval_query,
@@ -48,25 +47,26 @@ class FinancialReportGenerator(Traceable):
         logger.debug("Raw retrieved data:")
         logger.debug(json.dumps([rd.model_dump() for rd in retrieved_data], indent=2))
 
-        retrieved_data_processed = process_retrieved_data(portfolio, retrieved_data)
+        formatted_retrieved_data = process_retrieved_data(portfolio, retrieved_data)
 
-        system_content = system_prompt
-
-        structure = (
-            f"STRUCTURE: {structure_prompt} containing the {data_extraction_prompt}.\n"
+        prompt_params = dict(
+            system_prompt=system_prompt,
+            structure_prompt=structure_prompt,
+            data_extraction_prompt=data_extraction_prompt,
         )
-        logger.info("Requested report:")
-        logger.info(structure)
-        user_content = structure + "CONTEXT:\n" + "\n * ".join(retrieved_data_processed)
+        logger.info(f"Requested report:\n{retrieval_query=}" + json.dumps(prompt_params, indent=2))
 
-        result = _generate(system_content, user_content)
+        result = await generate(
+            ai_config_path="python/src/semantic_retrieval/aiconfigs/py-completion-gen-aiconfig_aiconfig.json",
+            params=dict(data=formatted_retrieved_data, **prompt_params),
+        )
 
         return result
 
 
 def process_retrieved_data(
     portfolio: PortfolioData, retrieved_data: List[FinancialReportData]
-) -> List[str]:
+) -> str:
     portfolio_with_details = {}
     for fr_data in retrieved_data:
         company = fr_data.company
@@ -80,30 +80,10 @@ def process_retrieved_data(
             f"missing={portfolio.keys() - portfolio_with_details.keys()}\n"
         )
 
-    return [
+    the_list = [
         f"Security: {company}\nDetails: {details}"
         for company, details in portfolio_with_details.items()
         if company in portfolio.keys()
     ]
 
-
-def _generate(system_content: str, user_content: str) -> str:
-    # TODO [P0.5]: implement with aiconfig
-    system = {
-        "role": "system",
-        "content": system_content,
-    }
-    logger.debug("system content:\n")
-    logger.debug(system_content)
-    logger.debug("\n\nuser_content:\n")
-    logger.debug(user_content)
-
-    response = openai.ChatCompletion.create(  # type: ignore [fixme]
-        model="gpt-4",
-        messages=[
-            system,
-            {"role": "user", "content": user_content},
-        ],
-    )
-
-    return response.choices[0]["message"]["content"]  # type: ignore [fixme]
+    return "\n * ".join(the_list)
