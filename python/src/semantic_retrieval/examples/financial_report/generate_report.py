@@ -145,10 +145,11 @@ async def run_generate_report(config_instance: config.Config):
     logger.info("Generating report...")
     report = await generator.run(
         dict_portfolio,
-        config_instance.retrieval_query,
         top_k=config_instance.top_k,
         overfetch_factor=config_instance.overfetch_factor,
         retriever=retriever,
+        ai_config_path=config_instance.ai_config_path,
+        variant_name=config_instance.variant_name,
     )
 
     # Save for evaluation.
