@@ -12,9 +12,6 @@ from semantic_retrieval.document.document import Document
 from semantic_retrieval.document.metadata.in_memory_document_metadata_db import (
     InMemoryDocumentMetadataDB,
 )
-from semantic_retrieval.document_parsers.multi_document_parser import (
-    ParserConfig,
-)
 from semantic_retrieval.ingestion.data_sources.fs.file_system import FileSystem
 
 import semantic_retrieval.document_parsers.multi_document_parser as mdp
@@ -60,9 +57,7 @@ async def test_access_policies():
 
     ingested_documents = await mdp.parse_documents(
         raw_documents,
-        parser_config=ParserConfig(
-            metadata_db=metadata_db, access_control_policy_factory=None
-        ),
+        metadata_db=metadata_db,
         callback_manager=cm,
     )
 
@@ -73,10 +68,7 @@ async def test_access_policies():
         )
         == False
     )
-    assert (
-        await always_deny_policy.testPolicyPermission(AccessIdentity(resource="abc"))
-        == False
-    )
+    assert await always_deny_policy.testPolicyPermission(AccessIdentity(resource="abc")) == False
 
     assert (
         await always_accept_policy.testDocumentReadPermission(
@@ -84,7 +76,4 @@ async def test_access_policies():
         )
         == True
     )
-    assert (
-        await always_accept_policy.testPolicyPermission(AccessIdentity(resource="abc"))
-        == True
-    )
+    assert await always_accept_policy.testPolicyPermission(AccessIdentity(resource="abc")) == True
