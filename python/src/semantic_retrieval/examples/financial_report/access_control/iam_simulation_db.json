@@ -5,8 +5,7 @@
   },
   "access_10ks": {
     "advisor/jonathan": [
-      "AAPL",
-      "PEP"
+      "AAPL", "PEP", "AMZN", "NVDA", "UNH", "JNJ"
     ]
   }
 }

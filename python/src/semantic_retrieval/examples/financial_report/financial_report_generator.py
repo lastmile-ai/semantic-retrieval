@@ -7,7 +7,10 @@ from semantic_retrieval.examples.financial_report.financial_report_document_retr
     FinancialReportDocumentRetriever,
     PortfolioData,
 )
-from semantic_retrieval.generator.retrieval_augmented_generation.generator import generate
+from semantic_retrieval.generator.retrieval_augmented_generation.generator import (
+    generate,
+    resolve_ai_config,
+)
 
 from semantic_retrieval.utils.callbacks import CallbackManager, Traceable
 
@@ -22,12 +25,8 @@ class FinancialReportGenerator(Traceable):
 
     async def run(
         self,
-        # access_passport,
         portfolio: PortfolioData,
-        system_prompt: str,
         retrieval_query: str,
-        structure_prompt: str,
-        data_extraction_prompt: str,
         top_k: int,
         overfetch_factor: float,
         retriever: FinancialReportDocumentRetriever,
@@ -49,16 +48,16 @@ class FinancialReportGenerator(Traceable):
 
         formatted_retrieved_data = process_retrieved_data(portfolio, retrieved_data)
 
-        prompt_params = dict(
-            system_prompt=system_prompt,
-            structure_prompt=structure_prompt,
-            data_extraction_prompt=data_extraction_prompt,
+        resolved = await resolve_ai_config(
+            ai_config_path="python/src/semantic_retrieval/aiconfigs/py-completion-gen-aiconfig_aiconfig.json",
+            params=dict(data=formatted_retrieved_data),
         )
-        logger.info(f"Requested report:\n{retrieval_query=}" + json.dumps(prompt_params, indent=2))
+        requested_report = resolved["messages"][1]["content"].split("\n")[0]
+        logger.info(f"Requested report:\n{retrieval_query=}\n{requested_report}\n\n")
 
         result = await generate(
             ai_config_path="python/src/semantic_retrieval/aiconfigs/py-completion-gen-aiconfig_aiconfig.json",
-            params=dict(data=formatted_retrieved_data, **prompt_params),
+            params=dict(data=formatted_retrieved_data),
         )
 
         return result
