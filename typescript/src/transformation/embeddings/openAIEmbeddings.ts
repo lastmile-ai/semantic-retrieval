@@ -8,6 +8,9 @@ import getEnvVar from "../../utils/getEnvVar";
 
 interface OpenAIEmbeddingsConfig extends OpenAIClientOptions {
   apiKey?: string;
+
+  // Max parallel requests when performing batch embedding requests
+  maxParallelBatchRequests?: number;
 }
 
 type EmbedFragmentData = {
@@ -32,6 +35,8 @@ const MODEL_DIMENSIONS = {
 export class OpenAIEmbeddings extends DocumentEmbeddingsTransformer {
   model = DEFAULT_MODEL as TiktokenModel;
 
+  maxParallelBatchRequests = 20;
+
   // TODO: Handle this for other models when they are supported
   maxEncodingLength = 8191;
 
@@ -44,6 +49,9 @@ export class OpenAIEmbeddings extends DocumentEmbeddingsTransformer {
     if (!apiKey) {
       throw new Error("No OpenAI API key found for OpenAIEmbeddings");
     }
+
+    this.maxParallelBatchRequests =
+      config?.maxParallelBatchRequests ?? this.maxParallelBatchRequests;
 
     this.client = new OpenAI({ ...config, apiKey });
   }
@@ -84,9 +92,9 @@ export class OpenAIEmbeddings extends DocumentEmbeddingsTransformer {
   async transformDocuments(documents: Document[]): Promise<VectorEmbedding[]> {
     const embeddings: VectorEmbedding[] = [];
 
-    // We'll send the actual requests in batches of 5 in case there are lots of large documents
+    // We'll send the actual requests in batches of maxParallelBatchRequests size
+    // in case there are lots of large documents
     let requestBatch: EmbedFragmentData[][] = [];
-    const MAX_REQUEST_BATCH_SIZE = 5;
 
     let currentTextBatch: EmbedFragmentData[] = [];
     let currentTextBatchSize = 0;
@@ -133,7 +141,7 @@ export class OpenAIEmbeddings extends DocumentEmbeddingsTransformer {
         ) {
           requestBatch.push(currentTextBatch);
 
-          if (requestBatch.length === MAX_REQUEST_BATCH_SIZE) {
+          if (requestBatch.length === this.maxParallelBatchRequests) {
             const embeddingPromises = requestBatch.map((batch) =>
               this.createEmbeddings(batch)
             );
