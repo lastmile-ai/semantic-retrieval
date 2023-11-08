@@ -2,6 +2,8 @@ import asyncio
 import logging
 import sys
 from typing import List
+from semantic_retrieval.access_control.access_function import always_allow
+from semantic_retrieval.access_control.access_identity import AuthenticatedIdentity
 
 from semantic_retrieval.common.core import LOGGER_FMT
 from semantic_retrieval.examples.financial_report.config import (
@@ -120,11 +122,16 @@ async def run_ingest(config: Config):
         openai_embedding_config, callback_manager=callback_manager
     )
 
-    pineconeVectorDB = await PineconeVectorDB.from_documents(  # type: ignore [fixme TODO]
+    pineconeVectorDB = await PineconeVectorDB.from_documents(
         transformedDocuments,
         pinecone_vectordb_config,
         embeddings,
         metadata_db,
+        # Give permission for ingestion.
+        user_access_function=always_allow(),
+        # Doesn't matter in this case.
+        viewer_identity=AuthenticatedIdentity.mock(),
+        callback_manager=callback_manager,
     )
 
     # TODO [P1]: validate state of pineconeVectorDB
