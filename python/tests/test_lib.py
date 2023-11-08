@@ -4,11 +4,7 @@ from semantic_retrieval.document.metadata.in_memory_document_metadata_db import 
     InMemoryDocumentMetadataDB,
 )
 from semantic_retrieval.ingestion.data_sources.fs.file_system import FileSystem
-from semantic_retrieval.document_parsers.multi_document_parser import (
-    ParserConfig,
-)
 from semantic_retrieval.transformation.document.text.separator_text_chunker import (
-    SeparatorTextChunkConfig,
     SeparatorTextChunker,
     SeparatorTextChunkerParams,
 )
@@ -38,21 +34,17 @@ async def test_create_index():
 
     parsed_documents = await mdp.parse_documents(
         raw_documents,
-        parser_config=ParserConfig(
-            metadata_db=metadata_db, access_control_policy_factory=None
-        ),
+        metadata_db=metadata_db,
         callback_manager=cm,
     )
 
-    separator_text_chunk_config = SeparatorTextChunkConfig(
-        chunk_size_limit=500,
-        chunk_overlap=100,
-    )
-
     documentTransformer = SeparatorTextChunker(
-        separator_text_chunk_config=separator_text_chunk_config,
         params=SeparatorTextChunkerParams(
-            separator_text_chunk_config=separator_text_chunk_config,
+            separator=" ",
+            strip_new_lines=True,
+            chunk_size_limit=500,
+            chunk_overlap=100,
+            document_metadata_db=metadata_db,
         ),
         callback_manager=cm,
     )

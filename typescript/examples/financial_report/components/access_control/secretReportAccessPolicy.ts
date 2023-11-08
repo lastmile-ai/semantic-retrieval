@@ -20,8 +20,4 @@ export class SecretReportAccessPolicy implements ResourceAccessPolicy {
     }
     return false;
   }
-
-  async testPolicyPermission(_requestor: AccessIdentity) {
-    return false; // Not needed for this example
-  }
 }

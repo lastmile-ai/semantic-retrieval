@@ -23,6 +23,8 @@ class TextChunkConfig(Record):
 
 
 class TextChunkTransformerParams:
+    separator: str = " "
+    strip_new_lines: bool = True
     metadata_db: Optional[DocumentMetadataDB]
 
 
@@ -31,10 +33,7 @@ async def _len(x: str) -> int:
 
 
 class TextChunkTransformer(BaseDocumentTransformer, Traceable):
-    def __init__(
-        self, params: TextChunkTransformerParams, callback_manager: CallbackManager
-    ):
-        self.params = params
+    def __init__(self, callback_manager: CallbackManager):
         self.size_fn = _len
         self.chunk_size_limit = 500
         self.chunk_overlap = 100
@@ -70,7 +69,11 @@ class TextChunkTransformer(BaseDocumentTransformer, Traceable):
 
             # TODO [P1]: One other issue with chunks is some csvs are getting 0 chunks returned even though they have sub_chunks
             # Definitely some issue with merge_sub_chunks, but not going to debug this right now
-            for chunk in await self.chunk_text(original_fragment):  # type: ignore [fixme]
+            if not isinstance(original_fragment, str):
+                raise ValueError(
+                    f"Expected original_fragment to be a string, but got {type(original_fragment)}"
+                )
+            for chunk in await self.chunk_text(original_fragment):
                 current_fragment = {
                     "fragment_id": str(uuid4()),
                     "fragment_type": DocumentFragmentType.TEXT,
@@ -85,9 +88,7 @@ class TextChunkTransformer(BaseDocumentTransformer, Traceable):
 
                 # TODO [P1]: Unsure if this is working correctly
                 if fragment_count > 0:
-                    transformed_fragments[fragment_count - 1][
-                        "nextFragment"
-                    ] = current_fragment
+                    transformed_fragments[fragment_count - 1]["nextFragment"] = current_fragment
 
                 fragment_count += 1
                 transformed_fragments.append(current_fragment)
@@ -118,9 +119,7 @@ class TextChunkTransformer(BaseDocumentTransformer, Traceable):
         chunk = separator.join(sub_chunks).strip()
         return chunk if chunk != "" else None
 
-    async def merge_sub_chunks(
-        self, sub_chunks: List[str], separator: str
-    ) -> List[str]:
+    async def merge_sub_chunks(self, sub_chunks: List[str], separator: str) -> List[str]:
         chunks = []
         prev_sub_chunks = []
         current_sub_chunks = []
@@ -135,10 +134,7 @@ class TextChunkTransformer(BaseDocumentTransformer, Traceable):
                     f"SubChunk size {sub_chunk_size} exceeds chunkSizeLimit of {self.chunk_size_limit}"
                 )
 
-            if (
-                current_chunk_size + chunk_separator_size + sub_chunk_size
-                > self.chunk_size_limit
-            ):
+            if current_chunk_size + chunk_separator_size + sub_chunk_size > self.chunk_size_limit:
                 chunk = self.join_sub_chunks(current_sub_chunks, separator)
                 if chunk is not None:
                     chunks.append(chunk)
@@ -182,9 +178,7 @@ class TextChunkTransformer(BaseDocumentTransformer, Traceable):
 
                 while num_prev_sub_chunks_overlap > 0:
                     current_sub_chunks.append(
-                        prev_sub_chunks[
-                            num_total_prev_sub_chunks - num_prev_sub_chunks_overlap
-                        ]
+                        prev_sub_chunks[num_total_prev_sub_chunks - num_prev_sub_chunks_overlap]
                     )
                     num_prev_sub_chunks_overlap -= 1
 

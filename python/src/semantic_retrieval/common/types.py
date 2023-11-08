@@ -1,10 +1,12 @@
 # Don't rely on the generic type. Wrong annotation might be missed.
 # Use `Any` to signal that uncertainty explicitly.
+import json
 import time
-from typing import Any, Awaitable, Callable, Optional, TypeVar
+from typing import Any, Awaitable, Callable, Generator, Optional, TypeVar
 
 import numpy.typing as npt
 from pydantic import BaseModel, ConfigDict
+from result import Result
 
 
 # TODO [P1]: is this useful?
@@ -25,9 +27,18 @@ Q = TypeVar("Q")
 # Canonical typevar for params
 P = TypeVar("P")
 
+TR = TypeVar("TR", covariant=True)
+E = TypeVar("E", covariant=True)
+
 
 class Record(BaseModel):
     model_config = ConfigDict(strict=True, frozen=True)
+
+    def __repr__(self) -> str:
+        return json.dumps(self.model_dump(), indent=2)
+
+    def __str__(self) -> str:
+        return self.__repr__()
 
 
 class CallbackEvent(Record):
@@ -47,3 +58,7 @@ class CallbackResult(Record):
 # Any CallbackResults returned will be stored in the CallbackManager.
 # The user can then access these results.
 Callback = Callable[[CallbackEvent, str], Awaitable[Optional[CallbackResult]]]
+
+# This is for annotating @do_result annotated functions.
+# It will be treated as compatible with Result[TR, E].
+DoResult = Generator[Result[TR, E], TR, Result[TR, E]]

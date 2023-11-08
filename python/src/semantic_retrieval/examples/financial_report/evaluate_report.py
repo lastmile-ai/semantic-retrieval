@@ -4,29 +4,21 @@ import sys
 from typing import List
 
 
-import pandas as pd
-
 from semantic_retrieval.common.core import LOGGER_FMT
 from semantic_retrieval.evaluation.lib import (
     eval_res_to_df,
     evaluate,
 )
 
-from semantic_retrieval.examples.financial_report.config import (
-    Config,
-    get_config,
-    set_up_script,
-)
+from semantic_retrieval.examples.financial_report.lib import config
 
-
-import pandas as pd
-from semantic_retrieval.examples.financial_report.eval_test_config import TEST_CASES
-
-from semantic_retrieval.examples.financial_report import lib as fr_lib
 from semantic_retrieval.evaluation import lib as evaluation_lib
 
 from semantic_retrieval.evaluation import metrics
-from semantic_retrieval.functional.functional import result_reduce_list_separate
+from semantic_retrieval.examples.financial_report.lib.eval import (
+    get_test_suite,
+    test_case_to_sample_eval_params,
+)
 
 
 logger = logging.getLogger(__name__)
@@ -35,39 +27,38 @@ logging.basicConfig(format=LOGGER_FMT)
 ROOT_DATA_DIR = "examples/example_data/financial_report/"
 
 
-async def run_evaluate_report(config: Config):
+async def run_evaluate_report(config_instance: config.Config):
+    # Convert the raw test cases to evaluation params.
+    # See lib_eval/test_case_to_sample_eval_params for more details.
     evaluation_params_list = [
-        await fr_lib.test_case_to_sample_eval_params(tc, ROOT_DATA_DIR)
-        for tc in TEST_CASES
+        await test_case_to_sample_eval_params(tc, ROOT_DATA_DIR) for tc in get_test_suite()
     ]
 
-    # Helper function to pretty print all the results
-    def _print(df: pd.DataFrame) -> None:
-        return print(df.set_index(["name", "interpretation"]))
-
     # Separate out the valid test params from the error ones.
-    evaluation_params_valid, evaluation_params_errs = result_reduce_list_separate(
-        evaluation_params_list
-    )
+    evaluation_params_valid = [ep.unwrap() for ep in evaluation_params_list if ep.is_ok()]
 
-    print(f"Evaluation params with errors: {evaluation_params_errs}")
+    logger.info("Evaluating the following test cases:")
+    for eval_param in evaluation_params_valid:
+        logger.info(f"\n\nEval params: {eval_param}")
 
-    # Run `evaluate()` on the valid params.
     eval_res = evaluate(evaluation_params_valid)
 
-    # Print results
-    df_eval_res = eval_res.map(eval_res_to_df)
-    df_eval_res.map(_print)
+    if eval_res.is_err():
+        logger.critical(f"Error evaluating: {eval_res.err()}")
+
+    df_eval_res = eval_res_to_df(eval_res.unwrap())
+
+    print(df_eval_res.set_index(["name", "interpretation"]))
 
 
-async def main(argv: List[str]):  # type: ignore
-    loggers = [logger, metrics.logger, fr_lib.logger, evaluation_lib.logger]
+async def main(argv: List[str]):
+    loggers = [logger, metrics.logger, evaluation_lib.logger]
 
-    args = set_up_script(argv, loggers)
-    config = get_config(args)
+    args = config.set_up_script(argv, loggers)
+    config_instance = config.get_config(args)
     logger.debug("CONFIG:\n")
     logger.debug(str(config))
-    return await run_evaluate_report(config)
+    return await run_evaluate_report(config_instance)
 
 
 if __name__ == "__main__":

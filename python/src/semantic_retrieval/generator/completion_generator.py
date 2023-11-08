@@ -26,5 +26,5 @@ class LLMCompletionGenerator(Generic[P, R], Traceable):
         self.callback_manager = callback_manager
 
     @abstractmethod
-    async def run(self, params: LLMCompletionGeneratorParams[P]) -> R: 
+    async def run(self, params: P) -> R:
         pass

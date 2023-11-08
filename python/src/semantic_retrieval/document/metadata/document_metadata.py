@@ -1,10 +1,7 @@
 from semantic_retrieval.common.types import Record
-from typing import Dict, Optional, List, Any
+from typing import Dict, Optional, Any
 
-# from dataclasses import dataclass
-from semantic_retrieval.access_control.resource_access_policy import (
-    ResourceAccessPolicy,
-)
+from semantic_retrieval.utils.interop import canonical_field
 
 
 class DocumentMetadata(Record):
@@ -20,27 +17,31 @@ class DocumentMetadata(Record):
     name: Optional[str] = None
     mime_type: Optional[str] = None
     hash: Optional[str] = None
-    access_policies: List[ResourceAccessPolicy] = []
 
+    # access_policies: List[ResourceAccessPolicy] = []
+    #
     def to_dict(self) -> Dict[str, Any]:
         return {
-            "document_id": self.document_id,
-            "uri": self.uri,
-            "metadata": self.metadata,
-            "attributes": self.attributes,
-            # TODO [P1]: Need to make sure that these also end up being serializable when implemented
-            # Assuming that RawDocument, Document, DataSource and ResourceAccessPolicy have to_dict function
-            "raw_document": self.raw_document.to_dict() if self.raw_document else None,  # type: ignore [fixme]
-            "document": self.document.to_dict() if self.document else None,  # type: ignore [fixme]
-            "collection_id": self.collection_id,
-            "data_source": self.data_source.to_dict() if self.data_source else None,  # type: ignore [fixme]
-            "name": self.name,
-            "mime_type": self.mime_type,
-            "hash": self.hash,
-            # Assuming that ResourceAccessPolicy has to_dict function
-            "access_policies": [ap.model_dump_json() for ap in self.access_policies]
-            if self.access_policies
-            else [],
+            canonical_field(field): value
+            for field, value in {
+                "document_id": self.document_id,
+                "uri": self.uri,
+                "metadata": self.metadata,
+                "attributes": self.attributes,
+                # TODO [P1]: Need to make sure that these also end up being serializable when implemented
+                # Assuming that RawDocument, Document, DataSource and ResourceAccessPolicy have to_dict function
+                # "raw_document": self.raw_document.to_dict() if self.raw_document else None,
+                # "document": self.document.to_dict() if self.document else None,
+                "collection_id": self.collection_id,
+                # "data_source": self.data_source.to_dict() if self.data_source else None,
+                "name": self.name,
+                "mime_type": self.mime_type,
+                "hash": self.hash,
+                # Assuming that ResourceAccessPolicy has to_dict function
+                # "access_policies": [ap.model_dump_json() for ap in self.access_policies]
+                # if self.access_policies
+                # else [],
+            }.items()
         }
 
 

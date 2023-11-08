@@ -13,6 +13,7 @@ import {
 
 export type FinancialReportData = {
   company: string;
+  profile: string;
   details: string;
 }[];
 

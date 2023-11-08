@@ -1,6 +1,5 @@
 from dataclasses import dataclass
 from typing import Optional, List
-from openai import ChatCompletion  # type: ignore [fixme, github problem]
 
 from semantic_retrieval.generator.completion_models.completion_model import (
     CompletionModel,
@@ -27,21 +26,17 @@ class OpenAIChatModelConfig:
     default_model: Optional[str] = None
 
 
-class OpenAIChatModel(CompletionModel[ChatCompletionCreateParams, ChatCompletion]):
+class OpenAIChatModel(CompletionModel[ChatCompletionCreateParams, ChatCompletion]):  # type: ignore
     object_path = "/v1/chat/completions"
     resource_type = "chat.completion"
 
     def __init__(self, config: Optional[OpenAIChatModelConfig] = None):
-        # TODO [P1] impl w/ aiconfig?
         pass
 
     async def construct_messages(
         self, params: OpenAIChatModelParams
     ) -> List[ChatCompletionMessageParam]:
-        # TODO [P1] imple w/ aiconfig?
-        messages = []
-        return messages
+        raise NotImplementedError()
 
-    async def run(self, params: OpenAIChatModelParams) -> ChatCompletion:  # type: ignore [fixme]
-        # TODO [P1] impl w/ aiconfig?
-        pass
+    async def run(self, params: OpenAIChatModelParams) -> ChatCompletion:  # type: ignore
+        raise NotImplementedError()

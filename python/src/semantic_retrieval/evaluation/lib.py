@@ -1,3 +1,4 @@
+import json
 import logging
 from typing import (
     Any,
@@ -29,6 +30,14 @@ T = TypeVar("T")
 class IDSetPairEvalDataset(types.Record):
     input_set: Set[str]
     output_set: Set[str]
+
+    def __repr__(self):
+        return json.dumps(
+            {"input_set": list(self.input_set), "output_set": list(self.output_set)}, indent=2
+        )
+
+    def __str__(self) -> str:
+        return self.__repr__()
 
 
 class NumericalEvalDataset(types.Record):
@@ -74,15 +83,11 @@ class SampleEvaluationResult(types.Record, Generic[T_OutputDatum]):
 
 
 class SampleEvaluationFunction(Protocol, Generic[T_OutputDatum]):
-    def __call__(
-        self, output_datum: T_OutputDatum
-    ) -> SampleEvaluationResult[T_OutputDatum]:
+    def __call__(self, output_datum: T_OutputDatum) -> SampleEvaluationResult[T_OutputDatum]:
         return SampleEvaluationResult(
             name="example",
             value=0.0,
-            interpretation=EvaluationMetric(
-                name="example", best_value=1.0, worst_value=0.0
-            ),
+            interpretation=EvaluationMetric(name="example", best_value=1.0, worst_value=0.0),
         )
 
 
@@ -114,9 +119,7 @@ def evaluate(
 
 
 def eval_res_to_df(
-    eval_res: DatasetEvaluationResult[
-        T_OutputDatum  # pyright: ignore[reportInvalidTypeVarUse]
-    ],
+    eval_res: DatasetEvaluationResult[T_OutputDatum],  # pyright: ignore[reportInvalidTypeVarUse]
 ):
     records = []
     for sample_res in eval_res.results:
