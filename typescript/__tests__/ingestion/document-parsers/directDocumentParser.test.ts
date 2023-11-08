@@ -18,14 +18,14 @@ classical Latin literature from 45 BC, making it over 2000 years old. Richard Mc
 professor at Hampden-Sydney College in Virginia, looked up one of the more obscure Latin words, 
 consectetur, from a Lorem Ipsum passage, and going through the cites of the word in classical literature, 
 discovered the undoubtable source. 
-`
+`;
 
 const testRawContent3 = `
 Lorem Ipsum comes from sections 1.10.32 and 1.10.33 of 
 "de Finibus Bonorum et Malorum" (The Extremes of Good and Evil) by Cicero, written in 45 BC. This book 
 is a treatise on the theory of ethics, very popular during the Renaissance. The first line of Lorem Ipsum, 
 "Lorem ipsum dolor sit amet..", comes from a line in section 1.10.32.
-`
+`;
 
 const rawDocument1: RawDocument = {
   metadata: {},
@@ -33,7 +33,7 @@ const rawDocument1: RawDocument = {
   documentId: "rawDoc1Id",
   uri: "rawDoc1Uri",
   name: "rawDoc1Name",
-  dataSource: new FileSystem("test"),
+  dataSource: new FileSystem({ path: "test" }),
   mimeType: "text/plain",
   getChunkedContent: async () => [
     {
@@ -50,7 +50,7 @@ const rawDocument2: RawDocument = {
   documentId: "rawDoc2Id",
   uri: "rawDoc2Uri",
   name: "rawDoc2Name",
-  dataSource: new FileSystem("test"),
+  dataSource: new FileSystem({ path: "test" }),
   mimeType: "text/plain",
   getChunkedContent: async () => [
     {
@@ -68,7 +68,6 @@ const rawDocument2: RawDocument = {
   ],
   getContent: async () => testRawContent2,
 };
-
 
 describe("DirectDocument parser", () => {
   test("parse single RawDocumentChunk into matching DocumentFragment", async () => {

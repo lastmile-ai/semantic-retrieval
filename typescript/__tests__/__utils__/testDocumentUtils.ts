@@ -93,7 +93,7 @@ export function getTestRawDocument(
     documentId,
     uri: "test-source-uri",
     name: "test-raw-doc-name",
-    dataSource: config?.dataSource ?? new FileSystem("test"),
+    dataSource: config?.dataSource ?? new FileSystem({ path: "test" }),
     mimeType: "text/plain",
     getChunkedContent: async () =>
       config?.chunkedContent ?? [

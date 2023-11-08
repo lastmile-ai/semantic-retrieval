@@ -1,25 +1,20 @@
-import { JSONObject } from "../../common/jsonTypes";
 import {
   RawDocument,
   IngestedDocument,
   DocumentFragment,
 } from "../../document/document";
-import { BaseDocumentParser } from "./documentParser";
+import { BaseDocumentParser, DocumentParserConfig } from "./documentParser";
 import { v4 as uuid } from "uuid";
 import { Md5 } from "ts-md5";
-import { CallbackManager, ParseSuccessEvent } from "../../utils/callbacks";
+import { ParseSuccessEvent } from "../../utils/callbacks";
 
 /**
  * Parse a RawDocument directly into a Document, with each DocumentFragment
  * representing a RawDocumentChunk.
  */
 export class DirectDocumentParser extends BaseDocumentParser {
-  constructor(
-    attributes?: JSONObject,
-    metadata?: JSONObject,
-    callbackManager?: CallbackManager
-  ) {
-    super(attributes, metadata, callbackManager);
+  constructor(config?: DocumentParserConfig) {
+    super(config);
   }
 
   async parse(rawDocument: RawDocument): Promise<IngestedDocument> {

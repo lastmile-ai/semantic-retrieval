@@ -273,7 +273,7 @@ describe("pineconeVectorDB query", () => {
     const onQueryVectorDBCallback = jest.fn();
 
     const callbacks: CallbackMapping = {
-      onAddDocumentToVectorDB: [onAddDocumentToVectorDBCallback],
+      onAddDocumentsToVectorDB: [onAddDocumentToVectorDBCallback],
       onQueryVectorDB: [onQueryVectorDBCallback],
     };
     const callbackManager = new CallbackManager("rag-run-0", callbacks);

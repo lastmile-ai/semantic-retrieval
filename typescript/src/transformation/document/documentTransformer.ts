@@ -3,7 +3,7 @@ import { DocumentMetadataDB } from "../../document/metadata/documentMetadataDB";
 import {
   CallbackManager,
   Traceable,
-  TranformDocumentsEvent,
+  TransformDocumentsEvent,
 } from "../../utils/callbacks";
 import { Transformer } from "../transformer";
 
@@ -67,7 +67,7 @@ export abstract class BaseDocumentTransformer
 
     const transformedDocuments = (await Promise.all(transformPromises)).flat();
 
-    const event: TranformDocumentsEvent = {
+    const event: TransformDocumentsEvent = {
       name: "onTransformDocuments",
       transformedDocuments,
       originalDocuments: documents,
