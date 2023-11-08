@@ -66,6 +66,9 @@ export class InMemoryDocumentMetadataDB implements DocumentMetadataDB {
           if (key === "previousFragment" || key === "nextFragment") {
             return;
           }
+          if (key === "callbacks") {
+            return;
+          }
           if (!options?.persistFragments && key === "fragments") {
             return [];
           }

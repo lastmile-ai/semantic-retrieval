@@ -22,39 +22,49 @@ import {
 } from "../../../utils/callbacks";
 
 type FileLoaderMap = {
-  [extension: string]: (path: string) => LangChainFileLoader;
+  [extension: string]: (
+    path: string,
+    callbackManager?: CallbackManager
+  ) => LangChainFileLoader;
 };
 
 const DEFAULT_FILE_LOADERS: FileLoaderMap = {
-  ".csv": (path: string) => new CSVFileLoader(path),
-  ".docx": (path: string) => new DocxFileLoader(path),
-  ".pdf": (path: string) => new PDFFileLoader(path),
-  ".txt": (path: string) => new TxtFileLoader(path),
+  ".csv": (path: string, callbackManager?: CallbackManager) =>
+    new CSVFileLoader(path, { callbackManager }),
+  ".docx": (path: string, callbackManager?: CallbackManager) =>
+    new DocxFileLoader(path, { callbackManager }),
+  ".pdf": (path: string, callbackManager?: CallbackManager) =>
+    new PDFFileLoader(path, { callbackManager }),
+  ".txt": (path: string, callbackManager?: CallbackManager) =>
+    new TxtFileLoader(path, { callbackManager }),
   // TODO: We should probably have a different loader for MD which loads sections delineated by headers, etc.
-  ".md": (path: string) => new TxtFileLoader(path),
+  ".md": (path: string, callbackManager?: CallbackManager) =>
+    new TxtFileLoader(path, { callbackManager }),
 };
+
+export interface FileSystemConfig {
+  path: string;
+  collectionId?: string;
+  fileLoaders?: FileLoaderMap;
+  callbackManager?: CallbackManager;
+}
 
 /**
  * A data source that loads documents from a file or directory (recursive) in
  * the local file system.
  */
-export class FileSystem implements DataSource {
+export class FileSystem implements DataSource, FileSystemConfig {
   name: string = "FileSystem";
   path: string;
   collectionId: string | undefined;
   callbackManager?: CallbackManager;
   fileLoaders: FileLoaderMap = {};
 
-  constructor(
-    path: string,
-    collectionId?: string,
-    fileLoaders?: FileLoaderMap,
-    callbackManager?: CallbackManager
-  ) {
-    this.path = path;
-    this.collectionId = collectionId;
-    this.fileLoaders = fileLoaders ?? DEFAULT_FILE_LOADERS;
-    this.callbackManager = callbackManager;
+  constructor(config: FileSystemConfig) {
+    this.path = config.path;
+    this.collectionId = config.collectionId;
+    this.fileLoaders = config.fileLoaders ?? DEFAULT_FILE_LOADERS;
+    this.callbackManager = config.callbackManager;
   }
 
   private async getStats(): Promise<{
@@ -81,7 +91,10 @@ export class FileSystem implements DataSource {
     const mimeType = mime.lookup(filePath);
 
     const hash = new Md5();
-    const chunks = await fileLoader(filePath).loadChunkedContent();
+    const chunks = await fileLoader(
+      filePath,
+      this.callbackManager
+    ).loadChunkedContent();
     for (const chunk of chunks) {
       hash.appendStr(chunk.content + "\n");
     }
@@ -147,10 +160,10 @@ export class FileSystem implements DataSource {
 
       const loadDirDocuments = files.map(async (file) => {
         if (file.isDirectory()) {
-          const subDir = new FileSystem(
-            resolve(this.path, file.name),
-            collectionId
-          );
+          const subDir = new FileSystem({
+            path: resolve(this.path, file.name),
+            collectionId,
+          });
           return await subDir.loadDocuments();
         } else if (file.isFile()) {
           return [
@@ -172,6 +185,7 @@ export class FileSystem implements DataSource {
 
       const event: LoadDocumentsErrorEvent = {
         name: "onLoadDocumentsError",
+        dataSource: this,
         error: err,
       };
       await this.callbackManager?.runCallbacks(event);
@@ -180,6 +194,7 @@ export class FileSystem implements DataSource {
 
     const event: LoadDocumentsSuccessEvent = {
       name: "onLoadDocumentsSuccess",
+      dataSource: this,
       rawDocuments: rawDocuments,
     };
     await this.callbackManager?.runCallbacks(event);
