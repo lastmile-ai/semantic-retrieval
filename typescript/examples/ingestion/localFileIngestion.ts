@@ -17,7 +17,9 @@ dotenv.config();
 const metadataDB = new InMemoryDocumentMetadataDB();
 
 async function createIndex() {
-  const fileSystem = new FileSystem("../examples/example_data/ingestion");
+  const fileSystem = new FileSystem({
+    path: "../examples/example_data/ingestion",
+  });
   const rawDocuments = await fileSystem.loadDocuments();
 
   const parsedDocuments = await MultiDocumentParser.parseDocuments(

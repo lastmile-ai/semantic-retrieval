@@ -1,8 +1,11 @@
 import { TextLoader } from "langchain/document_loaders/fs/text";
-import { LangChainFileLoader } from "./langchainFileLoader";
+import {
+  LangChainFileLoader,
+  LangChainFileLoaderOptions,
+} from "./langchainFileLoader";
 
 export class TxtFileLoader extends LangChainFileLoader {
-  constructor(path: string) {
-    super(path, new TextLoader(path));
+  constructor(path: string, options?: LangChainFileLoaderOptions) {
+    super(path, new TextLoader(path), options);
   }
 }

@@ -1,26 +1,16 @@
-import { JSONObject } from "../../common/jsonTypes";
 import {
   RawDocument,
   DocumentFragment,
   IngestedDocument,
 } from "../../document/document";
-import { CallbackManager } from "../../utils/callbacks";
-import { BaseDocumentParser } from "./documentParser";
+import { BaseDocumentParser, DocumentParserConfig } from "./documentParser";
 
 /**
  * A basic DocumentParser implementation for text/plain documents.
  */
 export class TextDocumentParser extends BaseDocumentParser {
-  attributes = {};
-  metadata = {};
-  callbackManager?: CallbackManager;
-
-  constructor(
-    attributes?: JSONObject,
-    metadata?: JSONObject,
-    callbackManager?: CallbackManager
-  ) {
-    super(attributes, metadata, callbackManager);
+  constructor(config?: DocumentParserConfig) {
+    super(config);
   }
 
   // TODO: Actually implement this when we have txt files loaded from non-langchain-directory sources

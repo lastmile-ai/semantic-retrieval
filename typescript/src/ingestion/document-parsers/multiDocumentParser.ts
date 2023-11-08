@@ -1,12 +1,14 @@
 import { DocumentAccessPolicyFactory } from "../../access-control/documentAccessPolicyFactory";
 import { IngestedDocument, RawDocument } from "../../document/document";
 import { DocumentMetadataDB } from "../../document/metadata/documentMetadataDB";
+import { CallbackManager } from "../../utils/callbacks";
 import { ParserRegistry } from "./parserRegistry";
 
 type ParserConfig = {
   metadataDB?: DocumentMetadataDB;
   accessControlPolicyFactory?: DocumentAccessPolicyFactory;
   parserRegistry?: ParserRegistry;
+  callbackManager?: CallbackManager;
 };
 
 /**
@@ -22,7 +24,7 @@ export async function parseDocuments(
   rawDocuments: RawDocument[],
   config: ParserConfig
 ): Promise<IngestedDocument[]> {
-  const parserRegistry = config.parserRegistry ?? new ParserRegistry();
+  const parserRegistry = config.parserRegistry ?? new ParserRegistry(config);
 
   // Sanity check all parsers are available
   for (const rawDoc of rawDocuments) {
