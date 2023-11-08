@@ -1,13 +1,14 @@
 import asyncio
-from typing import Final, Union
+import dataclasses
 import json
 import logging
-from typing import Any, Coroutine, Optional, Sequence, TextIO, TypeVar
+from typing import Any, Coroutine, Final, Optional, Sequence, TextIO, TypeVar, Union
 from uuid import uuid4
+import pandas as pd
+from pydantic import BaseModel
 
 from result import Err, Ok, Result
 from semantic_retrieval.common.core import LOGGER_FMT
-
 from semantic_retrieval.common.types import Callback, CallbackEvent, CallbackResult
 
 logger = logging.getLogger(__name__)
@@ -76,11 +77,62 @@ def safe_serialize_json(obj: Any, **kwargs: Any):
     return json.dumps(obj, default=default, **kwargs)
 
 
-def to_json(file: Union[str, TextIO]):
+def safe_serialize_arbitrary_for_logging(
+    data: Any, max_elements: int = 10, indent: str = ""
+) -> str:
+    if isinstance(data, pd.DataFrame):
+        return str(data.head(2))
+    match data:
+        case Ok(ok):
+            return safe_serialize_arbitrary_for_logging({"Ok": ok}, max_elements, indent + "  ")
+        case Err(err):
+            return safe_serialize_arbitrary_for_logging({"Err": err}, max_elements, indent + "  ")
+        case _:
+            pass
+    if isinstance(data, BaseModel):
+        data = data.model_dump()
+    if dataclasses.is_dataclass(data):
+        data = dataclasses.asdict(data)
+    if isinstance(data, dict):
+        keys = list(data.keys())
+        result = []
+        result.append("{")
+        for key in keys[:max_elements]:
+            result.append(
+                f'{indent}  {repr(key)}: {safe_serialize_arbitrary_for_logging(data[key], max_elements, indent + "  ")},'
+            )
+        if len(keys) > max_elements:
+            result.append(f"{indent}  ...,")
+        result.append(f"{indent}" + "}")
+        return "\n".join(result)
+    elif isinstance(data, list):
+        result = []
+        result.append("[")
+        for item in data[:max_elements]:
+            result.append(
+                f'{indent}  {safe_serialize_arbitrary_for_logging(item, max_elements, indent + "  ")},'
+            )
+        if len(data) > max_elements:
+            result.append(f"{indent}  ...,")
+        result.append(f"{indent}" + "]")
+        return "\n".join(result)
+    elif isinstance(data, str):
+        return repr(data[:max_elements] + ("..." if len(data) > max_elements else ""))
+    elif data is None or isinstance(data, (int, float, bool)):
+        return repr(data)
+    else:
+        return f"<<non-serializable: {type(data).__qualname__}>>"
+
+
+def to_json(file: Union[str, TextIO], max_elements: int = 10) -> Callback:
     def _write(event: CallbackEvent, run_id: str, file: TextIO) -> int:
-        data_event = event.model_dump()
-        data_write = dict(run_id=run_id, **data_event)
-        return file.write("\n" + safe_serialize_json(data_write, indent=2))
+        data_to_serialize = dict(run_id=run_id, evnet=event)
+        data_to_write = safe_serialize_arbitrary_for_logging(
+            data_to_serialize, max_elements=max_elements
+        )
+        return file.write(data_to_write)
+        # data_write = dict(run_id=run_id, **data_event)
+        # return file.write("\n" + safe_serialize_json(data_write, indent=2))
 
     async def _callback(event: CallbackEvent, run_id: str) -> Optional[CallbackResult]:
         if isinstance(file, str):
