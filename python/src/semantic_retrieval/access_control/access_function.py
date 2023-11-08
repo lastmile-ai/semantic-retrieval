@@ -55,12 +55,12 @@ async def get_data_access_checked(
 async def get_data_access_checked_list(
     params: T,
     user_access_function: AccessFunction,
-    get_data_unsafe: Callable[[T], List[U]],
+    get_data_unsafe: Callable[[T], Awaitable[List[U]]],
     resource_auth_id_fn: Callable[[U], Awaitable[str]],
     viewer_auth_id: str,
     cm: CallbackManager,
 ):
-    data_list_unchecked = get_data_unsafe(params)
+    data_list_unchecked = await get_data_unsafe(params)
     data_list_checked = [
         await get_data_access_checked(
             item,
