@@ -11,6 +11,8 @@ from semantic_retrieval.utils.logging import set_log_level
 
 
 class Config(Record):
+    # see keys of ai_config metadata "report_variants"
+    variant_name: str
     # Keys
     pinecone_key: str
     openai_key: str
@@ -28,6 +30,9 @@ class Config(Record):
     path_10ks: str = "10ks"
     metadata_db_name: str = "the_metadata_db"
     portfolio_csv_dir: str = "portfolios"
+    ai_config_path: str = (
+        "python/src/semantic_retrieval/aiconfigs/py-completion-gen-aiconfig_aiconfig.json"
+    )
 
     # Misc
     viewer_role: str = "advisor/jonathan"
@@ -41,7 +46,6 @@ class Config(Record):
     # assume 8k (GPT4) and leave room for the instruction and
     # generated output
     retrieved_context_limit: int = 4000
-    retrieval_query: str = "covid 19 impact"
     # structure_prompt: str = "Numbered list, one security per list item,"
     # data_extraction_prompt: str = "data_extraction_prompt"
 
@@ -76,7 +80,7 @@ def resolve_path(data_root: str, path: str) -> str:
 def set_up_script(argv: Sequence[str], loggers: List[logging.Logger]):
     load_dotenv()
 
-    parser = argparsify(Config)
+    parser = argparsify(Config, required={"variant_name"})
     args = parser.parse_args(argv[1:])
 
     config = get_config(args)
