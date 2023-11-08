@@ -58,7 +58,10 @@ class InMemoryDocumentMetadataDB(DocumentMetadataDB, Traceable):
     async def persist(self, file_path: str):
         with open(file_path, "w") as file:
             file.write(
-                json.dumps({d_id: dmd.to_dict() for d_id, dmd in self.metadata.items()})
+                json.dumps(
+                    {d_id: dmd.to_dict() for d_id, dmd in self.metadata.items()},
+                    indent=2,
+                )
             )
 
     @staticmethod
