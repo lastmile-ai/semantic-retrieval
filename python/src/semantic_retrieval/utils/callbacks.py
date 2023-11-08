@@ -37,14 +37,12 @@ async def run_thunk_safe(thunk: Coroutine[Any, Any, T], timeout: int) -> Result[
         res = await asyncio.wait_for(task, timeout=timeout)
         return Ok(res)
     except BaseException as e:  # type: ignore
-        # TODO log
+        # TODO [P1] log
         return Err(str(e))
 
 
 class CallbackManager:
-    def __init__(
-        self, callbacks: Sequence[Callback], run_id: Optional[str] = None
-    ) -> None:
+    def __init__(self, callbacks: Sequence[Callback], run_id: Optional[str] = None) -> None:
         self.callbacks: Final[Sequence[Callback]] = callbacks
         self.reset_run_state(run_id=run_id)
 
@@ -71,7 +69,7 @@ class CallbackManager:
         return CallbackManager([to_json("/var/logs/callbacks.json")])
 
 
-def safe_serialize_json(obj: Any, **kwargs):  # type: ignore [fixme]
+def safe_serialize_json(obj: Any, **kwargs: Any):
     def default(o: Any):
         return f"<<non-serializable: {type(o).__qualname__}>>"
 
