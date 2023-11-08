@@ -140,8 +140,12 @@ async def test_case_to_sample_eval_params(
     output_path = os.path.join(root_dir, output_path)
     logger.info(f"\n\nPreparing test case {name}:\n{input_path=}\n{output_path=}")
     idset_pair: Result[IDSetPairEvalDataset, str] = await muncher(input_path, output_path)
-    logger.debug(f"{name=}")
-    logger.debug(f"{idset_pair=}")
+    if idset_pair.is_err():
+        raise ValueError(idset_pair)
+
+    logger.info(f"{name=}")
+    logger.info(f"idset_pair=\n")
+    logger.info(idset_pair.ok())
 
     # Eval params contains the data and the evaluation function.
     # In this case, the data is the output ID set,
