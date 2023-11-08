@@ -1,6 +1,6 @@
 import json
 import logging
-from typing import List
+from typing import Any, Dict, List
 from semantic_retrieval.common.core import LOGGER_FMT
 from semantic_retrieval.examples.financial_report.lib import financial_report_document_retriever
 from semantic_retrieval.examples.financial_report.lib.common import (
@@ -8,8 +8,8 @@ from semantic_retrieval.examples.financial_report.lib.common import (
     PortfolioData,
 )
 from semantic_retrieval.generator.retrieval_augmented_generation.generator import (
+    ai_config_metadata_lookup,
     generate,
-    resolve_ai_config,
 )
 
 from semantic_retrieval.utils.callbacks import CallbackManager, Traceable
@@ -26,11 +26,18 @@ class FinancialReportGenerator(Traceable):
     async def run(
         self,
         portfolio: PortfolioData,
-        retrieval_query: str,
         top_k: int,
         overfetch_factor: float,
         retriever: financial_report_document_retriever.FinancialReportDocumentRetriever,
+        ai_config_path: str,
+        variant_name: str,
     ) -> str:
+        params_variant = await get_ai_config_params_for_variant(ai_config_path, variant_name)
+        requested_report = json.dumps(params_variant, indent=2)
+        logger.info(f"Requested report:\n{requested_report}\n\n")
+
+        retrieval_query = params_variant["retrieval_query"]
+
         res_retrieved_data = await retriever.retrieve_data(
             portfolio=portfolio,
             query=retrieval_query,
@@ -48,19 +55,26 @@ class FinancialReportGenerator(Traceable):
 
         formatted_retrieved_data = process_retrieved_data(portfolio, retrieved_data)
 
-        resolved = await resolve_ai_config(
-            ai_config_path="python/src/semantic_retrieval/aiconfigs/py-completion-gen-aiconfig_aiconfig.json",
-            params=dict(data=formatted_retrieved_data),
-        )
-        requested_report = resolved["messages"][1]["content"].split("\n")[0]
-        logger.info(f"Requested report:\n{retrieval_query=}\n{requested_report}\n\n")
-
+        ai_config_params = dict(data=formatted_retrieved_data, **params_variant)
         result = await generate(
-            ai_config_path="python/src/semantic_retrieval/aiconfigs/py-completion-gen-aiconfig_aiconfig.json",
-            params=dict(data=formatted_retrieved_data),
+            ai_config_path=ai_config_path,
+            params=ai_config_params,
         )
 
         return result
+
+
+async def get_ai_config_params_for_variant(
+    ai_config_path: str, variant_name: str
+) -> Dict[str, Any]:
+    variants = ai_config_metadata_lookup(ai_config_path=ai_config_path, key="report_variants")
+
+    try:
+        return variants[variant_name]  # type: ignore
+    except KeyError:
+        raise Exception(
+            f"Unknown variant name: {variant_name}. Available variants: {variants.keys()}"
+        )
 
 
 def process_retrieved_data(

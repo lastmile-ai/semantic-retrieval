@@ -2,7 +2,7 @@ import asyncio
 import logging
 import sys
 from typing import List
-from semantic_retrieval.access_control.access_function import AccessFunction, always_allow
+from semantic_retrieval.access_control import access_function
 from semantic_retrieval.access_control.access_identity import AuthenticatedIdentity
 
 from semantic_retrieval.common.core import LOGGER_FMT
@@ -61,10 +61,21 @@ async def run_ingest(config_instance: config.Config):
         ]
     )
 
-    # We use `mock` identity here because we need ingestion
-    # to have access to all data.
-    viewer_identity = AuthenticatedIdentity.mock()
-    access_function: AccessFunction = always_allow()
+    # Ingestion needs permission to read all the data.
+    # In this case, set identiy to mock() and then
+    # run allow all access function, which does not check the identity.
+    mock_viewer_identity = AuthenticatedIdentity.mock()
+    ingestion_access_function: access_function.AccessFunction = access_function.always_allow()
+
+    # Create a new FileSystem instance
+    fs_path = config.resolve_path(
+        config_instance.data_root,
+        config_instance.path_10ks,
+    )
+    file_system = FileSystem(fs_path, callback_manager=callback_manager)
+
+    # Load documents using the FileSystem instance
+    raw_documents = await file_system.load_documents()
 
     # Initialize an in-memory metadata DB
     logger.info("Initializing an in-memory metadata DB")
@@ -121,8 +132,8 @@ async def run_ingest(config_instance: config.Config):
         pinecone_vectordb_config,
         embeddings,
         metadata_db,
-        user_access_function=access_function,
-        viewer_identity=viewer_identity,
+        user_access_function=ingestion_access_function,
+        viewer_identity=mock_viewer_identity,
         callback_manager=callback_manager,
     )
 
