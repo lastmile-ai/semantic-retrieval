@@ -29,6 +29,8 @@ export type PineconeVectorDBConfig = VectorDBConfig & {
   apiKey?: string;
   environment?: string;
   namespace?: string;
+  vectorsPerRequest?: number;
+  maxParallelBatchRequests?: number;
 };
 
 /**
@@ -39,6 +41,10 @@ export class PineconeVectorDB extends VectorDB {
   client: Pinecone;
   index: Index;
   namespace: Index<RecordMetadata>;
+
+  // Pinecone recommends a limit of 100 vectors max per upsert request
+  vectorsPerRequest = 100;
+  maxParallelBatchRequests = 20;
 
   constructor(config: PineconeVectorDBConfig) {
     super(config.embeddings, config.metadataDB, config.callbackManager);
@@ -53,6 +59,11 @@ export class PineconeVectorDB extends VectorDB {
     if (!environment) {
       throw new Error("No Pinecone environment found for PineconeVectorDB");
     }
+
+    this.vectorsPerRequest =
+      config?.vectorsPerRequest ?? this.vectorsPerRequest;
+    this.maxParallelBatchRequests =
+      config?.maxParallelBatchRequests ?? this.maxParallelBatchRequests;
 
     this.client = new Pinecone({ apiKey, environment });
     this.index = this.client.index(config.indexName);
@@ -154,23 +165,19 @@ export class PineconeVectorDB extends VectorDB {
       })
     );
 
-    // Pinecone recommends a limit of 100 vectors max per upsert request
-    // Let's do 80 to be safe, with 5 parallel requests
-    const VECTORS_PER_REQUEST = 80;
-    const PARALLEL_REQUESTS = 5;
     let vectorIdx = 0;
     while (vectorIdx < pineconeVectors.length) {
       const requests: Promise<void>[] = [];
-      for (let i = 0; i < PARALLEL_REQUESTS; i++) {
+      for (let i = 0; i < this.maxParallelBatchRequests; i++) {
         const vectors = pineconeVectors.slice(
           vectorIdx,
-          vectorIdx + VECTORS_PER_REQUEST
+          vectorIdx + this.vectorsPerRequest
         );
         if (vectors.length > 0) {
           requests.push(
             requestWithThrottleBackoff(() => this.namespace.upsert(vectors))
           );
-          vectorIdx += VECTORS_PER_REQUEST;
+          vectorIdx += this.vectorsPerRequest;
         }
       }
       await Promise.all(requests);
