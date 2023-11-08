@@ -2,9 +2,9 @@ import json
 import logging
 from typing import List
 from semantic_retrieval.common.core import LOGGER_FMT
-from semantic_retrieval.examples.financial_report.financial_report_document_retriever import (
+from semantic_retrieval.examples.financial_report.lib import financial_report_document_retriever
+from semantic_retrieval.examples.financial_report.lib.common import (
     FinancialReportData,
-    FinancialReportDocumentRetriever,
     PortfolioData,
 )
 from semantic_retrieval.generator.retrieval_augmented_generation.generator import (
@@ -29,7 +29,7 @@ class FinancialReportGenerator(Traceable):
         retrieval_query: str,
         top_k: int,
         overfetch_factor: float,
-        retriever: FinancialReportDocumentRetriever,
+        retriever: financial_report_document_retriever.FinancialReportDocumentRetriever,
     ) -> str:
         res_retrieved_data = await retriever.retrieve_data(
             portfolio=portfolio,
