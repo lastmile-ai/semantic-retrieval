@@ -100,6 +100,8 @@ class FinancialReportDocumentRetriever(Traceable):
 
         retrieved_doc_ids = {_get_doc_id(result) for result in knn}
 
+        logger.debug(f"{retrieved_doc_ids=}")
+
         metadata = {
             doc_id: await self.metadata_db.get_metadata(doc_id)
             for doc_id in retrieved_doc_ids
@@ -122,8 +124,9 @@ class FinancialReportDocumentRetriever(Traceable):
                     res_ticker = _uri_extract_ticker(uri)
                     match res_ticker:
                         case Err(msg):
-                            print(f"error ticker result: {msg=}")
+                            logger.error(f"error ticker result: {msg=}")
                         case Ok(ticker):
+                            logger.debug(f"{ticker=}")
                             res_f_data = (
                                 _get_financial_report_data_with_ticker_if_in_portfolio(
                                     portfolio, ticker, knn_result
