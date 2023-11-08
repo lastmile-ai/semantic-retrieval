@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from functools import partial
 import logging
 from typing import Any, Dict, Iterable, List
+from uuid import uuid4
 
 import pinecone
 from pinecone import ScoredVector
@@ -137,7 +138,7 @@ class PineconeVectorDB(VectorDB, Traceable):
 
         embedding_creator = self.embeddings
 
-        logger.info("Getting embeddings")
+        logger.debug("Getting embeddings")
         embeddings_list = await embedding_creator.transform_documents(documents)
 
         logger.info(f"Upserting {len(embeddings_list)} to Pinecone")
@@ -148,7 +149,7 @@ class PineconeVectorDB(VectorDB, Traceable):
             md_canonical = {canonical_field(f): v for f, v in md.items()}
             logger.debug(f"{md_canonical.keys()=}")
             return PCVector(
-                id=f"vec{idx}",
+                id=uuid4().hex,
                 vector=ve.vector,
                 metadata=md_canonical,
             )
