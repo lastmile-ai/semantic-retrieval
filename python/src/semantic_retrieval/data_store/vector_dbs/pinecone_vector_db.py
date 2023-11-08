@@ -133,9 +133,7 @@ class PineconeVectorDB(VectorDB, Traceable):
         self,
         documents: List[Document],
     ):
-        print(f"{self.config.api_key=}")
         pinecone.init(api_key=self.config.api_key, environment=self.config.environment)
-        # index = pinecone.Index(self.config.index_name)
 
         embedding_creator = self.embeddings
 
@@ -156,9 +154,7 @@ class PineconeVectorDB(VectorDB, Traceable):
             )
 
         _upsert_results = _batch_upsert(
-            vectors_iterable=[
-                _ve_to_pcv(ve, idx) for idx, ve in enumerate(embeddings_list)
-            ],
+            vectors_iterable=[_ve_to_pcv(ve, idx) for idx, ve in enumerate(embeddings_list)],
             index_name=self.config.index_name,
             namespace=self.config.namespace,
             pool_threads=30,
@@ -186,13 +182,10 @@ class PineconeVectorDB(VectorDB, Traceable):
                 ):
                     return vec
                 case VectorDBTextQuery(text=text):
-                    return await self.embeddings.embed(
-                        text=text, model_handle=None, metadata=None
-                    )
+                    return await self.embeddings.embed(text=text, model_handle=None, metadata=None)
 
         vec = await _get_query_vector()
 
-        print(f"{self.config.api_key=}")
         pinecone.init(api_key=self.config.api_key, environment=self.config.environment)
         index = pinecone.Index(self.config.index_name)
 
@@ -280,9 +273,7 @@ def _batch_upsert(
                 async_req=True,
                 namespace=namespace,
             )
-            for ids_vectors_chunk in unflatten_iterable(
-                the_vectors, chunk_size=batch_size
-            )
+            for ids_vectors_chunk in unflatten_iterable(the_vectors, chunk_size=batch_size)
         ]
         # Wait for and retrieve responses (this raises in case of error)
         results = []
