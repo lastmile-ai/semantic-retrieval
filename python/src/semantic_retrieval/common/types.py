@@ -1,5 +1,6 @@
 # Don't rely on the generic type. Wrong annotation might be missed.
 # Use `Any` to signal that uncertainty explicitly.
+import json
 import time
 from typing import Any, Awaitable, Callable, Generator, Optional, TypeVar
 
@@ -32,6 +33,12 @@ E = TypeVar("E", covariant=True)
 
 class Record(BaseModel):
     model_config = ConfigDict(strict=True, frozen=True)
+
+    def __repr__(self) -> str:
+        return json.dumps(self.model_dump(), indent=2)
+
+    def __str__(self) -> str:
+        return self.__repr__()
 
 
 class CallbackEvent(Record):

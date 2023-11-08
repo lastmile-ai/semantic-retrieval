@@ -21,4 +21,10 @@ async def generate(ai_config_path: str, params: Dict[str, str]) -> str:
     assert len(out_list) == 1
     out: ExecuteResult = out_list[0]
     text = runtime.get_output_text("rag_complete", output=out)  # type: ignore [LAS-441]
+
     return text
+
+
+async def resolve_ai_config(ai_config_path: str, params: Dict[str, str]) -> Any:
+    runtime = AIConfigRuntime.from_config(ai_config_path)
+    return await runtime.resolve("rag_complete", params=params)
