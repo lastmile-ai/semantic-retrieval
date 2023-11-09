@@ -187,7 +187,7 @@ export class PineconeVectorDB extends VectorDB {
       name: "onAddDocumentsToVectorDB",
       documents,
     };
-    this.callbackManager?.runCallbacks(event);
+    await this.callbackManager?.runCallbacks(event);
   }
 
   async query(query: VectorDBQuery): Promise<VectorEmbedding[]> {
@@ -230,7 +230,7 @@ export class PineconeVectorDB extends VectorDB {
       query: query,
       vectorEmbeddings: vectorEmbeddings,
     };
-    this.callbackManager?.runCallbacks(event);
+    await this.callbackManager?.runCallbacks(event);
 
     return vectorEmbeddings;
   }

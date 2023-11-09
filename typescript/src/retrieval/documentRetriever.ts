@@ -182,7 +182,7 @@ export abstract class DocumentRetriever<R = unknown> extends BaseRetriever {
       name: "onRetrieverGetDocumentsForFragments",
       documents,
     };
-    this.callbackManager?.runCallbacks(event);
+    await this.callbackManager?.runCallbacks(event);
 
     return documents;
   }
@@ -216,9 +216,10 @@ export abstract class DocumentRetriever<R = unknown> extends BaseRetriever {
 
     const event: RetrieveDataEvent = {
       name: "onRetrieveData",
+      params,
       data: processedDocuments,
     };
-    this.callbackManager?.runCallbacks(event);
+    await this.callbackManager?.runCallbacks(event);
 
     return processedDocuments;
   }

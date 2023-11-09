@@ -39,8 +39,7 @@ export default class TestVectorDB extends VectorDB {
       documents: _documents,
     };
 
-    // Open Q: Should this be await'ed
-    this.callbackManager?.runCallbacks(event);
+    await this.callbackManager?.runCallbacks(event);
   }
 
   async query(_query: VectorDBQuery): Promise<VectorEmbedding[]> {
@@ -53,8 +52,7 @@ export default class TestVectorDB extends VectorDB {
       vectorEmbeddings,
     };
 
-    // Open Q: Should this be await'ed
-    this.callbackManager?.runCallbacks(event);
+    await this.callbackManager?.runCallbacks(event);
 
     return vectorEmbeddings;
   }

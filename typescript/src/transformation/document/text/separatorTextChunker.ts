@@ -40,7 +40,7 @@ export class SeparatorTextChunker extends TextChunkTransformer {
       name: "onChunkText",
       chunks: mergedChunks,
     };
-    this.callbackManager?.runCallbacks(event);
+    await this.callbackManager?.runCallbacks(event);
 
     return mergedChunks;
   }

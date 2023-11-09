@@ -20,7 +20,7 @@ export class VectorDBDocumentRetriever extends BaseVectorDBRetriever<
       name: "onRetrieverProcessDocuments",
       documents,
     };
-    this.callbackManager?.runCallbacks(event);
+    await this.callbackManager?.runCallbacks(event);
 
     return documents;
   }

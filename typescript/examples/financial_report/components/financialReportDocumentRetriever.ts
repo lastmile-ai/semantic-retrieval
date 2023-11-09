@@ -131,6 +131,7 @@ export class FinancialReportDocumentRetriever
 
     const event: RetrieveDataEvent = {
       name: "onRetrieveData",
+      params,
       data,
     };
 
