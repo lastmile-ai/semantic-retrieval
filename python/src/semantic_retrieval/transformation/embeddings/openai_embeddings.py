@@ -106,14 +106,18 @@ def _emb_requests_thread_pool(
     frags: List[List[EmbedFragmentData]], model: str, model_handle: ModelHandle
 ) -> List[Any]:
     logger.debug(f"{len(frags)=}")
-    logger.debug(f"Total len = {sum([len(frag) for frag in frags])}")
+    logger.info(f"Fragments total len = {sum([len(frag) for frag in frags])}")
+    logger.info(f"Starting thread pool to get embeddings...")
     with ThreadPoolExecutor() as executor:
-        return list(
+        out = list(
             executor.map(
                 partial(_make_emb_request, model=model, model_handle=model_handle),
                 frags,
             )
         )
+
+        logger.info(f"Done with thread pool (n_batches: {len(out)})")
+        return out
 
 
 class OpenAIEmbeddings(DocumentEmbeddingsTransformer, Traceable):

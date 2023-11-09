@@ -40,6 +40,9 @@ class Record(BaseModel):
     def __str__(self) -> str:
         return self.__repr__()
 
+    def to_dict(self):
+        return self.model_dump()
+
 
 class CallbackEvent(Record):
     name: str

@@ -6,6 +6,7 @@ from uuid import uuid4
 
 import pinecone
 from pinecone import ScoredVector
+from result import Err, Ok
 from semantic_retrieval.access_control.access_function import (
     AccessFunction,
     get_data_access_checked_list,
@@ -26,7 +27,10 @@ from semantic_retrieval.transformation.embeddings.embeddings import (
     DocumentEmbeddingsTransformer,
     VectorEmbedding,
 )
-from semantic_retrieval.utils.callbacks import CallbackManager, Traceable
+from semantic_retrieval.utils.callbacks import (
+    CallbackManager,
+    Traceable,
+)
 from semantic_retrieval.utils.interop import canonical_field
 
 logger = logging.getLogger(__name__)
@@ -38,6 +42,9 @@ class PineconeVectorDBConfig(VectorDBConfig):
     api_key: str
     environment: str
     namespace: str
+
+
+UpsertResponseWrapper = Dict[str, Any]
 
 
 @dataclass
@@ -87,7 +94,7 @@ class PineconeVectorDB(VectorDB, Traceable):
         user_access_function: AccessFunction,
         viewer_identity: AuthenticatedIdentity,
         callback_manager: CallbackManager,
-    ):
+    ) -> "PineconeVectorDB":
         instance = cls(
             config,
             embeddings,
@@ -163,6 +170,21 @@ class PineconeVectorDB(VectorDB, Traceable):
             )
         )
 
+        readys = [r["ready"] for r in _upsert_results]
+        succesful = [r["successful"] for r in _upsert_results]
+        if not all(readys):
+            raise ValueError(
+                "Something went horribly wrong: waited on all results, but not all ready."
+            )
+
+        n_failed = len([r for r in succesful if not r])
+        if n_failed > 0:
+            logger.error(f"Failed to upsert {n_failed} batches to Pinecone.")
+            return Err(_upsert_results)
+        else:
+            logger.info("Upserted all embeddings to Pinecone.")
+            return Ok(_upsert_results)
+
     async def query(self, query: VectorDBQuery) -> List[VectorEmbedding]:
         async def _get_query_vector():
             match query:
@@ -234,7 +256,7 @@ async def _run_query(query_params: QueryParams) -> List[VectorEmbedding]:
 
     await query_params.callback_manager.run_callbacks(
         CallbackEvent(
-            name="pinecone_vector_db_query_post_pre_check",
+            name="pinecone_vector_db_query_pre_check",
             data=dict(
                 params=query_params,
                 n_res=len(query_response.matches),
@@ -261,7 +283,7 @@ def _batch_upsert(
     namespace: str,
     pool_threads: int,
     batch_size: int,
-) -> List[pinecone.UpsertResponse]:
+) -> List[UpsertResponseWrapper]:
     with pinecone.Index(index_name, pool_threads=pool_threads) as index:
         logger.debug(f"[batch upsert] {index_name=}")
         the_vectors = list(vectors_iterable)
@@ -275,10 +297,16 @@ def _batch_upsert(
             )
             for ids_vectors_chunk in unflatten_iterable(the_vectors, chunk_size=batch_size)
         ]
-        # Wait for and retrieve responses (this raises in case of error)
-        results = []
-        for i, async_result in enumerate(async_results):
-            results.append(async_result)
-            logger.debug(f"upsert_res={i}, {async_result=}")
 
+        def _get_result(raw_result: pinecone.UpsertResponse) -> UpsertResponseWrapper:
+            out = {}
+            for k in dir(raw_result):
+                out[k] = getattr(raw_result, k)
+                # out["get"] = raw_result.get()
+                out["wait"] = raw_result.wait()
+                out["ready"] = raw_result.ready()
+                out["successful"] = raw_result.successful()
+            return out
+
+        results = list(map(_get_result, async_results))
         return results
