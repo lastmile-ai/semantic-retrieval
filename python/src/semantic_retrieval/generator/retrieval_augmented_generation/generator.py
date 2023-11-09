@@ -5,7 +5,7 @@ from aiconfig.model_parser import InferenceOptions
 
 
 async def generate(ai_config_path: str, params: Dict[str, str]) -> str:
-    runtime = AIConfigRuntime.from_config(ai_config_path)
+    runtime = AIConfigRuntime.load(ai_config_path)
 
     def callback(data: Any, acc: Any, output_num: int) -> None:
         if "content" in data:
@@ -26,11 +26,11 @@ async def generate(ai_config_path: str, params: Dict[str, str]) -> str:
 
 
 async def resolve_ai_config(ai_config_path: str, params: Dict[str, str]) -> Any:
-    runtime = AIConfigRuntime.from_config(ai_config_path)
+    runtime = AIConfigRuntime.load(ai_config_path)
     return await runtime.resolve("rag_complete", params=params)
 
 
 def ai_config_metadata_lookup(ai_config_path: str, key: str) -> Dict[str, str]:
-    runtime = AIConfigRuntime.from_config(ai_config_path)
+    runtime = AIConfigRuntime.load(ai_config_path)
     md = getattr(runtime.metadata, key)
     return md
