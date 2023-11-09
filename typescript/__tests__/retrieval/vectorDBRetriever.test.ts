@@ -9,6 +9,7 @@ import { AccessPassport } from "../../src/access-control/accessPassport";
 import { ResourceAccessPolicy } from "../../src/access-control/resourceAccessPolicy";
 import { getTestDocument } from "../__utils__/testDocumentUtils";
 import { AlwaysAllowAccessPolicy } from "../../src/access-control/policies/alwaysAllowAccessPolicy";
+import { AlwaysDenyAccessPolicy } from "../../src/access-control/policies/alwaysDenyAccessPolicy";
 
 const mockQuery = jest.fn();
 
@@ -78,11 +79,7 @@ const retrievedEmbeddings: VectorEmbedding[] = [
   },
 ];
 
-const alwaysDenyPolicy: ResourceAccessPolicy = {
-  policy: "always-deny",
-  testDocumentReadPermission: async () => false,
-  testPolicyPermission: async () => false,
-};
+const alwaysDenyPolicy = new AlwaysDenyAccessPolicy();
 
 mockQuery.mockImplementation(async () => retrievedEmbeddings);
 
