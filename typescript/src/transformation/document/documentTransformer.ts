@@ -72,7 +72,7 @@ export abstract class BaseDocumentTransformer
       transformedDocuments,
       originalDocuments: documents,
     };
-    this.callbackManager?.runCallbacks(event);
+    await this.callbackManager?.runCallbacks(event);
 
     return transformedDocuments;
   }

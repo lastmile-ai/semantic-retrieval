@@ -57,7 +57,7 @@ export class DirectDocumentParser extends BaseDocumentParser {
       name: "onParseSuccess",
       ingestedDocument: out,
     };
-    this.callbackManager?.runCallbacks(event);
+    await this.callbackManager?.runCallbacks(event);
     return out;
   }
 
