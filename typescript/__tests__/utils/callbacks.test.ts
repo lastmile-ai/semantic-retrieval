@@ -147,7 +147,7 @@ describe("Callbacks", () => {
       onGetAccessIdentity: [onGetAccessIdentityCallback],
     };
     const callbackManager = new CallbackManager("rag-run-0", callbacks);
-    const accessPassport = new AccessPassport(callbackManager);
+    const accessPassport = new AccessPassport({ callbackManager });
 
     try {
       accessPassport.register({

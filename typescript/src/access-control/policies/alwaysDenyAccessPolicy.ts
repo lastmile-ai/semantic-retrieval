@@ -4,9 +4,9 @@ import { DocumentMetadataDB } from "../../document/metadata/documentMetadataDB";
 import { AccessIdentity } from "../accessIdentity";
 import { GLOBAL_RESOURCE, ResourceAccessPolicy } from "../resourceAccessPolicy";
 
-export class AlwaysAllowAccessPolicy implements ResourceAccessPolicy {
+export class AlwaysDenyAccessPolicy implements ResourceAccessPolicy {
   resource: string = GLOBAL_RESOURCE;
-  policy: string = "AlwaysAllowAccessPolicy";
+  policy: string = "AlwaysDenyAccessPolicy";
   policyJSON: JSONObject = {};
 
   async testDocumentReadPermission(
@@ -14,10 +14,10 @@ export class AlwaysAllowAccessPolicy implements ResourceAccessPolicy {
     _metadataDB: DocumentMetadataDB,
     _requestor?: AccessIdentity
   ): Promise<boolean> {
-    return true;
+    return false;
   }
 
   async testPolicyPermission(_requestor: AccessIdentity) {
-    return ["read", "write"];
+    return false;
   }
 }

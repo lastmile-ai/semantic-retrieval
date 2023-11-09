@@ -14,6 +14,7 @@ import type {
 import { CompletionModelParams } from "../generator/completion-models/completionModel";
 import { VectorEmbedding } from "../transformation/embeddings/embeddings";
 import { DataSource } from "../ingestion/data-sources/dataSource";
+import { BaseRetrieverQueryParams } from "../retrieval/retriever";
 
 export type LoadDocumentsSuccessEvent = {
   name: "onLoadDocumentsSuccess";
@@ -122,7 +123,14 @@ export type RetrieverProcessDocumentsEvent = {
 
 export type RetrieveDataEvent = {
   name: "onRetrieveData";
+  params: BaseRetrieverQueryParams;
   data: any;
+};
+
+export type RetrieverSourceAccessPolicyCheckFailedEvent = {
+  name: "onRetrieverSourceAccessPolicyCheckFailed";
+  params: BaseRetrieverQueryParams;
+  policy: ResourceAccessPolicy | null;
 };
 
 export type GetFragmentsEvent = {
@@ -173,6 +181,7 @@ type CallbackEvent =
   | RetrieverFilterAccessibleFragmentsEvent
   | RetrieverGetDocumentsForFragmentsEvent
   | RetrieverProcessDocumentsEvent
+  | RetrieverSourceAccessPolicyCheckFailedEvent
   | RetrieveDataEvent
   | GetFragmentsEvent
   | RunCompletionRequestEvent
@@ -205,6 +214,7 @@ interface CallbackMapping {
   onRetrieverFilterAccessibleFragments?: Callback<RetrieverFilterAccessibleFragmentsEvent>[];
   onRetrieverGetDocumentsForFragments?: Callback<RetrieverGetDocumentsForFragmentsEvent>[];
   onRetrieverProcessDocuments?: Callback<RetrieverProcessDocumentsEvent>[];
+  onRetrieverSourceAccessPolicyCheckFailed?: Callback<RetrieverSourceAccessPolicyCheckFailedEvent>[];
   onRetrieveData?: Callback<RetrieveDataEvent>[];
   onGetFragments?: Callback<GetFragmentsEvent>[];
   onRunCompletionRequest?: Callback<RunCompletionRequestEvent>[];
@@ -341,6 +351,12 @@ class CallbackManager {
           event,
           this.callbacks.onRetrieverProcessDocuments,
           DEFAULT_CALLBACKS.onRetrieverProcessDocuments
+        );
+      case "onRetrieverSourceAccessPolicyCheckFailed":
+        return await this.callback_helper(
+          event,
+          this.callbacks.onRetrieverSourceAccessPolicyCheckFailed,
+          DEFAULT_CALLBACKS.onRetrieverSourceAccessPolicyCheckFailed
         );
       case "onRetrieveData":
         return await this.callback_helper(

@@ -3,16 +3,20 @@ import { Document } from "../document/document";
 import { DocumentMetadataDB } from "../document/metadata/documentMetadataDB";
 import { AccessIdentity } from "./accessIdentity";
 
+// Resource for globally-scoped access policies (e.g. AlwaysAllowAccessPolicy)
+// AccessPassport will always have access to this resource
+export const GLOBAL_RESOURCE = "*";
+
 /**
  * Access policy for a resource
  */
 export interface ResourceAccessPolicy {
   policy: string;
-  resource?: string;
+  resource: string;
   policyJSON?: JSONObject;
 
   /**
-   * Tests whether the requestor has read permission for the specified document.
+   * Tests whether the requestor has read permission for the specified document containing this policy.
    * @param document - The document to test access for.
    * @param metadataDB - The metadata database to use for access control.
    * @param requestor - The user identity access to the resource.
@@ -23,6 +27,17 @@ export interface ResourceAccessPolicy {
     metadataDB: DocumentMetadataDB,
     requestor?: AccessIdentity
   ) => Promise<boolean>;
+
+  /**
+   * Tests whether the user has read permission for this policy.
+   * This is used to test whether a resource can be read by the requestor.
+   * @param requestor - The identity requesting access to the resource.
+   * @returns either a list of permissions that the user has for this scope, or false if the user has no permissions.
+   * @see https://cloud.google.com/resource-manager/reference/rest/v3/organizations/testIamPermissions and https://developers.google.com/drive/api/reference/rest/v3/permissions
+   */
+  testPolicyPermission: (
+    requestor: AccessIdentity
+  ) => Promise<string[] | boolean>;
 }
 
 /**
