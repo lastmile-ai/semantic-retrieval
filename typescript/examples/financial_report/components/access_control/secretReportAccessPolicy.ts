@@ -20,4 +20,12 @@ export class SecretReportAccessPolicy implements ResourceAccessPolicy {
     }
     return false;
   }
+
+  async testPolicyPermission(requestor: AccessIdentity) {
+    if (!(requestor && isFinancialReportIdentity(requestor))) {
+      return false;
+    }
+
+    return requestor.role === "admin" ? ["*", "read", "write"] : false;
+  }
 }
