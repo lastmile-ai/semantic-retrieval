@@ -25,6 +25,7 @@ import { SecretReportAccessPolicy } from "./components/access_control/secretRepo
 import { AccessIdentity } from "../../../typescript/src/access-control/accessIdentity";
 import {
   CallbackManager,
+  QueryVectorDBEvent,
   RetrieveDataEvent,
   RetrievedFragmentPolicyCheckFailedEvent,
   RunCompletionGenerationEvent,
@@ -118,6 +119,7 @@ async function main() {
     namespace,
     embeddings: new OpenAIEmbeddings(),
     metadataDB,
+    callbackManager,
   });
 
   const documentRetriever = new VectorDBDocumentRetriever({
@@ -204,6 +206,20 @@ function getLoggingCallbackManager(verboseLogging: boolean) {
           documentId: event.fragment.documentId,
           policy: event.policy?.policy ?? "No policy specified",
         });
+      },
+    ],
+    onQueryVectorDB: [
+      async (event: QueryVectorDBEvent) => {
+        if (verboseLogging) {
+          console.log(
+            "Vector DB query and embeddings: ",
+            event.query,
+            event.vectorEmbeddings
+          );
+        }
+        console.log(
+          `VectorDB query returned ${event.vectorEmbeddings.length} embeddings`
+        );
       },
     ],
   });

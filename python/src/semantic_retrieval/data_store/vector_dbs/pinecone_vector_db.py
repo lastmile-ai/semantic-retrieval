@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from functools import partial
 import logging
 from typing import Any, Dict, Iterable, List
+from uuid import uuid4
 
 import pinecone
 from pinecone import ScoredVector
@@ -49,26 +50,14 @@ class PCVector:
         return (self.id, self.vector, self.metadata)
 
 
+@dataclass
 class QueryParams:
     index: pinecone.Index
     namespace: str
     top_k: int
     metadata_filter: Dict[str, Any]
     vector: List[float]
-
-    def __init__(
-        self,
-        index: pinecone.Index,
-        namespace: str,
-        top_k: int,
-        metadata_filter: Dict[str, Any],
-        vector: list[float],
-    ) -> None:
-        self.index = index
-        self.namespace = namespace
-        self.top_k = top_k
-        self.metadata_filter = metadata_filter
-        self.vector = vector
+    callback_manager: CallbackManager
 
 
 class PineconeVectorDB(VectorDB, Traceable):
@@ -137,7 +126,7 @@ class PineconeVectorDB(VectorDB, Traceable):
 
         embedding_creator = self.embeddings
 
-        logger.info("Getting embeddings")
+        logger.debug("Getting embeddings")
         embeddings_list = await embedding_creator.transform_documents(documents)
 
         logger.info(f"Upserting {len(embeddings_list)} to Pinecone")
@@ -148,7 +137,7 @@ class PineconeVectorDB(VectorDB, Traceable):
             md_canonical = {canonical_field(f): v for f, v in md.items()}
             logger.debug(f"{md_canonical.keys()=}")
             return PCVector(
-                id=f"vec{idx}",
+                id=uuid4().hex,
                 vector=ve.vector,
                 metadata=md_canonical,
             )
@@ -198,6 +187,7 @@ class PineconeVectorDB(VectorDB, Traceable):
             top_k=top_k,
             metadata_filter=metadata_filter,
             vector=vec.vector,
+            callback_manager=self.callback_manager,
         )
 
         async def _resource_auth_id_fn(
@@ -218,7 +208,7 @@ class PineconeVectorDB(VectorDB, Traceable):
 
         await self.callback_manager.run_callbacks(
             CallbackEvent(
-                name="pinecone_vector_db_query",
+                name="pinecone_vector_db_query_post_check",
                 data=dict(
                     vector_db=self,
                     query=query,
@@ -232,7 +222,7 @@ class PineconeVectorDB(VectorDB, Traceable):
         return query_res
 
 
-def _run_query(query_params: QueryParams) -> List[VectorEmbedding]:
+async def _run_query(query_params: QueryParams) -> List[VectorEmbedding]:
     query_response = query_params.index.query(
         namespace=query_params.namespace,
         top_k=query_params.top_k,
@@ -240,6 +230,16 @@ def _run_query(query_params: QueryParams) -> List[VectorEmbedding]:
         include_metadata=True,
         vector=query_params.vector,
         filter=query_params.metadata_filter,
+    )
+
+    await query_params.callback_manager.run_callbacks(
+        CallbackEvent(
+            name="pinecone_vector_db_query_post_pre_check",
+            data=dict(
+                params=query_params,
+                n_res=len(query_response.matches),
+            ),
+        )
     )
 
     # TODO [P1] type better
