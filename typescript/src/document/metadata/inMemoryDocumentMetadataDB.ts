@@ -56,7 +56,7 @@ export class InMemoryDocumentMetadataDB implements DocumentMetadataDB {
     });
   }
 
-  async persist(filePath: string) {
+  async persist(filePath: string, options?: { persistFragments: boolean }) {
     await fs.writeFile(
       filePath,
       JSON.stringify(
@@ -65,6 +65,12 @@ export class InMemoryDocumentMetadataDB implements DocumentMetadataDB {
           // Don't serialize fragment relationships to avoid circular references
           if (key === "previousFragment" || key === "nextFragment") {
             return;
+          }
+          if (key === "callbacks") {
+            return;
+          }
+          if (!options?.persistFragments && key === "fragments") {
+            return [];
           }
           return value;
         },

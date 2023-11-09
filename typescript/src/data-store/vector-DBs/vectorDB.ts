@@ -50,6 +50,7 @@ export function isTextQuery(query: VectorDBQuery): query is VectorDBTextQuery {
 export interface VectorDBConfig {
   embeddings: EmbeddingsTransformer;
   metadataDB: DocumentMetadataDB;
+  callbackManager?: CallbackManager;
 }
 
 /**
@@ -67,10 +68,12 @@ export abstract class VectorDB implements VectorDBConfig, Traceable {
 
   constructor(
     embeddings: EmbeddingsTransformer,
-    metadataDB: DocumentMetadataDB
+    metadataDB: DocumentMetadataDB,
+    callbackManager?: CallbackManager
   ) {
     this.embeddings = embeddings;
     this.metadataDB = metadataDB;
+    this.callbackManager = callbackManager;
   }
 
   static async fromDocuments(

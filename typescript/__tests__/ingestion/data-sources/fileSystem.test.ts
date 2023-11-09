@@ -80,7 +80,7 @@ async function validateDocxRawDocument(rawDocument: RawDocument) {
 describe("FileSystem data source", () => {
   test("individual txt file", async () => {
     const path = resolveExamplesPath("DonQuixote.txt");
-    const fileSystem = new FileSystem(path);
+    const fileSystem = new FileSystem({ path });
     const rawDocuments = await fileSystem.loadDocuments();
 
     expect(rawDocuments.length).toBe(1);
@@ -89,7 +89,9 @@ describe("FileSystem data source", () => {
 
   test("directory", async () => {
     const directoryPath = resolveExamplesPath();
-    const rawDocuments = await new FileSystem(directoryPath).loadDocuments();
+    const rawDocuments = await new FileSystem({
+      path: directoryPath,
+    }).loadDocuments();
     expect(rawDocuments.length).toBe(4);
 
     await validateTxtRawDocument(rawDocuments[0]);

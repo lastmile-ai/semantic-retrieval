@@ -178,8 +178,8 @@ describe("pineconeVectorDB addDocuments", () => {
   });
 
   test("upserts many vectors in correct batches", async () => {
-    // 3 documents of 400 fragments each will have 5 parallel requests of 80
-    // vectors each, per document
+    // 3 documents of 400 fragments each will have 12 parallel requests of 100
+    // vectors each
     const testDocuments = Array(3).fill(
       getTestDocument({
         fragments: Array(400).fill(getTestDocumentFragment()),
@@ -187,7 +187,7 @@ describe("pineconeVectorDB addDocuments", () => {
     );
 
     await PineconeVectorDB.fromDocuments(testDocuments, TEST_CONFIG);
-    expect(mockUpsert).toHaveBeenCalledTimes(15);
+    expect(mockUpsert).toHaveBeenCalledTimes(12);
   });
 });
 
@@ -273,7 +273,7 @@ describe("pineconeVectorDB query", () => {
     const onQueryVectorDBCallback = jest.fn();
 
     const callbacks: CallbackMapping = {
-      onAddDocumentToVectorDB: [onAddDocumentToVectorDBCallback],
+      onAddDocumentsToVectorDB: [onAddDocumentToVectorDBCallback],
       onQueryVectorDB: [onQueryVectorDBCallback],
     };
     const callbackManager = new CallbackManager("rag-run-0", callbacks);

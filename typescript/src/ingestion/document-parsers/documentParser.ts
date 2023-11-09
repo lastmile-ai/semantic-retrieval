@@ -1,5 +1,4 @@
 import { Attributable } from "../../common/base";
-import { JSONObject } from "../../common/jsonTypes";
 import {
   RawDocument,
   DocumentFragment,
@@ -40,19 +39,17 @@ export interface DocumentParser extends Attributable, Traceable {
   serialize(rawDocument: RawDocument): Promise<string>;
 }
 
+export interface DocumentParserConfig extends Attributable, Traceable {}
+
 export abstract class BaseDocumentParser implements DocumentParser {
   attributes = {};
   metadata = {};
   callbackManager?: CallbackManager;
 
-  constructor(
-    attributes?: JSONObject,
-    metadata?: JSONObject,
-    callbackManager?: CallbackManager
-  ) {
-    this.attributes = attributes ?? this.attributes;
-    this.metadata = metadata ?? this.metadata;
-    this.callbackManager = callbackManager;
+  constructor(config?: DocumentParserConfig) {
+    this.attributes = config?.attributes ?? this.attributes;
+    this.metadata = config?.metadata ?? this.metadata;
+    this.callbackManager = config?.callbackManager;
   }
 
   abstract parse(rawDocument: RawDocument): Promise<IngestedDocument>;

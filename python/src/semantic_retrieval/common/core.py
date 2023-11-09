@@ -1,5 +1,15 @@
 import logging
-from typing import Iterable, List, TypeVar
+import time
+from typing import Any, Callable, Iterable, List, Optional, ParamSpec, TypeVar
+
+from result import Err, Ok, Result
+
+
+P = ParamSpec("P")
+
+
+F = TypeVar("F", bound=Callable[..., Any])
+U_Callable = TypeVar("U_Callable", bound=Callable[..., Any])
 
 
 LOGGER_FMT = "[%(levelname)s] %(asctime)s %(filename)s:%(lineno)d: %(message)s"
@@ -8,6 +18,15 @@ logger = logging.getLogger(__name__)
 logging.basicConfig(format=LOGGER_FMT)
 
 T = TypeVar("T")
+U = TypeVar("U")
+
+E = TypeVar("E")
+
+Thunk = Callable[[], T]
+ResultThunk = Callable[[], Result[T, E]]
+
+G = TypeVar("G", bound=Callable[..., Any])
+Decorator = Callable[[F], G]
 
 
 def file_contents(path: str):
@@ -42,3 +61,30 @@ def unflatten_iterable(it: Iterable[T], chunk_size: int) -> List[List[T]]:
         out[-1].append(x)
 
     return out
+
+
+def exp_backoff(
+    max_retries: int,
+    base_delay: int,
+    logger: Optional[logging.Logger] = None,
+) -> Decorator[Thunk[U], ResultThunk[U, str]]:
+    logger = logger or logging.getLogger(__name__)
+
+    def dec(thunk: Thunk[U]) -> ResultThunk[U, str]:
+        def wrapper_thunk() -> Result[U, str]:
+            retries = 0
+            while retries < max_retries:
+                try:
+                    return Ok(thunk())
+                except Exception as e:
+                    logger.info(f"Attempt {retries + 1} failed: {e}")
+                    retries += 1
+                    delay = base_delay * retries
+                    logger.info(f"Retrying in {delay:.2f} seconds...")
+                    time.sleep(delay)
+
+            return Err("Max retries reached, operation failed.")
+
+        return wrapper_thunk
+
+    return dec

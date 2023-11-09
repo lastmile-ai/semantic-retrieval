@@ -1,5 +1,10 @@
 import { DirectDocumentParser } from "./directDocumentParser";
-import { DocumentParser } from "./documentParser";
+import { DocumentParser, DocumentParserConfig } from "./documentParser";
+
+export interface ParserRegistryConfig extends DocumentParserConfig {
+  defaultParser?: DocumentParser | null;
+  parsers?: Map<string, DocumentParser>;
+}
 
 /**
  * A registry of document parsers, keyed by MIME type. By default, DirectDocumentParser
@@ -11,20 +16,18 @@ export class ParserRegistry {
   defaultParser: DocumentParser | undefined;
   parsers: Map<string, DocumentParser>;
 
-  constructor(
-    parsers?: Map<string, DocumentParser>,
-    defaultParser?: DocumentParser | null
-  ) {
+  constructor(config: ParserRegistryConfig) {
     this.parsers =
-      parsers ??
+      config.parsers ??
       new Map([
-        // ["text/plain", new TextDocumentParser()],
-        // ['text/html', new HtmlDocumentParser()],
-        // ['application/pdf', new PDFDocumentParser()],
+        // ["text/plain", new TextDocumentParser(config)],
+        // ['text/html', new HtmlDocumentParser(config)],
+        // ['application/pdf', new PDFDocumentParser(config)],
       ]);
 
-    if (defaultParser !== null) {
-      this.defaultParser = defaultParser ?? new DirectDocumentParser();
+    if (config.defaultParser !== null) {
+      this.defaultParser =
+        config.defaultParser ?? new DirectDocumentParser(config);
     }
   }
 

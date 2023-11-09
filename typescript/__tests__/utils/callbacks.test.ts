@@ -37,12 +37,10 @@ describe("Callbacks", () => {
       onLoadDocumentsSuccess: [onLoadDocumentsSuccessCallback1],
     };
     const callbackManager = new CallbackManager("rag-run-0", callbacks);
-    const fileSystem = new FileSystem(
-      "../examples/example_data/ingestion/DonQuixote.txt",
-      undefined,
-      undefined,
-      callbackManager
-    );
+    const fileSystem = new FileSystem({
+      path: "../examples/example_data/ingestion/DonQuixote.txt",
+      callbackManager,
+    });
     await fileSystem.loadDocuments();
 
     // This test passes by virtue of static type checking. No dynamic condition to check.
@@ -57,12 +55,10 @@ describe("Callbacks", () => {
       onLoadDocumentsError: [onLoadDocumentsErrorCallback1],
     };
     const callbackManager = new CallbackManager("rag-run-0", callbacks);
-    const fileSystem = new FileSystem(
-      "../examples/example_data/ingestion/DonQuixote.txt",
-      undefined,
-      undefined,
-      callbackManager
-    );
+    const fileSystem = new FileSystem({
+      path: "../examples/example_data/ingestion/DonQuixote.txt",
+      callbackManager,
+    });
 
     await fileSystem.loadDocuments();
 
@@ -82,12 +78,10 @@ describe("Callbacks", () => {
       onDataSourceTestConnectionError: [onTestConnectionErrorCallback1],
     };
     const callbackManager = new CallbackManager("rag-run-0", callbacks);
-    const fileSystem = new FileSystem(
-      "../examples/example_data/ingestion/DonQuixote.txt",
-      undefined,
-      undefined,
-      callbackManager
-    );
+    const fileSystem = new FileSystem({
+      path: "../examples/example_data/ingestion/DonQuixote.txt",
+      callbackManager,
+    });
 
     await fileSystem.testConnection();
 
@@ -108,11 +102,7 @@ describe("Callbacks", () => {
       onParseSuccess: [onParseSuccessCallback1],
     };
     const callbackManager = new CallbackManager("rag-run-0", callbacks);
-    const documentParser = new DirectDocumentParser(
-      undefined,
-      undefined,
-      callbackManager
-    );
+    const documentParser = new DirectDocumentParser({ callbackManager });
 
     try {
       await documentParser.parse(getTestRawDocument());
