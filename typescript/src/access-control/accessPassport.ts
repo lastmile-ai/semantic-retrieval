@@ -4,17 +4,31 @@ import {
   RegisterAccessIdentityEvent,
   Traceable,
 } from "../utils/callbacks";
-import { AccessIdentity } from "./accessIdentity";
+import { AccessIdentity, GLOBAL_RESOURCE_IDENTITY } from "./accessIdentity";
+import { GLOBAL_RESOURCE } from "./resourceAccessPolicy";
+
+export interface AccessPassportConfig {
+  accessIdentities?: Map<string, AccessIdentity>;
+  callbackManager?: CallbackManager;
+}
 
 /**
  * Class for maintaining resource-to-access-identity mapping for a given identity (e.g. user).
  */
 export class AccessPassport implements Traceable {
-  accessIdentities: Map<string, AccessIdentity> = new Map();
+  accessIdentities: Map<string, AccessIdentity> = new Map([
+    [GLOBAL_RESOURCE, GLOBAL_RESOURCE_IDENTITY],
+  ]);
   callbackManager?: CallbackManager;
 
-  constructor(callbackManager?: CallbackManager) {
-    this.callbackManager = callbackManager;
+  constructor(config?: AccessPassportConfig) {
+    this.callbackManager = config?.callbackManager;
+    if (config?.accessIdentities) {
+      this.accessIdentities = config.accessIdentities;
+      if (!this.accessIdentities.has(GLOBAL_RESOURCE)) {
+        this.accessIdentities.set(GLOBAL_RESOURCE, GLOBAL_RESOURCE_IDENTITY);
+      }
+    }
   }
 
   register(accessIdentity: AccessIdentity) {
