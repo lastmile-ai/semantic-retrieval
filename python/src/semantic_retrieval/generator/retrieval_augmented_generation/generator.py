@@ -5,6 +5,7 @@ from aiconfig.model_parser import InferenceOptions
 
 
 async def generate(ai_config_path: str, params: Dict[str, str]) -> str:
+    print(f"{ai_config_path=}, {params=}")
     runtime = AIConfigRuntime.from_config(ai_config_path)
 
     def callback(data: Any, acc: Any, output_num: int) -> None:
