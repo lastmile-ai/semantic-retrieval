@@ -113,7 +113,7 @@ export abstract class TextChunkTransformer
       originalDocument: document,
       transformedDocument,
     };
-    this.callbackManager?.runCallbacks(event);
+    await this.callbackManager?.runCallbacks(event);
 
     // TODO: Think through metadata handling, since setting new doc metadata on each transformation
     // can cause proliferation of DB entries. On the other hand, we probably don't want to mutate

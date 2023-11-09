@@ -73,7 +73,7 @@ export abstract class BaseVectorDBRetriever<
       name: "onGetFragments",
       fragments: documentFragments,
     };
-    this.callbackManager?.runCallbacks(event);
+    await this.callbackManager?.runCallbacks(event);
 
     return documentFragments;
   }
@@ -108,9 +108,10 @@ export abstract class BaseVectorDBRetriever<
 
     const event: RetrieveDataEvent = {
       name: "onRetrieveData",
+      params,
       data: processedDocuments,
     };
-    this.callbackManager?.runCallbacks(event);
+    await this.callbackManager?.runCallbacks(event);
 
     return processedDocuments;
   }

@@ -14,6 +14,7 @@ import type {
 import { CompletionModelParams } from "../generator/completion-models/completionModel";
 import { VectorEmbedding } from "../transformation/embeddings/embeddings";
 import { DataSource } from "../ingestion/data-sources/dataSource";
+import { BaseRetrieverQueryParams } from "../retrieval/retriever";
 
 export type LoadDocumentsSuccessEvent = {
   name: "onLoadDocumentsSuccess";
@@ -122,6 +123,7 @@ export type RetrieverProcessDocumentsEvent = {
 
 export type RetrieveDataEvent = {
   name: "onRetrieveData";
+  params: BaseRetrieverQueryParams;
   data: any;
 };
 
