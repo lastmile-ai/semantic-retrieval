@@ -1,11 +1,12 @@
 from functools import partial
 import logging
 import os
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 import openai
+from result import Err, Ok, Result
 
 from tiktoken import encoding_for_model
-from semantic_retrieval.common.core import LOGGER_FMT, flatten_list
+from semantic_retrieval.common.core import LOGGER_FMT, exp_backoff, flatten_list
 from semantic_retrieval.common.json_types import JSONObject
 from semantic_retrieval.common.types import CallbackEvent, Record
 
@@ -16,7 +17,11 @@ from semantic_retrieval.transformation.embeddings.embeddings import (
 )
 
 from semantic_retrieval.document.document import Document
-from semantic_retrieval.utils.callbacks import CallbackManager, Traceable
+from semantic_retrieval.utils.callbacks import (
+    CallbackManager,
+    Traceable,
+    safe_serialize_arbitrary_for_logging,
+)
 from semantic_retrieval.utils.text import (
     num_tokens_from_string_for_model,
     truncate_string_to_tokens,
@@ -49,6 +54,16 @@ MODEL_DIMENSIONS = {
 from concurrent.futures import ThreadPoolExecutor
 
 
+def _create_embeddings_with_backoff(
+    input: List[str], model_handle: ModelHandle, model: str
+) -> Result[Dict[str, Any], str]:
+    @exp_backoff(max_retries=5, base_delay=1, logger=logger)
+    def _create_embeddings() -> Dict[str, Any]:
+        return model_handle.creator.create(input=input, model=model)
+
+    return _create_embeddings()
+
+
 def _make_emb_request(
     fragments: List[EmbedFragmentData],
     model: str,
@@ -56,27 +71,35 @@ def _make_emb_request(
 ) -> List[VectorEmbedding]:
     input = [fragment.text for fragment in fragments]
 
-    embeddings = model_handle.creator.create(input=input, model=model)
+    res_embeddings = _create_embeddings_with_backoff(input, model_handle, model)
+    _log = safe_serialize_arbitrary_for_logging({"res_embeddings": res_embeddings}, max_elements=3)
 
-    logger.debug("Got embeddings for batch")
+    match res_embeddings:
+        case Err(err):
+            # TODO propagate err
+            raise Exception(f"Error creating embeddings: {err}")
+        case Ok(embeddings):
+            logger.debug(f"Got embeddings for batch:\n{_log}")
 
-    vector_embeddings: List[VectorEmbedding] = []
-    for idx, embedding in enumerate(embeddings["data"]):
-        vector_embeddings.append(
-            VectorEmbedding(
-                vector=embedding["embedding"],
-                text=fragments[idx].text,
-                attributes={},
-                metadata={
-                    "document_id": fragments[idx].document_id,
-                    "fragment_id": fragments[idx].fragment_id,
-                    "model": model,
-                    "text": fragments[idx].text,
-                },
-            )
-        )
+            def _make_vector_embedding(
+                frag_emb_pair: Tuple[EmbedFragmentData, Dict[str, Any]]
+            ) -> VectorEmbedding:
+                frag, embedding_data = frag_emb_pair
+                return VectorEmbedding(
+                    vector=embedding_data["embedding"],
+                    text=frag.text,
+                    attributes={},
+                    metadata={
+                        "document_id": frag.document_id,
+                        "fragment_id": frag.fragment_id,
+                        "model": model,
+                        "text": frag.text,
+                    },
+                )
 
-    return vector_embeddings
+            pairs = list(zip(fragments, embeddings["data"]))
+            out = list(map(_make_vector_embedding, pairs))
+            return out
 
 
 def _emb_requests_thread_pool(
