@@ -80,7 +80,7 @@ def safe_serialize_json(obj: Any, **kwargs: Any):
 def safe_serialize_arbitrary_for_logging(
     data: Any, max_elements: Optional[int] = None, indent: str = ""
 ) -> str:
-    max_elements = max_elements or 50
+    max_elements = max_elements or 20
     if isinstance(data, pd.DataFrame):
         return str(data.head(2))
     match data:

@@ -7,7 +7,6 @@ openai==0.28.1
 python-dotenv
 pytest-asyncio
 pyright
-cchardet
 pandas
 chardet
 scikit-learn
