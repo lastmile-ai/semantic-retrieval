@@ -15,4 +15,8 @@ export class AlwaysAllowAccessPolicy implements ResourceAccessPolicy {
   ): Promise<boolean> {
     return true;
   }
+
+  async testPolicyPermission(_requestor: AccessIdentity) {
+    return ["read", "write"];
+  }
 }
