@@ -21,7 +21,7 @@
       "rawDocument": {
         "metadata": {},
         "attributes": {},
-        "documentId": "c2e2b8f5-1129-46c8-8dba-cb20460ca41b",
+        "documentId": "59b55368-6461-44c3-a272-4dc935773d57",
         "uri": "test-source-uri",
         "name": "test-raw-doc-name",
         "dataSource": {
@@ -31,20 +31,13 @@
         },
         "mimeType": "text/plain"
       },
-      "fragments": [
-        {
-          "fragmentId": "44cd5488-2e1a-43d8-bfc1-dea3d5ea2aff",
-          "fragmentType": "text",
-          "documentId": "test-document-id-1",
-          "metadata": {},
-          "attributes": {}
-        }
-      ]
+      "fragments": []
     },
     "collectionId": "test-collection-id",
     "uri": "test-document-1-uri",
     "accessPolicies": [
       {
+        "resource": "*",
         "policy": "AlwaysAllowAccessPolicy",
         "policyJSON": {}
       }

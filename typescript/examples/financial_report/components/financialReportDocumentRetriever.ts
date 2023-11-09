@@ -1,3 +1,4 @@
+import { AccessPassport } from "../../../src/access-control";
 import { JSONObject } from "../../../src/common/jsonTypes";
 import { DocumentMetadataDB } from "../../../src/document/metadata/documentMetadataDB";
 import { CSVRetriever } from "../../../src/retrieval/csvRetriever";
@@ -17,7 +18,9 @@ export type FinancialReportData = {
   details: string;
 }[];
 
-type FinancialReportQuery = BaseRetrieverQueryParams<string>;
+export interface FinancialReportQuery extends BaseRetrieverQueryParams<string> {
+  accessPassport: AccessPassport;
+}
 
 export interface PortfolioData extends JSONObject {
   [Company: string]: { Shares: number | null };
@@ -58,12 +61,15 @@ export class FinancialReportDocumentRetriever
     params: FinancialReportQuery
   ): Promise<FinancialReportData> {
     const portfolio = await this.portfolioRetriever.retrieveData({
+      accessPassport: params.accessPassport,
       query: { primaryKeyColumn: "Company" },
     });
 
-    const ownedCompanies = Object.keys(portfolio).filter(
-      (company) => (portfolio[company].Shares ?? 0) > 0
-    );
+    const ownedCompanies = portfolio
+      ? Object.keys(portfolio).filter(
+          (company) => (portfolio[company].Shares ?? 0) > 0
+        )
+      : [];
 
     const ownedCompaniesDocumentIds = await Promise.all(
       ownedCompanies.map(async (company) => ({
@@ -104,6 +110,7 @@ export class FinancialReportDocumentRetriever
     );
 
     const companyProfiles = await this.companyProfilesRetriever.retrieveData({
+      accessPassport: params.accessPassport,
       query: { primaryKeyColumn: "Company" },
     });
 
@@ -123,7 +130,9 @@ export class FinancialReportDocumentRetriever
 
         return {
           company: report.company,
-          profile: companyProfiles[report.company].Profile,
+          profile:
+            companyProfiles?.[report.company]?.Profile ??
+            "No profile available",
           details,
         };
       })

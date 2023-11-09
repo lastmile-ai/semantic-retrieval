@@ -128,13 +128,15 @@ async function main() {
     callbackManager,
   });
 
-  const portfolioRetriever = new CSVRetriever<PortfolioData>(
-    `../examples/example_data/financial_report/portfolios/${clientId}_portfolio.csv`
-  );
+  const portfolioRetriever = new CSVRetriever<PortfolioData>({
+    path: `../examples/example_data/financial_report/portfolios/${clientId}_portfolio.csv`,
+    sourceAccessPolicies: [new AlwaysAllowAccessPolicy()],
+  });
 
-  const companyProfilesRetriever = new CSVRetriever<CompanyProfiles>(
-    "../examples/example_data/financial_report/company_profiles.csv"
-  );
+  const companyProfilesRetriever = new CSVRetriever<CompanyProfiles>({
+    path: "../examples/example_data/financial_report/company_profiles.csv",
+    sourceAccessPolicies: [new AlwaysAllowAccessPolicy()],
+  });
 
   const accessPassport = new AccessPassport();
   accessPassport.register(accessIdentity);

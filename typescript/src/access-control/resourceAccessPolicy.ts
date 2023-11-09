@@ -3,12 +3,16 @@ import { Document } from "../document/document";
 import { DocumentMetadataDB } from "../document/metadata/documentMetadataDB";
 import { AccessIdentity } from "./accessIdentity";
 
+// Resource for globally-scoped access policies (e.g. AlwaysAllowAccessPolicy)
+// AccessPassport will always have access to this resource
+export const GLOBAL_RESOURCE = "*";
+
 /**
  * Access policy for a resource
  */
 export interface ResourceAccessPolicy {
   policy: string;
-  resource?: string;
+  resource: string;
   policyJSON?: JSONObject;
 
   /**
