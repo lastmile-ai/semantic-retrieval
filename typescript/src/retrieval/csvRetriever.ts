@@ -38,7 +38,7 @@ export class CSVRetriever<R extends JSONObject> extends BaseRetriever {
 
     for (const row of rows) {
       const { [primaryKeyColumn]: key, ...restRow } = row;
-      if (key == null) {
+      if (key == null && restRow != null) {
         throw new Error(
           `Primary key column ${primaryKeyColumn} missing from row`
         );
