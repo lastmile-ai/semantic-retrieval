@@ -39,10 +39,14 @@ export class CSVRetriever<R extends JSONObject> extends BaseRetriever {
     for (const row of rows) {
       const { [primaryKeyColumn]: key, ...restRow } = row;
       if (key == null) {
-        throw new Error(
-          `Primary key column ${primaryKeyColumn} missing from row`
-        );
+        if (restRow != null) {
+          throw new Error(
+            `Primary key column ${primaryKeyColumn} missing from row`
+          );
+        }
+        continue; // ignore completely empty rows
       }
+
       const keyVal = typeof key === "string" ? key : JSON.stringify(key);
       retrievedData[keyVal] = restRow;
     }
