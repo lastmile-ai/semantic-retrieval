@@ -22,7 +22,7 @@ metadata_db = InMemoryDocumentMetadataDB(callback_manager=CallbackManager.defaul
 async def test_create_index():
     load_dotenv()
 
-    rel_path_from_python_root = "examples/example_data/financial_report/portfolios"
+    rel_path_from_python_root = "examples/example_data/ingestion/DonQuixote.txt"
     # rel_path_from_python_root = "examples/example_data/test/test.txt"
     cwd = os.path.normpath(os.getcwd())
     root_dir = os.path.join(cwd, "..") if cwd.endswith("python") else cwd
