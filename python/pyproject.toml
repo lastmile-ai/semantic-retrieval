@@ -2,8 +2,8 @@
 requires = ["setuptools", "wheel"]
 
 [project]
-name = "semantic-retrieval"
-version = "0.1.0"
+name = "python-semantic-retrieval"
+version = "0.1.2"
 authors = [
     { name="Suyog Sonwalkar", email="suyog@lastmileai.dev" },
 ]
