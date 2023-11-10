@@ -21,5 +21,5 @@
   // See https://stackoverflow.com/a/61107618 for more info
   "include": ["src", "__tests__"],
   "types": ["jest"],
-  "exclude": ["dist", "docs", "examples", "node_modules"]
+  "exclude": ["dist", "examples", "node_modules"]
 }

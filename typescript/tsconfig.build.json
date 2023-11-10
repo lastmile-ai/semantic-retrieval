@@ -18,7 +18,5 @@
     // to avoid that.
     "skipLibCheck": true,
   },
-  "exclude": [
-    "__tests__"
-  ]
+  "exclude": ["__tests__", "examples", "dist", "node_modules"]
 }
