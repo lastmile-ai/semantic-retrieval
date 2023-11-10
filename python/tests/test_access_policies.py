@@ -50,7 +50,7 @@ async def test_access_policies():
     cm = CallbackManager.default()
     # Get ingested documents to be able to test the policies - TODO [P1]: This should either be helper or mocked
     file_system = FileSystem(
-        "examples/example_data/financial_report/10ks",
+        "examples/example_data/ingestion",
         callback_manager=cm,
     )
     raw_documents = await file_system.load_documents()
