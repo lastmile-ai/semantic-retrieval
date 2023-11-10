@@ -114,11 +114,13 @@ def safe_serialize_arbitrary_for_logging(
                 f'{indent}  {safe_serialize_arbitrary_for_logging(item, max_elements, indent + "  ")},'
             )
         if len(data) > max_elements:
-            result.append(f"{indent}  ...,")
+            _len = len(data)
+            result.append(f"{indent}  ...(len={_len}),")
         result.append(f"{indent}" + "]")
         return "\n".join(result)
     elif isinstance(data, str):
-        return repr(data[:max_elements] + ("..." if len(data) > max_elements else ""))
+        _len = len(data)
+        return repr(data[:max_elements] + (f"...(len={_len})" if _len > max_elements else ""))
     elif data is None or isinstance(data, (int, float, bool)):
         return repr(data)
     else:
