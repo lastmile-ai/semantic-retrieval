@@ -27,6 +27,7 @@ from semantic_retrieval.transformation.embeddings.embeddings import (
     DocumentEmbeddingsTransformer,
     VectorEmbedding,
 )
+from semantic_retrieval.transformation.embeddings.openai_embeddings import OpenAIEmbeddingsHandle
 from semantic_retrieval.utils.callbacks import (
     CallbackManager,
     Traceable,
@@ -187,6 +188,9 @@ class PineconeVectorDB(VectorDB, Traceable):
             return Ok(_upsert_results)
 
     async def query(self, query: VectorDBQuery) -> List[VectorEmbedding]:
+        # TODO make the caller do embedding
+        model_handle = OpenAIEmbeddingsHandle()
+
         async def _get_query_vector():
             match query:
                 case VectorDBEmbeddingQuery(
@@ -194,7 +198,9 @@ class PineconeVectorDB(VectorDB, Traceable):
                 ):
                     return vec
                 case VectorDBTextQuery(text=text):
-                    return await self.embeddings.embed(text=text, model_handle=None, metadata=None)
+                    return await self.embeddings.embed(
+                        text=text, model_handle=model_handle, metadata=None
+                    )
 
         vec = await _get_query_vector()
 

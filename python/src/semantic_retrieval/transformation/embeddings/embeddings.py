@@ -34,6 +34,23 @@ class ModelHandle(ABC):
     # Contains a :
     # create: Callable[[Any], Any] = lambda *args, **kwargs: "result"  # type: ignore
 
+    @staticmethod
+    def mock(embedding: Optional[List[float]] = None) -> "ModelHandle":
+        embedding_ = embedding or [0] * 1536
+
+        class MockModelHandle(ModelHandle):
+            class _MockResult:
+                def to_dict_recursive(self):
+                    return {"data": [{"embedding": embedding_}]}
+
+            class _MockHandleCreator:
+                def create(self, *args, **kwargs):  # type: ignore
+                    return MockModelHandle._MockResult()
+
+            creator: Any = _MockHandleCreator()
+
+        return MockModelHandle()
+
 
 class EmbeddingsTransformer(Transformer):
     def __init__(self, dimensions: int):
