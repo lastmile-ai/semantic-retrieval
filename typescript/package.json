@@ -1,7 +1,7 @@
 {
-  "name": "@lastmileai/semantic-retrieval",
+  "name": "semantic-retrieval",
   "version": "0.0.1",
-  "description": "Node.js library for LastMile AI API",
+  "description": "Node.js library for LastMile AI Semantic Retrieval Framework",
   "repository": {
     "type": "git",
     "url": "https://github.com/lastmile-ai/semantic-retrieval.git"
