@@ -78,10 +78,10 @@ def exp_backoff(
                     return Ok(thunk())
                 except Exception as e:
                     logger.info(f"Attempt {retries + 1} failed: {e}")
-                    retries += 1
-                    delay = base_delay * retries
+                    delay = base_delay * 2**retries
                     logger.info(f"Retrying in {delay:.2f} seconds...")
                     time.sleep(delay)
+                    retries += 1
 
             return Err("Max retries reached, operation failed.")
 
