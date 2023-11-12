@@ -25,7 +25,7 @@ Once data is loaded into `RawDocument`s, it must be parsed into a format usable 
 Although `Document`s may be used directly after they are parsed from a data source, it is often beneficial to first convert them into a format that will benefit the end use case of the data. This includes, but is not limited to: transforming unstructed data to structured data; creating vector embeddings from the data; summarizing or extracting additional information from the data. The `Transformer` class serves as a basis for implementing the transformations of `Document`s into these formats.
 
 ### Data Indexing
-Transformed `Document`s and other data can be stored in various underlying indexes or data stores in order to be retrieved for future use in the LLM flow. One very common example is the indexing of contextual data as vector embeddings in a vector database, to be retrieved at LLM completion reqeust time in order to augment the prompt context. The library supports a number of such data stores and indexes out-of-the-box, with useful abstractions to leverage for additional implementations.
+Transformed `Document`s and other data can be stored in various underlying indexes or data stores in order to be retrieved for future use in the LLM flow. One very common example is the indexing of contextual data as vector embeddings in a vector database, to be retrieved at LLM completion request time in order to augment the prompt context. The library supports a number of such data stores and indexes out-of-the-box, with useful abstractions to leverage for additional implementations.
 
 
 ## Data Retrieval
@@ -36,4 +36,14 @@ Data that is stored in an underyling data store or index can be obtained using a
 `CompletionGenerator`s define how an input query or prompt (e.g. from a user) is used to generate a completion response from an underlying `CompletionModel`, and what the final result looks like. Similar to retrievers, completion generators are not limited to performing completion requests to a model, but can support any desired custom logic between an input query and finalized response.
 
 ## Access Control
-// TODO
+Proper access control is essential for leveraging data in semantic retrieval flows. The access control implementation in this framework differs slightly depending on the language used. A future iteration will consolidate both languages to a single implementation.
+
+### Typescript
+The typescript library leverages a concept of `ResourceAccessPolicy` to define which identities have access to requested resources. During ingestion, the `ResourceAccessPolicies` for source `RawDocument`s is specified in the associated `DocumentMetadataDB` entries. 
+Post-ingestion, any access to an underlying data store is performed with the use of an `AccessPassport`, which is a mapping of all the resources an end-user has access to, to that user's `AccessIdentity` (e.g. authentication credentials) for that resource. When an attempt is made to access data belonging to a particular resource, the relevant `ResourceAccessPolicy` tests the user's `AccessIdentity` to determine their permission for that resource.
+
+During retrieval, a `DocumentRetriever` will test whether the requestor has access to read the documents by calling the `testDocumentReadPermission` to filter out non-readable documents from those returned. For non-document resource accesses, the `testPolicyPermission` function on the associated `ResourceAccessPolicy` can be used to determine which permissions the identity has for the resource.
+
+
+### Python
+The python library leverages a `user_access_function` and `viewer_identity` as part of retrieval. The lowest point of data access calls the `user_access_function` to determine if the `viewer_identity` has permissions to access a particular resource: if a retriever retrieves data directly, the access check is performed in the retriever; otherwise, if the retriever queries data from an underlying data store, the access check is performed by the data store.
