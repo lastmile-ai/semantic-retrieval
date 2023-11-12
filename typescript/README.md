@@ -37,9 +37,11 @@ Developing and testing the semantic-retrieval package can be done locally using 
 
 1. Clone (https://github.com/lastmile-ai/lastmile-att-demo.git) (or pull) and cd to typescript directory
 2. Create a `.env` file with your API keys, like this:
-   OPENAI_API_KEY="my-openai-key"
-   PINECONE_API_KEY="my-pinecone-key"
-   PINECONE_ENVIRONMENT="my-pinecone-environment"
+```
+OPENAI_API_KEY="my-openai-key"
+PINECONE_API_KEY="my-pinecone-key"
+PINECONE_ENVIRONMENT="my-pinecone-environment"
+```
 3. In local SR repo, cd to typescript directory. Build and pack a local package:
 ```
 yarn build && yarn pack
