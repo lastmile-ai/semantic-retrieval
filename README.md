@@ -47,3 +47,26 @@ During retrieval, a `DocumentRetriever` will test whether the requestor has acce
 
 ### Python
 The python library leverages a `user_access_function` and `viewer_identity` as part of retrieval. The lowest point of data access calls the `user_access_function` to determine if the `viewer_identity` has permissions to access a particular resource: if a retriever retrieves data directly, the access check is performed in the retriever; otherwise, if the retriever queries data from an underlying data store, the access check is performed by the data store.
+
+
+#### Changelog
+Pypi v0.1.3
+
+This version contains some simple new helper functions for constructing custom config objects from .env and CLI arguments. Also includes README updates applying to both Python and Typescript.
+
+```
+changeset:   2a64a87d1890059ceb1d5f21d30f4cb4da9d0bf6
+user:        Jonathan Lessinger <jonathan@lastmileai.dev>
+date:        Mon, 13 Nov 2023 14:10:09 -0500
+summary:     [SR-PY] add config-related helper functions
+
+changeset:   c565aa8aa8aa70cde160ca9b779558423b09f511
+user:        Ryan Holinshead <>
+date:        Sun, 12 Nov 2023 14:28:59 -0500
+summary:     Minor Updates to README: Fill out Access Control section
+
+changeset:   cd438aa90582627f706eb59122da62d5208ddca1
+user:        Jonathan Lessinger <jonathan@lastmileai.dev>
+date:        Mon, 13 Nov 2023 16:55:14 -0500
+summary:     [EZ][SR-PY] one small type fix
+```
