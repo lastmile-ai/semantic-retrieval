@@ -46,7 +46,7 @@ def text_file_write(path: str, contents: str):
     except Exception as e:
         # TODO [P1] deal with this
         logger.critical("exn=" + str(e))
-        return ""
+        return -1
 
 
 def flatten_list(list_of_lists: List[List[T]]) -> List[T]:
