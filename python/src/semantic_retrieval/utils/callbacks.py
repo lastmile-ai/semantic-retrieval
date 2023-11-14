@@ -77,6 +77,15 @@ def safe_serialize_json(obj: Any, **kwargs: Any):
     return json.dumps(obj, default=default, **kwargs)
 
 
+def _maybe_redacted(key: str, value: Any) -> Any:
+    if isinstance(value, str) and any(
+        k in key.lower() for k in ["api_key", "apikey", "token", "secret"]
+    ):
+        return "<<redacted>>"
+    else:
+        return value
+
+
 def safe_serialize_arbitrary_for_logging(
     data: Any, max_elements: Optional[int] = None, indent: str = ""
 ) -> str:
@@ -91,16 +100,17 @@ def safe_serialize_arbitrary_for_logging(
         case _:
             pass
     if isinstance(data, BaseModel):
-        data = data.model_dump()
+        return safe_serialize_arbitrary_for_logging(data.model_dump(), max_elements, indent)
     if dataclasses.is_dataclass(data):
-        data = dataclasses.asdict(data)
+        return safe_serialize_arbitrary_for_logging(dataclasses.asdict(data), max_elements, indent)
     if isinstance(data, dict):
         keys = list(data.keys())
         result = []
         result.append("{")
         for key in keys[:max_elements]:
+            value = _maybe_redacted(key, data[key])
             result.append(
-                f'{indent}  {repr(key)}: {safe_serialize_arbitrary_for_logging(data[key], max_elements, indent + "  ")},'
+                f'{indent}  {repr(key)}: {safe_serialize_arbitrary_for_logging(value, max_elements, indent + "  ")},'
             )
         if len(keys) > max_elements:
             result.append(f"{indent}  ...,")
