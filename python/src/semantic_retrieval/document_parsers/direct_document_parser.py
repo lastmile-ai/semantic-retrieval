@@ -2,23 +2,39 @@ import uuid
 from result import Err, Ok, Result
 from semantic_retrieval.document.document import (
     DirectDocumentFragment,
+    DocumentFragment,
     DocumentFragmentType,
     IngestedDocument,
     RawDocument,
 )
-from semantic_retrieval.document_parsers.document_parser import DocumentParser
-from typing import List
+from typing import Dict, List, Optional
+
+from semantic_retrieval.ingestion.document_parsers.document_parser import (
+    BaseDocumentParser,
+)
+from semantic_retrieval.utils.callbacks import CallbackManager, Traceable
 
 
-class DirectDocumentParser(DocumentParser):
-    async def parse(self, document: RawDocument) -> Result[IngestedDocument, str]:
+class DirectDocumentParser(BaseDocumentParser, Traceable):
+    def __init__(
+        self,
+        attributes: Dict[str, str],
+        metadata: Optional[Dict[str, str]],
+        callback_manager: Optional[CallbackManager] = None,
+    ):
+        super().__init__(attributes, metadata or {}, callback_manager)
+
+    async def parse(self, raw_document: RawDocument) -> Result[IngestedDocument, str]:
         # Not using chunked content
-        content = (await document.get_content()).unwrap()
+        content = (await raw_document.get_content()).unwrap()
 
-        content_result = await document.get_content()
+        content_result = await raw_document.get_content()
+
+        # TODO callbacks
+
         match content_result:
             case Ok(content):
-                document_id = document.document_id
+                document_id = raw_document.document_id
 
                 # Only make one fragment with the entire contents of the document for now
                 fragments: List[DirectDocumentFragment] = [
@@ -35,9 +51,9 @@ class DirectDocumentParser(DocumentParser):
 
                 return Ok(
                     IngestedDocument(
-                        raw_document=document,
+                        raw_document=raw_document,
                         document_id=document_id,
-                        collection_id=document.collection_id,
+                        collection_id=raw_document.collection_id,
                         fragments=fragments,
                         metadata={},
                         attributes={},
@@ -45,3 +61,11 @@ class DirectDocumentParser(DocumentParser):
                 )
             case Err(err):
                 return Err(err)
+
+    def parse_next(
+        self,
+        raw_document: RawDocument,
+        previous_fragment: Optional[DocumentFragment] = None,
+        take: Optional[int] = None,
+    ) -> DocumentFragment:
+        raise NotImplementedError()

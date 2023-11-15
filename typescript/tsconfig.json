@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "declaration": true,
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "noImplicitAny": true,
+    "outDir": "./dist",
+    "resolveJsonModule": true,
+    "rootDir": ".",
+    "strict": true,
+    "target": "es6",
+    "esModuleInterop": true,
+    // LangChain does some very restrictive things (resolution-mode assertions, exact
+    // pdf-parse module resolution) that would otherwise force us to use nodenext and
+    // .js extension in imports + declare our own pdf-parse types module. Skip lib check
+    // to avoid that.
+    "skipLibCheck": true,
+  },
+  // Include __tests__ so that the types are available in jest. Use tsconfig.build.json as
+  // the build config, which excludes __tests__ from the compiled dist/ directory.
+  // See https://stackoverflow.com/a/61107618 for more info
+  "include": ["src", "__tests__"],
+  "types": ["jest"],
+  "exclude": ["dist", "examples", "node_modules"]
+}

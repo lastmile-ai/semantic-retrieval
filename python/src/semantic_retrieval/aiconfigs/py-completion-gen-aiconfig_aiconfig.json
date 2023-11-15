@@ -1,0 +1,41 @@
+{
+  "name": "py-completion-gen-aiconfig",
+  "schema_version": "latest",
+  "metadata": {
+    "report_variants": {
+    "net_cash_flow": {
+      "retrieval_query": "overall cash flow",
+      "structure_prompt": "Numbered list, one security per list item,",
+      "data_extraction_prompt": "net cash flow"
+    }, 
+    "covid": {
+      "retrieval_query": "covid 19 impact",
+      "structure_prompt": "Numbered list, one security per list item,",
+      "data_extraction_prompt": "covid 19 impact"
+    }
+  },
+    "models": {
+      "GPT-4": {
+        "model": "gpt-4",
+        "system_prompt": "'INSTRUCTIONS:\\nYou are a helpful assistant. Rearrange the context to answer the question. Output your response following the requested structure. Do not include Any words that do not appear in the context. '",
+        "presence_penalty": 0,
+        "frequency_penalty": 0
+      }
+    }
+  },
+  "parameters": {},  
+  "prompts": [
+    {
+      "name": "rag_complete",
+      "input": "{{structure_prompt}} containing the {{data_extraction_prompt}}\n       \nCONTEXT:\n{{data}}",
+      "metadata": {
+        "model": {
+          "name": "GPT-4",
+          "settings": {}
+        },
+        "parameters": {},
+        "remember_chat_context": true
+      }
+    }
+  ]
+}

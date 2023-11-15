@@ -2,8 +2,8 @@
 requires = ["setuptools", "wheel"]
 
 [project]
-name = "semantic-retrieval"
-version = "0.1.0"
+name = "python-semantic-retrieval"
+version = "0.1.3"
 authors = [
     { name="Suyog Sonwalkar", email="suyog@lastmileai.dev" },
 ]
@@ -14,6 +14,7 @@ classifiers = [
   "Intended Audience :: Developers",
   "Programming Language :: Python :: 3",
 ]
+dynamic = ["dependencies"]
 
 [tool.setuptools.dynamic]
 dependencies = {file = ["requirements.txt"]}

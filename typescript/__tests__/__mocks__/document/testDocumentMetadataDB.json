@@ -1,0 +1,50 @@
+{
+  "test-document-id-1": {
+    "documentId": "test-document-id-1",
+    "rawDocument": {
+      "metadata": {},
+      "attributes": {},
+      "documentId": "test-document-id-1",
+      "uri": "test-source-uri",
+      "name": "test-raw-doc-name",
+      "dataSource": {
+        "name": "FileSystem",
+        "fileLoaders": {},
+        "path": "test"
+      },
+      "mimeType": "text/plain"
+    },
+    "document": {
+      "metadata": {},
+      "attributes": {},
+      "documentId": "test-document-id-1",
+      "rawDocument": {
+        "metadata": {},
+        "attributes": {},
+        "documentId": "59b55368-6461-44c3-a272-4dc935773d57",
+        "uri": "test-source-uri",
+        "name": "test-raw-doc-name",
+        "dataSource": {
+          "name": "FileSystem",
+          "fileLoaders": {},
+          "path": "test"
+        },
+        "mimeType": "text/plain"
+      },
+      "fragments": []
+    },
+    "collectionId": "test-collection-id",
+    "uri": "test-document-1-uri",
+    "accessPolicies": [
+      {
+        "resource": "*",
+        "policy": "AlwaysAllowAccessPolicy",
+        "policyJSON": {}
+      }
+    ],
+    "metadata": {
+      "key1": "value1",
+      "key2": "value2"
+    }
+  }
+}

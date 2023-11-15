@@ -16,7 +16,7 @@ class RawDocumentChunk(Record):
 
 class RawDocument(Record):
     uri: str
-    # data_source: Any  # TODO: Update this to DataSource type when it is defined
+    # data_source: Any  # TODO [P1]: Update this to DataSource type when it is defined
     name: str
     document_id: str
     hash: Optional[str]
@@ -63,7 +63,7 @@ class DocumentFragment(Attributable):
         pass
 
 
-# TODO (suyog): Same issue as with RawDocument when converting from Typescript that happened in FileSystem
+# TODO [P1] (suyog): Same issue as with RawDocument when converting from Typescript that happened in FileSystem
 class DirectDocumentFragment(DocumentFragment, Record):
     content: str
     metadata: Optional[dict[Any, Any]]

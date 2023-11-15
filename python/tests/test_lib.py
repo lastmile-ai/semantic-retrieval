@@ -4,57 +4,57 @@ from semantic_retrieval.document.metadata.in_memory_document_metadata_db import 
     InMemoryDocumentMetadataDB,
 )
 from semantic_retrieval.ingestion.data_sources.fs.file_system import FileSystem
-from semantic_retrieval.document_parsers.multi_document_parser import (
-    MultiDocumentParser,
-    ParserConfig,
-)
 from semantic_retrieval.transformation.document.text.separator_text_chunker import (
     SeparatorTextChunker,
     SeparatorTextChunkerParams,
 )
-from semantic_retrieval.transformation.document.text.text_chunk_transformer import (
-    TextChunkConfig,
-)
+
+import semantic_retrieval.document_parsers.multi_document_parser as mdp
 from dotenv import load_dotenv
 
+from semantic_retrieval.utils.callbacks import CallbackManager
 
-metadata_db = InMemoryDocumentMetadataDB()
+
+metadata_db = InMemoryDocumentMetadataDB(callback_manager=CallbackManager.default())
 
 
 @pytest.mark.asyncio
 async def test_create_index():
     load_dotenv()
 
-    rel_path_from_python_root = "examples/example_data/financial_report/portfolios"
+    rel_path_from_python_root = "examples/example_data/ingestion/DonQuixote.txt"
     # rel_path_from_python_root = "examples/example_data/test/test.txt"
     cwd = os.path.normpath(os.getcwd())
     root_dir = os.path.join(cwd, "..") if cwd.endswith("python") else cwd
     full_path = os.path.join(root_dir, rel_path_from_python_root)
-    file_system = FileSystem(full_path)
-    raw_documents = file_system.load_documents()
 
-    parsed_documents = await MultiDocumentParser().parse_documents(
+    cm = CallbackManager.default()
+    file_system = FileSystem(full_path, callback_manager=cm)
+    raw_documents = await file_system.load_documents()
+
+    parsed_documents = await mdp.parse_documents(
         raw_documents,
-        parser_config=ParserConfig(
-            metadata_db=metadata_db, access_control_policy_factory=None
-        ),
+        metadata_db=metadata_db,
+        callback_manager=cm,
     )
 
     documentTransformer = SeparatorTextChunker(
-        SeparatorTextChunkerParams(
-            metadata_db=metadata_db,
-            text_chunk_config=TextChunkConfig(
-                chunk_size_limit=500, chunk_overlap=100, size_fn=len
-            ),
-        )
+        params=SeparatorTextChunkerParams(
+            separator=" ",
+            strip_new_lines=True,
+            chunk_size_limit=500,
+            chunk_overlap=100,
+            document_metadata_db=metadata_db,
+        ),
+        callback_manager=cm,
     )
 
     # Transform the parsed documents
     _transformed_documents = await documentTransformer.transform_documents(
-        parsed_documents
+        parsed_documents,
     )
 
-    # TODO: Commenting out for now to get tests to pass, will add back in later - want to ship to have notebook ready
+    # TODO [P1]: Commenting out for now to get tests to pass, will add back in later - want to ship to have notebook ready
     # # Create the embeddings, use dotenv to get the environment vars & setup properly
     # await PineconeVectorDB.from_documents(
     #     transformed_documents,

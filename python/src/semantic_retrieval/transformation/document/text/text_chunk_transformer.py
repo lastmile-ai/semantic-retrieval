@@ -1,7 +1,7 @@
-from dataclasses import dataclass
 from uuid import uuid4
 from hashlib import md5
-from typing import Any, Callable, List, Optional
+from typing import List, Optional
+from semantic_retrieval.common.types import CallbackEvent, Record
 
 from semantic_retrieval.document.metadata.document_metadata_db import DocumentMetadataDB
 
@@ -14,32 +14,30 @@ from semantic_retrieval.document.document import (
     DocumentFragmentType,
     TransformedDocument,
 )
+from semantic_retrieval.utils.callbacks import CallbackManager, Traceable
 
 
-@dataclass
-class TextChunkConfig:
+class TextChunkConfig(Record):
     chunk_size_limit: int
     chunk_overlap: int
-    size_fn: Callable[[Any], int]
 
 
-@dataclass
 class TextChunkTransformerParams:
+    separator: str = " "
+    strip_new_lines: bool = True
     metadata_db: Optional[DocumentMetadataDB]
-    text_chunk_config: TextChunkConfig
 
 
 async def _len(x: str) -> int:
     return len(x)
 
 
-class TextChunkTransformer(BaseDocumentTransformer):
-    # TODO: finish impl
-    def __init__(self, params: Optional[TextChunkTransformerParams] = None):
-        self.params = params
+class TextChunkTransformer(BaseDocumentTransformer, Traceable):
+    def __init__(self, callback_manager: CallbackManager):
         self.size_fn = _len
         self.chunk_size_limit = 500
         self.chunk_overlap = 100
+        self.callback_manager = callback_manager
 
     async def chunk_text(self, text: str) -> List[str]:
         raise NotImplementedError("This method must be implemented in a derived class")
@@ -69,9 +67,13 @@ class TextChunkTransformer(BaseDocumentTransformer):
             def id_(chunk: str) -> str:
                 return chunk
 
-            # TODO: One other issue with chunks is some csvs are getting 0 chunks returned even though they have sub_chunks
+            # TODO [P1]: One other issue with chunks is some csvs are getting 0 chunks returned even though they have sub_chunks
             # Definitely some issue with merge_sub_chunks, but not going to debug this right now
-            for chunk in await self.chunk_text(original_fragment):  # type: ignore [fixme]
+            if not isinstance(original_fragment, str):
+                raise ValueError(
+                    f"Expected original_fragment to be a string, but got {type(original_fragment)}"
+                )
+            for chunk in await self.chunk_text(original_fragment):
                 current_fragment = {
                     "fragment_id": str(uuid4()),
                     "fragment_type": DocumentFragmentType.TEXT,
@@ -84,11 +86,9 @@ class TextChunkTransformer(BaseDocumentTransformer):
                     "serialize": id_,
                 }
 
-                # TODO: Unsure if this is working correctly
+                # TODO [P1]: Unsure if this is working correctly
                 if fragment_count > 0:
-                    transformed_fragments[fragment_count - 1][
-                        "nextFragment"
-                    ] = current_fragment
+                    transformed_fragments[fragment_count - 1]["nextFragment"] = current_fragment
 
                 fragment_count += 1
                 transformed_fragments.append(current_fragment)
@@ -102,15 +102,16 @@ class TextChunkTransformer(BaseDocumentTransformer):
             attributes={},
         )
 
-        # TODO: callback
-        # event = TransformDocumentEvent(
-        #     name="onTransformDocument",
-        #     originalDocument=document,
-        #     transformedDocument=transformed_document,  # type: ignore [fixme]
-        # )
-
-        # if self.callback_manager:
-        #     await self.callback_manager.run_callbacks(event)
+        await self.callback_manager.run_callbacks(
+            CallbackEvent(
+                name="text_chunk_transform_document",
+                data=dict(
+                    original_document=document,
+                    transformed_document=transformed_document,
+                    original_fragments_data=original_fragments_data,
+                ),
+            )
+        )
 
         return transformed_document
 
@@ -118,9 +119,7 @@ class TextChunkTransformer(BaseDocumentTransformer):
         chunk = separator.join(sub_chunks).strip()
         return chunk if chunk != "" else None
 
-    async def merge_sub_chunks(
-        self, sub_chunks: List[str], separator: str
-    ) -> List[str]:
+    async def merge_sub_chunks(self, sub_chunks: List[str], separator: str) -> List[str]:
         chunks = []
         prev_sub_chunks = []
         current_sub_chunks = []
@@ -135,10 +134,7 @@ class TextChunkTransformer(BaseDocumentTransformer):
                     f"SubChunk size {sub_chunk_size} exceeds chunkSizeLimit of {self.chunk_size_limit}"
                 )
 
-            if (
-                current_chunk_size + chunk_separator_size + sub_chunk_size
-                > self.chunk_size_limit
-            ):
+            if current_chunk_size + chunk_separator_size + sub_chunk_size > self.chunk_size_limit:
                 chunk = self.join_sub_chunks(current_sub_chunks, separator)
                 if chunk is not None:
                     chunks.append(chunk)
@@ -182,9 +178,7 @@ class TextChunkTransformer(BaseDocumentTransformer):
 
                 while num_prev_sub_chunks_overlap > 0:
                     current_sub_chunks.append(
-                        prev_sub_chunks[
-                            num_total_prev_sub_chunks - num_prev_sub_chunks_overlap
-                        ]
+                        prev_sub_chunks[num_total_prev_sub_chunks - num_prev_sub_chunks_overlap]
                     )
                     num_prev_sub_chunks_overlap -= 1
 
@@ -200,5 +194,16 @@ class TextChunkTransformer(BaseDocumentTransformer):
         if len(current_sub_chunks) > 0:
             chunk = self.join_sub_chunks(current_sub_chunks, separator)
 
-        # TODO is this correct?
+        await self.callback_manager.run_callbacks(
+            CallbackEvent(
+                name="merge_sub_chunks",
+                data=dict(
+                    sub_chunks=sub_chunks,
+                    separator=separator,
+                    chunks=chunks,
+                ),
+            )
+        )
+
+        # TODO [P1] is this correct?
         return chunks

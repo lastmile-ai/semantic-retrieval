@@ -1,6 +1,6 @@
 
 from semantic_retrieval.document_parsers.direct_document_parser import DirectDocumentParser
-from semantic_retrieval.document_parsers.document_parser import DocumentParser
+from semantic_retrieval.ingestion.document_parsers.document_parser import DocumentParser
 
 class ParserRegistry:
     default_parser: DocumentParser
@@ -10,7 +10,7 @@ class ParserRegistry:
         if default_parser is not None:
             self.default_parser = default_parser
         else:
-            self.default_parser = DirectDocumentParser()
+            self.default_parser = DirectDocumentParser(attributes={}, metadata={})
 
     def register_parser(self, mime_type: str, parser: DocumentParser) -> None:
         self.parsers[mime_type] = parser

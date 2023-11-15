@@ -1,5 +1,7 @@
-from typing import Dict, Any, List
+from abc import abstractmethod
+from typing import Dict, Any, List, Sequence
 from semantic_retrieval.common.types import Record
+from semantic_retrieval.document.document import Document
 
 from semantic_retrieval.transformation.embeddings.embeddings import (
     VectorEmbedding,
@@ -7,8 +9,7 @@ from semantic_retrieval.transformation.embeddings.embeddings import (
 )
 
 from semantic_retrieval.document.metadata.document_metadata_db import DocumentMetadataDB
-
-from semantic_retrieval.utils.callbacks import Traceable
+from semantic_retrieval.utils.callbacks import CallbackManager, Traceable
 
 
 class VectorDBBaseQuery(Record):
@@ -46,21 +47,25 @@ class VectorDB(Traceable):
         embeddings: EmbeddingsTransformer,
         metadata_db: DocumentMetadataDB,
         vector_db_config: VectorDBConfig,
+        callback_manager: CallbackManager,
     ):
         self.embeddings = embeddings
         self.metadata_db = metadata_db
-        self.callback_manager = None
+        self.callback_manager = callback_manager
         self.vector_db_config = vector_db_config
 
     @classmethod
-    def fromDocuments(cls, documents, config) -> "VectorDB":  # type: ignore [fixme]
-        # TODO implement
+    @abstractmethod
+    def fromDocuments(cls, documents: Sequence[Document], config: VectorDBConfig) -> "VectorDB":
         pass
 
-    async def addDocuments(self, documents) -> None:  # type: ignore [fixme]
-        # TODO implement
+    @abstractmethod
+    async def addDocuments(self, documents: Sequence[Document]) -> None:
         pass
 
-    async def query(self, query: VectorDBQuery) -> List[VectorEmbedding]:
-        # TODO implement
-        return []
+    @abstractmethod
+    async def query(
+        self,
+        query: VectorDBQuery,
+    ) -> List[VectorEmbedding]:
+        pass
