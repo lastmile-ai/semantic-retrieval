@@ -21,3 +21,4 @@ python/dist
 callback_data.json
 examples/example_data/financial_report/artifacts/the_metadata_db*
 .virtual_documents
+aiconfig.log

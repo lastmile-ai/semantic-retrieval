@@ -30,6 +30,13 @@ def result_reduce_list_separate(lst: List[Result[T, str]]) -> Tuple[List[T], Lis
     return oks, errs
 
 
+def result_reduce_list_all_ok(lst: List[Result[T, str]]) -> Result[List[T], str]:
+    oks, errs = result_reduce_list_separate(lst)
+    if errs:
+        return Err("\n".join(errs))
+    else:
+        return Ok(oks)
+
 def result_do(
     func: Callable[Concatenate[PS], Generator[Result[TR, E], TR, Result[TR, E]]]
 ) -> Callable[PS, Result[TR, E]]:
