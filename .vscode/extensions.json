@@ -6,6 +6,7 @@
       "meta.sapling-scm",
       "ms-python.python",
       "ms-python.vscode-pylance",
+      "ms-python.pylint"
     ]
   }
   
