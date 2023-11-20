@@ -1,13 +1,8 @@
-from typing import List, Tuple, TypeVar
-
-from result import Err, Ok, Result
-
 import functools
-from typing import Callable, Concatenate, Generator, TypeVar
+import traceback
+from typing import Callable, Concatenate, Generator, Iterable, ParamSpec, Tuple, TypeVar
 
 from result import Err, Ok, Result
-
-from typing import TypeVar, ParamSpec
 
 PS = ParamSpec("PS")
 
@@ -18,7 +13,30 @@ E = TypeVar("E", covariant=True)
 T = TypeVar("T")
 
 
-def result_reduce_list_separate(lst: List[Result[T, str]]) -> Tuple[List[T], List[str]]:
+def ErrWithTraceback(e: Exception, extra_msg: str = "") -> Result[T, str]:
+    if extra_msg:
+        extra_msg = extra_msg.rstrip(" :\n")
+        extra_msg = f"{extra_msg}"
+
+    return Err(f"{extra_msg}\nException:\n{e}\n{traceback.format_exc()}")
+
+
+def print_result(r: Result[T, str]) -> None:
+    match r:
+        case Ok(value):
+            print(f"Ok:\n" + str(value))
+        case Err(msg):
+            print(f"Err:\n" + msg)
+
+
+def result_to_exitcode(r: Result[T, str], fail_code: int = 1) -> int:
+    def _ok(_: T) -> int:
+        return 0
+
+    return r.map(_ok).unwrap_or(fail_code)
+
+
+def result_reduce_list_separate(lst: Iterable[Result[T, str]]) -> Tuple[list[T], list[str]]:
     oks, errs = [], []
     for item in lst:
         match item:
@@ -102,3 +120,11 @@ def result_do(
             return e.value
 
     return wrapper
+
+
+def result_reduce_list_all_ok(lst: Iterable[Result[T, str]]) -> Result[list[T], str]:
+    oks, errs = result_reduce_list_separate(lst)
+    if errs:
+        return Err("\n".join(errs))
+    else:
+        return Ok(oks)
