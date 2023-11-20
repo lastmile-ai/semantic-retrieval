@@ -8,7 +8,6 @@ import numpy.typing as npt
 from pydantic import BaseModel, ConfigDict
 from result import Result
 
-
 # TODO [P1]: is this useful?
 NPA = npt.NDArray[Any]
 
