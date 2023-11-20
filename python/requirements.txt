@@ -15,3 +15,4 @@ langchain==0.0.325
 tiktoken==0.5.1
 pinecone-client==2.2.4
 python-aiconfig==1.0.4
+jsoncomment==0.4.2
