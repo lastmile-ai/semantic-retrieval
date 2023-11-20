@@ -4,7 +4,7 @@
   "exclude": ["**/*scratch*", "python/build"],
   "ignore": [],
   "venv": "semantic-retrieval",
-  "pythonVersion": "3.11",
+  "pythonVersion": "3.10",
   "reportUnknownMemberType": false,
   "reportUnknownVariableType": false,
   "reportUnknownArgumentType": false,
