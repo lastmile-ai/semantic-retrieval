@@ -1,7 +1,7 @@
 import argparse
 import logging
 import os
-from enum import EnumType
+from enum import EnumMeta
 from types import UnionType
 from typing import Any, Dict, Optional, Set, Type, TypeVar
 
@@ -35,7 +35,7 @@ def add_parser_argument(
         )
     elif type(the_type) is UnionType:
         return f"UnionType not supported. field={field_name}"
-    elif type(the_type) is EnumType:
+    elif isinstance(the_type, EnumMeta):
         parser.add_argument(
             f"--{field_name}",
             type=str,
