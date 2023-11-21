@@ -1,5 +1,3 @@
-# Don't rely on the generic type. Wrong annotation might be missed.
-# Use `Any` to signal that uncertainty explicitly.
 import json
 import time
 from typing import Any, Awaitable, Callable, Generator, Optional, TypeVar
@@ -8,6 +6,8 @@ import numpy.typing as npt
 from pydantic import BaseModel, ConfigDict
 from result import Result
 
+# Don't rely on the generic type. Wrong annotation might be missed.
+# Use `Any` to signal that uncertainty explicitly.
 # TODO [P1]: is this useful?
 NPA = npt.NDArray[Any]
 
