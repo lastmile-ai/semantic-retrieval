@@ -20,6 +20,7 @@ from semantic_retrieval.functional.functional import (
     result_reduce_list_all_ok,
     result_to_exitcode,
 )
+
 from semantic_retrieval.utils.configs.configs import argparsify, parse_args
 
 LOGGER = logging.getLogger(__name__)
