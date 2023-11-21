@@ -1,14 +1,15 @@
 from abc import abstractmethod
-from typing import Dict, Any, List, Sequence
+from typing import Any, Dict, List, Sequence
+
 from semantic_retrieval.common.types import Record
 from semantic_retrieval.document.document import Document
-
-from semantic_retrieval.transformation.embeddings.embeddings import (
-    VectorEmbedding,
-    EmbeddingsTransformer,
+from semantic_retrieval.document.metadata.document_metadata_db import (
+    DocumentMetadataDB,
 )
-
-from semantic_retrieval.document.metadata.document_metadata_db import DocumentMetadataDB
+from semantic_retrieval.transformation.embeddings.embeddings import (
+    EmbeddingsTransformer,
+    VectorEmbedding,
+)
 from semantic_retrieval.utils.callbacks import CallbackManager, Traceable
 
 
@@ -56,7 +57,9 @@ class VectorDB(Traceable):
 
     @classmethod
     @abstractmethod
-    def fromDocuments(cls, documents: Sequence[Document], config: VectorDBConfig) -> "VectorDB":
+    def fromDocuments(
+        cls, documents: Sequence[Document], config: VectorDBConfig
+    ) -> "VectorDB":
         pass
 
     @abstractmethod

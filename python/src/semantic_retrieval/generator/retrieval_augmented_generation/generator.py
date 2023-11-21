@@ -1,6 +1,6 @@
 from typing import Any, Dict, List
-from aiconfig import AIConfigRuntime, ExecuteResult
 
+from aiconfig import AIConfigRuntime, ExecuteResult
 from aiconfig.model_parser import InferenceOptions
 
 
@@ -25,7 +25,9 @@ async def generate(ai_config_path: str, params: Dict[str, str]) -> str:
     return text
 
 
-async def resolve_ai_config(ai_config_path: str, params: Dict[str, str]) -> Any:
+async def resolve_ai_config(
+    ai_config_path: str, params: Dict[str, str]
+) -> Any:
     runtime = AIConfigRuntime.from_config(ai_config_path)
     return await runtime.resolve("rag_complete", params=params)
 

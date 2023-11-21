@@ -1,9 +1,14 @@
 from dataclasses import dataclass
-from semantic_retrieval.common.types import CallbackEvent
-from semantic_retrieval.document.document import RawDocument, IngestedDocument
 from typing import Optional, Sequence
-from semantic_retrieval.document.metadata.document_metadata import DocumentMetadata
-from semantic_retrieval.document.metadata.document_metadata_db import DocumentMetadataDB
+
+from semantic_retrieval.common.types import CallbackEvent
+from semantic_retrieval.document.document import IngestedDocument, RawDocument
+from semantic_retrieval.document.metadata.document_metadata import (
+    DocumentMetadata,
+)
+from semantic_retrieval.document.metadata.document_metadata_db import (
+    DocumentMetadataDB,
+)
 from semantic_retrieval.document_parsers.parser_registry import ParserRegistry
 from semantic_retrieval.utils.callbacks import CallbackManager
 

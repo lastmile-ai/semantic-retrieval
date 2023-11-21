@@ -1,18 +1,18 @@
-from uuid import uuid4
 from hashlib import md5
 from typing import List, Optional
+from uuid import uuid4
+
 from semantic_retrieval.common.types import CallbackEvent, Record
-
-from semantic_retrieval.document.metadata.document_metadata_db import DocumentMetadataDB
-
-from semantic_retrieval.transformation.document.document_transformer import (
-    BaseDocumentTransformer,
-)
-
 from semantic_retrieval.document.document import (
     Document,
     DocumentFragmentType,
     TransformedDocument,
+)
+from semantic_retrieval.document.metadata.document_metadata_db import (
+    DocumentMetadataDB,
+)
+from semantic_retrieval.transformation.document.document_transformer import (
+    BaseDocumentTransformer,
 )
 from semantic_retrieval.utils.callbacks import CallbackManager, Traceable
 
@@ -40,7 +40,9 @@ class TextChunkTransformer(BaseDocumentTransformer, Traceable):
         self.callback_manager = callback_manager
 
     async def chunk_text(self, text: str) -> List[str]:
-        raise NotImplementedError("This method must be implemented in a derived class")
+        raise NotImplementedError(
+            "This method must be implemented in a derived class"
+        )
 
     def sub_chunk_on_separator(self, text: str, separator: str) -> List[str]:
         sub_chunks = text.split(separator)
@@ -88,7 +90,9 @@ class TextChunkTransformer(BaseDocumentTransformer, Traceable):
 
                 # TODO [P1]: Unsure if this is working correctly
                 if fragment_count > 0:
-                    transformed_fragments[fragment_count - 1]["nextFragment"] = current_fragment
+                    transformed_fragments[fragment_count - 1][
+                        "nextFragment"
+                    ] = current_fragment
 
                 fragment_count += 1
                 transformed_fragments.append(current_fragment)
@@ -115,11 +119,15 @@ class TextChunkTransformer(BaseDocumentTransformer, Traceable):
 
         return transformed_document
 
-    def join_sub_chunks(self, sub_chunks: List[str], separator: str) -> Optional[str]:
+    def join_sub_chunks(
+        self, sub_chunks: List[str], separator: str
+    ) -> Optional[str]:
         chunk = separator.join(sub_chunks).strip()
         return chunk if chunk != "" else None
 
-    async def merge_sub_chunks(self, sub_chunks: List[str], separator: str) -> List[str]:
+    async def merge_sub_chunks(
+        self, sub_chunks: List[str], separator: str
+    ) -> List[str]:
         chunks = []
         prev_sub_chunks = []
         current_sub_chunks = []
@@ -134,7 +142,10 @@ class TextChunkTransformer(BaseDocumentTransformer, Traceable):
                     f"SubChunk size {sub_chunk_size} exceeds chunkSizeLimit of {self.chunk_size_limit}"
                 )
 
-            if current_chunk_size + chunk_separator_size + sub_chunk_size > self.chunk_size_limit:
+            if (
+                current_chunk_size + chunk_separator_size + sub_chunk_size
+                > self.chunk_size_limit
+            ):
                 chunk = self.join_sub_chunks(current_sub_chunks, separator)
                 if chunk is not None:
                     chunks.append(chunk)
@@ -151,7 +162,9 @@ class TextChunkTransformer(BaseDocumentTransformer, Traceable):
                 while num_prev_sub_chunks_overlap < num_total_prev_sub_chunks:
                     next_prev_sub_chunk_size = await self.size_fn(
                         prev_sub_chunks[
-                            num_total_prev_sub_chunks - num_prev_sub_chunks_overlap - 1
+                            num_total_prev_sub_chunks
+                            - num_prev_sub_chunks_overlap
+                            - 1
                         ]
                     )
 
@@ -178,7 +191,10 @@ class TextChunkTransformer(BaseDocumentTransformer, Traceable):
 
                 while num_prev_sub_chunks_overlap > 0:
                     current_sub_chunks.append(
-                        prev_sub_chunks[num_total_prev_sub_chunks - num_prev_sub_chunks_overlap]
+                        prev_sub_chunks[
+                            num_total_prev_sub_chunks
+                            - num_prev_sub_chunks_overlap
+                        ]
                     )
                     num_prev_sub_chunks_overlap -= 1
 

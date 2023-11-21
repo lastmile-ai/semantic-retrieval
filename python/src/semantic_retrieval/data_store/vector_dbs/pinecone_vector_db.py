@@ -1,6 +1,6 @@
+import logging
 from dataclasses import dataclass
 from functools import partial
-import logging
 from typing import Any, Dict, Iterable, List
 from uuid import uuid4
 
@@ -11,7 +11,9 @@ from semantic_retrieval.access_control.access_function import (
     AccessFunction,
     get_data_access_checked_list,
 )
-from semantic_retrieval.access_control.access_identity import AuthenticatedIdentity
+from semantic_retrieval.access_control.access_identity import (
+    AuthenticatedIdentity,
+)
 from semantic_retrieval.common.core import LOGGER_FMT, unflatten_iterable
 from semantic_retrieval.common.types import CallbackEvent, Record
 from semantic_retrieval.data_store.vector_dbs.vector_db import (
@@ -22,12 +24,16 @@ from semantic_retrieval.data_store.vector_dbs.vector_db import (
     VectorDBTextQuery,
 )
 from semantic_retrieval.document.document import Document
-from semantic_retrieval.document.metadata.document_metadata_db import DocumentMetadataDB
+from semantic_retrieval.document.metadata.document_metadata_db import (
+    DocumentMetadataDB,
+)
 from semantic_retrieval.transformation.embeddings.embeddings import (
     DocumentEmbeddingsTransformer,
     VectorEmbedding,
 )
-from semantic_retrieval.transformation.embeddings.openai_embeddings import OpenAIEmbeddingsHandle
+from semantic_retrieval.transformation.embeddings.openai_embeddings import (
+    OpenAIEmbeddingsHandle,
+)
 from semantic_retrieval.utils.callbacks import (
     CallbackManager,
     Traceable,
@@ -131,12 +137,16 @@ class PineconeVectorDB(VectorDB, Traceable):
         self,
         documents: List[Document],
     ):
-        pinecone.init(api_key=self.config.api_key, environment=self.config.environment)
+        pinecone.init(
+            api_key=self.config.api_key, environment=self.config.environment
+        )
 
         embedding_creator = self.embeddings
 
         logger.debug("Getting embeddings")
-        embeddings_list = await embedding_creator.transform_documents(documents)
+        embeddings_list = await embedding_creator.transform_documents(
+            documents
+        )
 
         logger.info(f"Upserting {len(embeddings_list)} to Pinecone")
 
@@ -152,7 +162,9 @@ class PineconeVectorDB(VectorDB, Traceable):
             )
 
         _upsert_results = _batch_upsert(
-            vectors_iterable=[_ve_to_pcv(ve, idx) for idx, ve in enumerate(embeddings_list)],
+            vectors_iterable=[
+                _ve_to_pcv(ve, idx) for idx, ve in enumerate(embeddings_list)
+            ],
             index_name=self.config.index_name,
             namespace=self.config.namespace,
             pool_threads=30,
@@ -204,7 +216,9 @@ class PineconeVectorDB(VectorDB, Traceable):
 
         vec = await _get_query_vector()
 
-        pinecone.init(api_key=self.config.api_key, environment=self.config.environment)
+        pinecone.init(
+            api_key=self.config.api_key, environment=self.config.environment
+        )
         index = pinecone.Index(self.config.index_name)
 
         top_k = query.topK
@@ -281,7 +295,9 @@ async def _run_query(query_params: QueryParams) -> List[VectorEmbedding]:
             text=match.metadata["text"],
         )
 
-    return list(map(_response_record_to_vector_embedding, query_response.matches))
+    return list(
+        map(_response_record_to_vector_embedding, query_response.matches)
+    )
 
 
 def _batch_upsert(
@@ -302,10 +318,14 @@ def _batch_upsert(
                 async_req=True,
                 namespace=namespace,
             )
-            for ids_vectors_chunk in unflatten_iterable(the_vectors, chunk_size=batch_size)
+            for ids_vectors_chunk in unflatten_iterable(
+                the_vectors, chunk_size=batch_size
+            )
         ]
 
-        def _get_result(raw_result: pinecone.UpsertResponse) -> UpsertResponseWrapper:
+        def _get_result(
+            raw_result: pinecone.UpsertResponse,
+        ) -> UpsertResponseWrapper:
             out = {}
             for k in dir(raw_result):
                 out[k] = getattr(raw_result, k)

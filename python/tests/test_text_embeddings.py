@@ -1,6 +1,5 @@
 import pytest
 from semantic_retrieval.transformation.embeddings.embeddings import ModelHandle
-
 from semantic_retrieval.transformation.embeddings.openai_embeddings import (
     OpenAIEmbeddings,
     OpenAIEmbeddingsConfig,

@@ -1,25 +1,21 @@
-from typing import Any, List, Optional, Callable
+import hashlib
+import mimetypes
+import os
+import uuid
+from typing import Any, Callable, List, Optional
 
+from langchain.document_loaders import (
+    CSVLoader,
+    Docx2txtLoader,
+    PyPDFLoader,
+    TextLoader,
+)
+from langchain.document_loaders.base import BaseLoader
 from result import Err, Ok, Result
 from semantic_retrieval.common.types import CallbackEvent
-from semantic_retrieval.ingestion.data_sources.data_source import DataSource
 from semantic_retrieval.document.document import RawDocument, RawDocumentChunk
-
-
-from langchain.document_loaders.base import BaseLoader
-from langchain.document_loaders import (
-    TextLoader,
-    CSVLoader,
-    PyPDFLoader,
-    Docx2txtLoader,
-)
-
+from semantic_retrieval.ingestion.data_sources.data_source import DataSource
 from semantic_retrieval.utils.callbacks import CallbackManager, Traceable
-import os
-import hashlib
-import uuid
-import mimetypes
-
 from semantic_retrieval.utils.configs.configs import remove_nones
 
 
@@ -93,7 +89,9 @@ class FileSystem(DataSource, Traceable):
     def check_stats(self):
         return os.path.isdir(self.path), os.path.isfile(self.path)
 
-    async def load_file(self, path: str, collection_id: str) -> FileSystemRawDocument:
+    async def load_file(
+        self, path: str, collection_id: str
+    ) -> FileSystemRawDocument:
         # TODO [P1] exception handling
         file_name_with_ext = os.path.basename(path)
         file_name = os.path.splitext(file_name_with_ext)[0]

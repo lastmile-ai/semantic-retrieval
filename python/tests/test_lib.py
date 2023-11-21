@@ -1,5 +1,8 @@
 import os
+
 import pytest
+import semantic_retrieval.document_parsers.multi_document_parser as mdp
+from dotenv import load_dotenv
 from semantic_retrieval.document.metadata.in_memory_document_metadata_db import (
     InMemoryDocumentMetadataDB,
 )
@@ -8,21 +11,20 @@ from semantic_retrieval.transformation.document.text.separator_text_chunker impo
     SeparatorTextChunker,
     SeparatorTextChunkerParams,
 )
-
-import semantic_retrieval.document_parsers.multi_document_parser as mdp
-from dotenv import load_dotenv
-
 from semantic_retrieval.utils.callbacks import CallbackManager
 
-
-metadata_db = InMemoryDocumentMetadataDB(callback_manager=CallbackManager.default())
+metadata_db = InMemoryDocumentMetadataDB(
+    callback_manager=CallbackManager.default()
+)
 
 
 @pytest.mark.asyncio
 async def test_create_index():
     load_dotenv()
 
-    rel_path_from_python_root = "examples/example_data/ingestion/DonQuixote.txt"
+    rel_path_from_python_root = (
+        "examples/example_data/ingestion/DonQuixote.txt"
+    )
     # rel_path_from_python_root = "examples/example_data/test/test.txt"
     cwd = os.path.normpath(os.getcwd())
     root_dir = os.path.join(cwd, "..") if cwd.endswith("python") else cwd

@@ -1,12 +1,14 @@
 from dataclasses import dataclass
 from typing import List, Optional
-from semantic_retrieval.common.types import CallbackEvent
-from semantic_retrieval.document.metadata.document_metadata_db import DocumentMetadataDB
 
+from semantic_retrieval.common.types import CallbackEvent
+from semantic_retrieval.document.metadata.document_metadata_db import (
+    DocumentMetadataDB,
+)
 from semantic_retrieval.transformation.document.text.text_chunk_transformer import (
     TextChunkTransformer,
 )
-from semantic_retrieval.utils.callbacks import Traceable, CallbackManager
+from semantic_retrieval.utils.callbacks import CallbackManager, Traceable
 
 
 @dataclass

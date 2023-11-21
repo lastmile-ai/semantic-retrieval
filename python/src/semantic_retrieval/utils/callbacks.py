@@ -2,14 +2,27 @@ import asyncio
 import dataclasses
 import json
 import logging
-from typing import Any, Coroutine, Final, Optional, Sequence, TextIO, TypeVar, Union
+from typing import (
+    Any,
+    Coroutine,
+    Final,
+    Optional,
+    Sequence,
+    TextIO,
+    TypeVar,
+    Union,
+)
 from uuid import uuid4
+
 import pandas as pd
 from pydantic import BaseModel
-
 from result import Err, Ok, Result
 from semantic_retrieval.common.core import LOGGER_FMT
-from semantic_retrieval.common.types import Callback, CallbackEvent, CallbackResult
+from semantic_retrieval.common.types import (
+    Callback,
+    CallbackEvent,
+    CallbackResult,
+)
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(format=LOGGER_FMT)
@@ -32,7 +45,9 @@ class Traceable:
     pass
 
 
-async def run_thunk_safe(thunk: Coroutine[Any, Any, T], timeout: int) -> Result[T, str]:
+async def run_thunk_safe(
+    thunk: Coroutine[Any, Any, T], timeout: int
+) -> Result[T, str]:
     try:
         task = asyncio.create_task(thunk)
         res = await asyncio.wait_for(task, timeout=timeout)
@@ -43,7 +58,9 @@ async def run_thunk_safe(thunk: Coroutine[Any, Any, T], timeout: int) -> Result[
 
 
 class CallbackManager:
-    def __init__(self, callbacks: Sequence[Callback], run_id: Optional[str] = None) -> None:
+    def __init__(
+        self, callbacks: Sequence[Callback], run_id: Optional[str] = None
+    ) -> None:
         self.callbacks: Final[Sequence[Callback]] = callbacks
         self.reset_run_state(run_id=run_id)
 
@@ -94,15 +111,23 @@ def safe_serialize_arbitrary_for_logging(
         return str(data.head(2))
     match data:
         case Ok(ok):
-            return safe_serialize_arbitrary_for_logging({"Ok": ok}, max_elements, indent + "  ")
+            return safe_serialize_arbitrary_for_logging(
+                {"Ok": ok}, max_elements, indent + "  "
+            )
         case Err(err):
-            return safe_serialize_arbitrary_for_logging({"Err": err}, max_elements, indent + "  ")
+            return safe_serialize_arbitrary_for_logging(
+                {"Err": err}, max_elements, indent + "  "
+            )
         case _:
             pass
     if isinstance(data, BaseModel):
-        return safe_serialize_arbitrary_for_logging(data.model_dump(), max_elements, indent)
+        return safe_serialize_arbitrary_for_logging(
+            data.model_dump(), max_elements, indent
+        )
     if dataclasses.is_dataclass(data):
-        return safe_serialize_arbitrary_for_logging(dataclasses.asdict(data), max_elements, indent)
+        return safe_serialize_arbitrary_for_logging(
+            dataclasses.asdict(data), max_elements, indent
+        )
     if isinstance(data, dict):
         keys = list(data.keys())
         result = []
@@ -130,14 +155,19 @@ def safe_serialize_arbitrary_for_logging(
         return "\n".join(result)
     elif isinstance(data, str):
         _len = len(data)
-        return repr(data[:max_elements] + (f"...(len={_len})" if _len > max_elements else ""))
+        return repr(
+            data[:max_elements]
+            + (f"...(len={_len})" if _len > max_elements else "")
+        )
     elif data is None or isinstance(data, (int, float, bool)):
         return repr(data)
     else:
         return f"<<non-serializable: {type(data).__qualname__}>>"
 
 
-def to_json(file: Union[str, TextIO], max_elements: Optional[int] = None) -> Callback:
+def to_json(
+    file: Union[str, TextIO], max_elements: Optional[int] = None
+) -> Callback:
     def _write(event: CallbackEvent, run_id: str, file: TextIO) -> int:
         data_to_serialize = dict(run_id=run_id, evnet=event)
         data_to_write = safe_serialize_arbitrary_for_logging(
@@ -147,7 +177,9 @@ def to_json(file: Union[str, TextIO], max_elements: Optional[int] = None) -> Cal
         # data_write = dict(run_id=run_id, **data_event)
         # return file.write("\n" + safe_serialize_json(data_write, indent=2))
 
-    async def _callback(event: CallbackEvent, run_id: str) -> Optional[CallbackResult]:
+    async def _callback(
+        event: CallbackEvent, run_id: str
+    ) -> Optional[CallbackResult]:
         if isinstance(file, str):
             with open(file, "a+") as f:
                 result = _write(event, run_id, f)

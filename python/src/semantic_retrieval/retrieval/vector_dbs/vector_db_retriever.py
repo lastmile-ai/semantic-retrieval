@@ -1,7 +1,13 @@
 from typing import Generic, Optional
+
 from semantic_retrieval.common.types import R
-from semantic_retrieval.data_store.vector_dbs.vector_db import VectorDB, VectorDBQuery
-from semantic_retrieval.document.metadata.document_metadata_db import DocumentMetadataDB
+from semantic_retrieval.data_store.vector_dbs.vector_db import (
+    VectorDB,
+    VectorDBQuery,
+)
+from semantic_retrieval.document.metadata.document_metadata_db import (
+    DocumentMetadataDB,
+)
 from semantic_retrieval.retrieval.document_retriever import DocumentRetriever
 from semantic_retrieval.retrieval.retriever import BaseRetrieverQueryParams
 from semantic_retrieval.utils.callbacks import CallbackManager

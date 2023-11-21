@@ -1,13 +1,15 @@
 from abc import abstractmethod
 from typing import List, Sequence
+
 from semantic_retrieval.common.types import CallbackEvent
-
 from semantic_retrieval.document.document import Document
-from semantic_retrieval.document.metadata.document_metadata import DocumentMetadata
-from semantic_retrieval.document.metadata.document_metadata_db import DocumentMetadataDB
-
+from semantic_retrieval.document.metadata.document_metadata import (
+    DocumentMetadata,
+)
+from semantic_retrieval.document.metadata.document_metadata_db import (
+    DocumentMetadataDB,
+)
 from semantic_retrieval.transformation.transformer import Transformer
-
 from semantic_retrieval.utils.callbacks import CallbackManager, Traceable
 
 
@@ -41,11 +43,14 @@ class BaseDocumentTransformer(DocumentTransformer, Traceable):
                     document_id=document.document_id
                 )
             )
-            original_document_metadata = res_original_document_metadata.unwrap()
+            original_document_metadata = (
+                res_original_document_metadata.unwrap()
+            )
             metadata_to_write = DocumentMetadata(
                 document_id=transformed_doc.document_id,
                 # document=document,
-                uri=original_document_metadata.uri or transformed_doc.document_id,
+                uri=original_document_metadata.uri
+                or transformed_doc.document_id,
                 metadata=dict(
                     transformer=self.__class__.__name__,
                     original_document_id=document.document_id,
@@ -56,7 +61,8 @@ class BaseDocumentTransformer(DocumentTransformer, Traceable):
             d_odm = original_document_metadata.to_dict()
             if not metadata_to_write.uri:
                 metadata_to_write.uri = (
-                    original_document_metadata.uri or transformed_doc.document_id
+                    original_document_metadata.uri
+                    or transformed_doc.document_id
                 )
             if not metadata_to_write.uri:
                 metadata_to_write.uri = transformed_doc.document_id
