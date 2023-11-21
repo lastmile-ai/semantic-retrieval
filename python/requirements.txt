@@ -18,3 +18,4 @@ pinecone-client==2.2.4
 python-aiconfig==1.0.4
 jsoncomment==0.4.2
 pylint==3.0.2
+lastmile_utils==0.0.2
