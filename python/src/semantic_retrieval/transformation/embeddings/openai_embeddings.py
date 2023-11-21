@@ -1,22 +1,23 @@
-from functools import partial
 import logging
 import os
+from functools import partial
 from typing import Any, Dict, List, Optional, Tuple
+
 import openai
 from result import Err, Ok, Result
-
-from tiktoken import encoding_for_model
-from semantic_retrieval.common.core import LOGGER_FMT, exp_backoff, flatten_list
+from semantic_retrieval.common.core import (
+    LOGGER_FMT,
+    exp_backoff,
+    flatten_list,
+)
 from semantic_retrieval.common.json_types import JSONObject
 from semantic_retrieval.common.types import CallbackEvent, Record
-
+from semantic_retrieval.document.document import Document
 from semantic_retrieval.transformation.embeddings.embeddings import (
     DocumentEmbeddingsTransformer,
     ModelHandle,
     VectorEmbedding,
 )
-
-from semantic_retrieval.document.document import Document
 from semantic_retrieval.utils.callbacks import (
     CallbackManager,
     Traceable,
@@ -26,6 +27,7 @@ from semantic_retrieval.utils.text import (
     num_tokens_from_string_for_model,
     truncate_string_to_tokens,
 )
+from tiktoken import encoding_for_model
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(format=LOGGER_FMT)
@@ -71,8 +73,12 @@ def _make_emb_request(
 ) -> List[VectorEmbedding]:
     input = [fragment.text for fragment in fragments]
 
-    res_embeddings = _create_embeddings_with_backoff(input, model_handle, model)
-    _log = safe_serialize_arbitrary_for_logging({"res_embeddings": res_embeddings}, max_elements=3)
+    res_embeddings = _create_embeddings_with_backoff(
+        input, model_handle, model
+    )
+    _log = safe_serialize_arbitrary_for_logging(
+        {"res_embeddings": res_embeddings}, max_elements=3
+    )
 
     match res_embeddings:
         case Err(err):
@@ -111,7 +117,9 @@ def _emb_requests_thread_pool(
     with ThreadPoolExecutor() as executor:
         out = list(
             executor.map(
-                partial(_make_emb_request, model=model, model_handle=model_handle),
+                partial(
+                    _make_emb_request, model=model, model_handle=model_handle
+                ),
                 frags,
             )
         )
@@ -126,8 +134,12 @@ class OpenAIEmbeddings(DocumentEmbeddingsTransformer, Traceable):
     # TODO [P1]: Handle this for other models when they are supported
     max_encoding_length = 8191
 
-    def __init__(self, config: OpenAIEmbeddingsConfig, callback_manager: CallbackManager):
-        super().__init__(MODEL_DIMENSIONS[DEFAULT_MODEL], callback_manager=callback_manager)
+    def __init__(
+        self, config: OpenAIEmbeddingsConfig, callback_manager: CallbackManager
+    ):
+        super().__init__(
+            MODEL_DIMENSIONS[DEFAULT_MODEL], callback_manager=callback_manager
+        )
 
         self.callback_manager = callback_manager
 
@@ -185,7 +197,9 @@ class OpenAIEmbeddings(DocumentEmbeddingsTransformer, Traceable):
         batches = [[]]
         n_tokens_this_batch = 0
         for frag in fragments:
-            n_tokens_frag = num_tokens_from_string_for_model(frag.text, self.model)
+            n_tokens_frag = num_tokens_from_string_for_model(
+                frag.text, self.model
+            )
             if n_tokens_frag > max_tokens_per_call:
                 text_to_embed = truncate_string_to_tokens(
                     frag.text, self.model, max_tokens_per_call
@@ -205,7 +219,9 @@ class OpenAIEmbeddings(DocumentEmbeddingsTransformer, Traceable):
             )
             n_tokens_this_batch += n_tokens_frag
 
-        embeddings_for_batches = _emb_requests_thread_pool(batches, self.model, model_handle)
+        embeddings_for_batches = _emb_requests_thread_pool(
+            batches, self.model, model_handle
+        )
         out = flatten_list(embeddings_for_batches)
 
         await self.callback_manager.run_callbacks(
@@ -225,7 +241,9 @@ class OpenAIEmbeddings(DocumentEmbeddingsTransformer, Traceable):
         documents: List[Document],
         model_handle: Optional[ModelHandle] = None,
     ) -> List[VectorEmbedding]:
-        fragments = flatten_list([document.fragments for document in documents])
+        fragments = flatten_list(
+            [document.fragments for document in documents]
+        )
         list_embed_fragment_data = [
             EmbedFragmentData(
                 document_id=fragment.document_id,

@@ -8,7 +8,10 @@ from typing import Any, Dict, Optional, Set, Type, TypeVar
 import pydantic
 from dotenv import load_dotenv
 from result import Ok, Result
-from semantic_retrieval.common.core import dict_union_allow_replace, remove_nones
+from semantic_retrieval.common.core import (
+    dict_union_allow_replace,
+    remove_nones,
+)
 from semantic_retrieval.common.json_types import JSONObject
 from semantic_retrieval.common.types import Record
 from semantic_retrieval.functional.functional import ErrWithTraceback
@@ -43,7 +46,9 @@ def add_parser_argument(
             required=is_required,
         )
     else:
-        parser.add_argument(f"--{field_name}", type=the_type, required=is_required)
+        parser.add_argument(
+            f"--{field_name}", type=the_type, required=is_required
+        )
 
 
 def add_parser_arguments(
@@ -67,7 +72,9 @@ def argparsify(
     return parser
 
 
-def get_config_args(args: argparse.Namespace | Dict[str, Any]) -> Dict[str, Any]:
+def get_config_args(
+    args: argparse.Namespace | Dict[str, Any]
+) -> Dict[str, Any]:
     def _get_cli():
         if isinstance(args, argparse.Namespace):
             return vars(args)
@@ -86,7 +93,9 @@ def get_config_args(args: argparse.Namespace | Dict[str, Any]) -> Dict[str, Any]
     env_values = remove_nones({k: os.getenv(v) for k, v in env_keys.items()})
     cli_values = remove_nones(_get_cli())
 
-    all_args = dict_union_allow_replace(env_values, cli_values, on_conflict="replace")
+    all_args = dict_union_allow_replace(
+        env_values, cli_values, on_conflict="replace"
+    )
     return all_args
 
 

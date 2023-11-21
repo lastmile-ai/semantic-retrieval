@@ -6,15 +6,17 @@ from semantic_retrieval.access_control.access_passport import AccessPassport
 from semantic_retrieval.common.types import P, Q, R
 from semantic_retrieval.document.document import Document
 from semantic_retrieval.generator.completion_generator import (
-    LLMCompletionGeneratorParams,
     LLMCompletionGenerator,
+    LLMCompletionGeneratorParams,
 )
 from semantic_retrieval.prompts.prompt_template import PromptTemplate
 from semantic_retrieval.retrieval.document_retriever import DocumentRetriever
 
 
 @dataclass
-class RAGCompletionGeneratorParams(Generic[P, Q], LLMCompletionGeneratorParams[P]):
+class RAGCompletionGeneratorParams(
+    Generic[P, Q], LLMCompletionGeneratorParams[P]
+):
     retriever: DocumentRetriever[List[Document], Q]
     accessPassport: AccessPassport
     ragPromptTemplate: PromptTemplate

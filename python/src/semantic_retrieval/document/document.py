@@ -1,11 +1,10 @@
 from abc import abstractmethod
-from result import Result
-from semantic_retrieval.common.base import Attributable
-
-from semantic_retrieval.common.storage import BlobIdentifier
 from enum import Enum
 from typing import Any, List, Optional
 
+from result import Result
+from semantic_retrieval.common.base import Attributable
+from semantic_retrieval.common.storage import BlobIdentifier
 from semantic_retrieval.common.types import Record
 
 

@@ -1,10 +1,11 @@
 from abc import abstractmethod
-from typing import TypeVar, Optional, List
+from typing import List, Optional, TypeVar
 
 from result import Result
 from semantic_retrieval.document.document import Document, DocumentFragment
-
-from semantic_retrieval.document.metadata.document_metadata_db import DocumentMetadataDB
+from semantic_retrieval.document.metadata.document_metadata_db import (
+    DocumentMetadataDB,
+)
 from semantic_retrieval.retrieval.retriever import (
     BaseRetriever,
     BaseRetrieverQueryParams,
@@ -34,5 +35,7 @@ class DocumentRetriever(BaseRetriever[R, Q]):
         pass
 
     @abstractmethod
-    async def retrieve_data(self, params: BaseRetrieverQueryParams[Q]) -> Result[R, str]:
+    async def retrieve_data(
+        self, params: BaseRetrieverQueryParams[Q]
+    ) -> Result[R, str]:
         pass

@@ -73,7 +73,9 @@ def write_text_file(path: str | None, contents: str) -> Result[int, str]:
     return path_fn(path)
 
 
-def write_to_text_file_handle(f_handle: IO[str], contents: str) -> Result[int, str]:
+def write_to_text_file_handle(
+    f_handle: IO[str], contents: str
+) -> Result[int, str]:
     try:
         return Ok(f_handle.write(contents))
     except IOError as e:
@@ -206,13 +208,17 @@ def dict_union(
                 result[k] = v
             else:
                 if on_conflict == "err":
-                    return Err(f"Key {k} exists with different values: {v}, {result[k]}.")
+                    return Err(
+                        f"Key {k} exists with different values: {v}, {result[k]}."
+                    )
                 elif on_conflict == "keep_first":
                     pass
                 elif on_conflict == "replace":
                     result[k] = v
                 else:
-                    assert False, f"should be unreachable: invalid {on_conflict=}"
+                    assert (
+                        False
+                    ), f"should be unreachable: invalid {on_conflict=}"
 
     return Ok(result)
 

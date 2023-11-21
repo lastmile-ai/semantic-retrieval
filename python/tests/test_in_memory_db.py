@@ -1,10 +1,12 @@
+import tempfile
+
 import pytest
-from semantic_retrieval.document.metadata.document_metadata import DocumentMetadata
+from semantic_retrieval.document.metadata.document_metadata import (
+    DocumentMetadata,
+)
 from semantic_retrieval.document.metadata.in_memory_document_metadata_db import (
     InMemoryDocumentMetadataDB,
 )
-import tempfile
-
 from semantic_retrieval.utils.callbacks import CallbackManager
 
 
@@ -14,7 +16,9 @@ async def test_in_memory_db():
 
     await db.set_metadata(
         "test",
-        DocumentMetadata(document_id="test", uri="blah", metadata={}, attributes={}),
+        DocumentMetadata(
+            document_id="test", uri="blah", metadata={}, attributes={}
+        ),
     )
 
     result = await db.get_metadata("test")

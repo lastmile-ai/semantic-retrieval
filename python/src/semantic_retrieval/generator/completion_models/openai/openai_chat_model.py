@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Optional, List
+from typing import List, Optional
 
 from semantic_retrieval.generator.completion_models.completion_model import (
     CompletionModel,

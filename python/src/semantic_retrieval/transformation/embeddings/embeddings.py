@@ -2,19 +2,18 @@ from abc import ABC, abstractmethod
 from typing import Any, Dict, List, Optional
 
 from semantic_retrieval.common.base import Attributable
-from semantic_retrieval.common.types import CallbackEvent
-
-from semantic_retrieval.transformation.transformer import Transformer
-
 from semantic_retrieval.common.json_types import JSONObject
-
+from semantic_retrieval.common.types import CallbackEvent
 from semantic_retrieval.document.document import Document, DocumentFragment
+from semantic_retrieval.transformation.transformer import Transformer
 from semantic_retrieval.utils.callbacks import CallbackManager, Traceable
 from semantic_retrieval.utils.interop import canonical_field
 
 
 class VectorEmbedding(Attributable):
-    vector: List[float] = []  # The vector representation of the embedding text.
+    vector: List[
+        float
+    ] = []  # The vector representation of the embedding text.
     text: str = ""  # The text embedded via the vector.
     extras: Dict[Any, Any] = {
         "dimensions": 0,
@@ -81,14 +80,18 @@ class DocumentEmbeddingsTransformer(EmbeddingsTransformer, Traceable):
             "fragment_id": fragment.fragment_id,
         }
 
-        return await self.embed(text, model_handle=model_handle, metadata=metadata)
+        return await self.embed(
+            text, model_handle=model_handle, metadata=metadata
+        )
 
     async def embed_document(
         self, document: Document, model_handle: Optional[ModelHandle]
     ) -> List[VectorEmbedding]:
         embeddings = []
         for fragment in document.fragments:
-            embeddings.append(await self.embed_fragment(fragment, model_handle))
+            embeddings.append(
+                await self.embed_fragment(fragment, model_handle)
+            )
 
         await self.callback_manager.run_callbacks(
             CallbackEvent(
@@ -109,5 +112,7 @@ class DocumentEmbeddingsTransformer(EmbeddingsTransformer, Traceable):
     ) -> List[VectorEmbedding]:
         embeddings = []
         for document in documents:
-            embeddings.extend(await self.embed_document(document, model_handle))
+            embeddings.extend(
+                await self.embed_document(document, model_handle)
+            )
         return embeddings

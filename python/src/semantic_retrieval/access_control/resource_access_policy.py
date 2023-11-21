@@ -1,11 +1,10 @@
-from abc import abstractmethod
 import json
-from typing import Optional, List, Union, Any
+from abc import abstractmethod
+from typing import Any, List, Optional, Union
 
-from semantic_retrieval.common.types import Record
-
-from semantic_retrieval.document.document import Document
 from semantic_retrieval.access_control.access_identity import AccessIdentity
+from semantic_retrieval.common.types import Record
+from semantic_retrieval.document.document import Document
 
 
 # Access policy for a resource
