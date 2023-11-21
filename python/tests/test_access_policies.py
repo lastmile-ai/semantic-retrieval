@@ -1,5 +1,7 @@
 from typing import Optional
+
 import pytest
+import semantic_retrieval.document_parsers.multi_document_parser as mdp
 from semantic_retrieval.access_control.access_identity import AccessIdentity
 from semantic_retrieval.access_control.access_passport import AccessPassport
 from semantic_retrieval.access_control.policies.always_allow_access_policy import (
@@ -13,11 +15,11 @@ from semantic_retrieval.document.metadata.in_memory_document_metadata_db import 
     InMemoryDocumentMetadataDB,
 )
 from semantic_retrieval.ingestion.data_sources.fs.file_system import FileSystem
-
-import semantic_retrieval.document_parsers.multi_document_parser as mdp
 from semantic_retrieval.utils.callbacks import CallbackManager
 
-metadata_db = InMemoryDocumentMetadataDB(callback_manager=CallbackManager.default())
+metadata_db = InMemoryDocumentMetadataDB(
+    callback_manager=CallbackManager.default()
+)
 
 
 class AlwaysDenyPolicy(ResourceAccessPolicy):
@@ -39,7 +41,9 @@ def test_access_passport():
     def get_resource(ai: AccessIdentity) -> str:
         return ai.resource
 
-    assert access_passport.get_identity("test-resource").map_or(False, get_resource)
+    assert access_passport.get_identity("test-resource").map_or(
+        False, get_resource
+    )
 
 
 @pytest.mark.asyncio
@@ -68,7 +72,12 @@ async def test_access_policies():
         )
         == False
     )
-    assert await always_deny_policy.testPolicyPermission(AccessIdentity(resource="abc")) == False
+    assert (
+        await always_deny_policy.testPolicyPermission(
+            AccessIdentity(resource="abc")
+        )
+        == False
+    )
 
     assert (
         await always_accept_policy.testDocumentReadPermission(
@@ -76,4 +85,9 @@ async def test_access_policies():
         )
         == True
     )
-    assert await always_accept_policy.testPolicyPermission(AccessIdentity(resource="abc")) == True
+    assert (
+        await always_accept_policy.testPolicyPermission(
+            AccessIdentity(resource="abc")
+        )
+        == True
+    )

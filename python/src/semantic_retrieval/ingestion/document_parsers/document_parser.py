@@ -1,7 +1,8 @@
+from abc import abstractmethod
 from typing import Any, Dict, List, Optional
 
+from result import Result
 from semantic_retrieval.common.base import Attributable
-
 from semantic_retrieval.document.document import (
     DocumentFragment,
     IngestedDocument,
@@ -10,17 +11,13 @@ from semantic_retrieval.document.document import (
 from semantic_retrieval.utils.callbacks import CallbackManager, Traceable
 
 
-from abc import abstractmethod
-from result import Result
-
-from semantic_retrieval.document.document import IngestedDocument, RawDocument
-
-
 class DocumentParser(Attributable, Traceable):
     mime_type_restriction: Optional[List[str]] = None
 
     @abstractmethod
-    async def parse(self, raw_document: RawDocument) -> Result[IngestedDocument, str]:
+    async def parse(
+        self, raw_document: RawDocument
+    ) -> Result[IngestedDocument, str]:
         pass
 
     @abstractmethod
@@ -54,7 +51,9 @@ class BaseDocumentParser(DocumentParser):
         # self.callback_manager = callback_manager
 
     @abstractmethod
-    async def parse(self, raw_document: RawDocument) -> Result[IngestedDocument, str]:
+    async def parse(
+        self, raw_document: RawDocument
+    ) -> Result[IngestedDocument, str]:
         pass
 
     @abstractmethod

@@ -1,11 +1,12 @@
 from abc import abstractmethod
-from typing import Optional, Generic
+from typing import Generic, Optional
 
 from result import Result
 from semantic_retrieval.access_control.access_passport import AccessPassport
-
 from semantic_retrieval.common.types import Q, R
-from semantic_retrieval.document.metadata.document_metadata_db import DocumentMetadataDB
+from semantic_retrieval.document.metadata.document_metadata_db import (
+    DocumentMetadataDB,
+)
 from semantic_retrieval.utils.callbacks import CallbackManager
 
 

@@ -2,10 +2,10 @@ from typing import Awaitable, Callable, List, Protocol, TypeVar
 
 from result import Err, Ok, Result
 from semantic_retrieval.common.types import CallbackEvent
-
-from semantic_retrieval.functional.functional import result_reduce_list_separate
+from semantic_retrieval.functional.functional import (
+    result_reduce_list_separate,
+)
 from semantic_retrieval.utils.callbacks import CallbackManager, run_thunk_safe
-
 
 T = TypeVar("T")
 U = TypeVar("U")
@@ -46,7 +46,9 @@ async def get_data_access_checked(
     resource_auth_id: str,
     viewer_auth_id: str,
 ) -> Result[U, str]:
-    if await user_access_check(user_access_function, resource_auth_id, viewer_auth_id):
+    if await user_access_check(
+        user_access_function, resource_auth_id, viewer_auth_id
+    ):
         return Ok(get_data_unsafe(params))
     else:
         return Err(f"Access denied: {resource_auth_id=}, {viewer_auth_id=}")

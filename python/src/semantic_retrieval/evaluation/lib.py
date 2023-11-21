@@ -1,5 +1,6 @@
 import json
 import logging
+from dataclasses import dataclass
 from typing import (
     Any,
     Awaitable,
@@ -18,7 +19,6 @@ from pydantic import root_validator
 from result import Ok, Result
 from semantic_retrieval.common import types
 from semantic_retrieval.common.core import LOGGER_FMT
-from dataclasses import dataclass
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(format=LOGGER_FMT)
@@ -33,7 +33,11 @@ class IDSetPairEvalDataset(types.Record):
 
     def __repr__(self):
         return json.dumps(
-            {"input_set": list(self.input_set), "output_set": list(self.output_set)}, indent=2
+            {
+                "input_set": list(self.input_set),
+                "output_set": list(self.output_set),
+            },
+            indent=2,
         )
 
     def __str__(self) -> str:
@@ -45,8 +49,12 @@ class NumericalEvalDataset(types.Record):
     ground_truth: Sequence[float | int]
 
 
-IDSetPairEvalDataPathMuncher = Callable[[str, str], Awaitable[IDSetPairEvalDataset]]
-NumericalEvalDataPathMuncher = Callable[[str, str], Awaitable[NumericalEvalDataset]]
+IDSetPairEvalDataPathMuncher = Callable[
+    [str, str], Awaitable[IDSetPairEvalDataset]
+]
+NumericalEvalDataPathMuncher = Callable[
+    [str, str], Awaitable[NumericalEvalDataset]
+]
 
 
 class EvaluationMetric(types.Record):
@@ -75,19 +83,27 @@ class SampleEvaluationResult(types.Record, Generic[T_OutputDatum]):
         if wv == bv:
             raise ValueError("best_value and worst_value cannot be equal")
         if wv < bv and not wv <= value <= bv:
-            raise ValueError(f"value {value} is not in range [{wv}, {bv}] (inclusive)")
+            raise ValueError(
+                f"value {value} is not in range [{wv}, {bv}] (inclusive)"
+            )
         if wv > bv and not wv >= value >= bv:
-            raise ValueError(f"value {value} is not in range [{bv}, {wv}] (inclusive)")
+            raise ValueError(
+                f"value {value} is not in range [{bv}, {wv}] (inclusive)"
+            )
 
         return values
 
 
 class SampleEvaluationFunction(Protocol, Generic[T_OutputDatum]):
-    def __call__(self, output_datum: T_OutputDatum) -> SampleEvaluationResult[T_OutputDatum]:
+    def __call__(
+        self, output_datum: T_OutputDatum
+    ) -> SampleEvaluationResult[T_OutputDatum]:
         return SampleEvaluationResult(
             name="example",
             value=0.0,
-            interpretation=EvaluationMetric(name="example", best_value=1.0, worst_value=0.0),
+            interpretation=EvaluationMetric(
+                name="example", best_value=1.0, worst_value=0.0
+            ),
         )
 
 
@@ -110,7 +126,10 @@ def evaluate(
     results = []
 
     for eval_params in evaluation_params_list:
-        sample, evaluation_fn = eval_params.output_sample, eval_params.evaluation_fn
+        sample, evaluation_fn = (
+            eval_params.output_sample,
+            eval_params.evaluation_fn,
+        )
         res_ = evaluation_fn(sample)
         logger.debug(f"{res_=}")
         results.append(res_)
@@ -119,7 +138,9 @@ def evaluate(
 
 
 def eval_res_to_df(
-    eval_res: DatasetEvaluationResult[T_OutputDatum],  # pyright: ignore[reportInvalidTypeVarUse]
+    eval_res: DatasetEvaluationResult[
+        T_OutputDatum  # pyright: ignore[reportInvalidTypeVarUse]
+    ],
 ):
     records = []
     for sample_res in eval_res.results:
