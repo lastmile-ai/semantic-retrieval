@@ -1,4 +1,6 @@
 import uuid
+from typing import Dict, List, Optional
+
 from result import Err, Ok, Result
 from semantic_retrieval.document.document import (
     DirectDocumentFragment,
@@ -7,8 +9,6 @@ from semantic_retrieval.document.document import (
     IngestedDocument,
     RawDocument,
 )
-from typing import Dict, List, Optional
-
 from semantic_retrieval.ingestion.document_parsers.document_parser import (
     BaseDocumentParser,
 )
@@ -24,7 +24,9 @@ class DirectDocumentParser(BaseDocumentParser, Traceable):
     ):
         super().__init__(attributes, metadata or {}, callback_manager)
 
-    async def parse(self, raw_document: RawDocument) -> Result[IngestedDocument, str]:
+    async def parse(
+        self, raw_document: RawDocument
+    ) -> Result[IngestedDocument, str]:
         # Not using chunked content
         content = (await raw_document.get_content()).unwrap()
 

@@ -1,4 +1,5 @@
 from typing import Dict, Optional
+
 from semantic_retrieval.prompts.prompt import IPrompt
 
 PromptTemplateParameters = Dict[str, str]
@@ -12,7 +13,9 @@ class PromptTemplate(IPrompt):
     def set_parameters(self, params: PromptTemplateParameters):
         self.parameters = params
 
-    def resolve_template(self, parameters: Optional[PromptTemplateParameters] = None):
+    def resolve_template(
+        self, parameters: Optional[PromptTemplateParameters] = None
+    ):
         return ""
 
     async def to_string(self) -> str:

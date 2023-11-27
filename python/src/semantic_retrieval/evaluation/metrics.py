@@ -1,9 +1,8 @@
-from functools import partial
 import logging
+from functools import partial
 from typing import TypeVar
-from sklearn.metrics import accuracy_score
-from semantic_retrieval.common.core import LOGGER_FMT
 
+from semantic_retrieval.common.core import LOGGER_FMT
 from semantic_retrieval.evaluation.lib import (
     EvaluationMetric,
     IDSet,
@@ -13,6 +12,7 @@ from semantic_retrieval.evaluation.lib import (
     SampleEvaluationParams,
     SampleEvaluationResult,
 )
+from sklearn.metrics import accuracy_score
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(format=LOGGER_FMT)

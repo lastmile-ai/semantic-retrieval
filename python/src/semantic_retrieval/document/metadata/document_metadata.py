@@ -1,6 +1,6 @@
-from semantic_retrieval.common.types import Record
-from typing import Dict, Optional, Any
+from typing import Any, Dict, Optional
 
+from semantic_retrieval.common.types import Record
 from semantic_retrieval.utils.interop import canonical_field
 
 

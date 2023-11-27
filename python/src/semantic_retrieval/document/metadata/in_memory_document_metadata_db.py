@@ -3,8 +3,9 @@ from typing import Any, Dict, List, NewType, Optional
 
 from result import Err, Ok, Result
 from semantic_retrieval.common.types import CallbackEvent
-from semantic_retrieval.document.metadata.document_metadata import DocumentMetadata
-
+from semantic_retrieval.document.metadata.document_metadata import (
+    DocumentMetadata,
+)
 from semantic_retrieval.document.metadata.document_metadata_db import (
     DocumentMetadataDB,
     DocumentMetadataQuery,
@@ -12,8 +13,9 @@ from semantic_retrieval.document.metadata.document_metadata_db import (
 from semantic_retrieval.utils.callbacks import CallbackManager, Traceable
 from semantic_retrieval.utils.interop import from_canonical_field
 
-
-DocumentMetadataMap = NewType("DocumentMetadataMap", Dict[str, DocumentMetadata])
+DocumentMetadataMap = NewType(
+    "DocumentMetadataMap", Dict[str, DocumentMetadata]
+)
 
 
 class InMemoryDocumentMetadataDB(DocumentMetadataDB, Traceable):
@@ -25,7 +27,9 @@ class InMemoryDocumentMetadataDB(DocumentMetadataDB, Traceable):
         self.metadata = metadata or {}
         self.callback_manager = callback_manager
 
-    async def get_metadata(self, document_id: str) -> Result[DocumentMetadata, str]:
+    async def get_metadata(
+        self, document_id: str
+    ) -> Result[DocumentMetadata, str]:
         if document_id in self.metadata:
             return Ok(self.metadata[document_id])
         else:
@@ -40,7 +44,8 @@ class InMemoryDocumentMetadataDB(DocumentMetadataDB, Traceable):
         out = [
             document_id
             for document_id, metadata in self.metadata.items()
-            if metadata.metadata.get(query.metadata_key) == query.metadata_value
+            if metadata.metadata.get(query.metadata_key)
+            == query.metadata_value
         ]
 
         await self.callback_manager.run_callbacks(
@@ -59,7 +64,10 @@ class InMemoryDocumentMetadataDB(DocumentMetadataDB, Traceable):
         with open(file_path, "w") as file:
             file.write(
                 json.dumps(
-                    {d_id: dmd.to_dict() for d_id, dmd in self.metadata.items()},
+                    {
+                        d_id: dmd.to_dict()
+                        for d_id, dmd in self.metadata.items()
+                    },
                     indent=2,
                 )
             )
@@ -89,6 +97,7 @@ class InMemoryDocumentMetadataDB(DocumentMetadataDB, Traceable):
             )
             return Ok(
                 InMemoryDocumentMetadataDB(
-                    callback_manager=CallbackManager.default(), metadata=the_map
+                    callback_manager=CallbackManager.default(),
+                    metadata=the_map,
                 )
             )

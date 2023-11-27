@@ -1,7 +1,8 @@
-from pydantic.dataclasses import dataclass
 from abc import ABC, abstractmethod
-from typing import Optional
 from io import IOBase
+from typing import Optional
+
+from pydantic.dataclasses import dataclass
 
 
 @dataclass
@@ -11,7 +12,9 @@ class BlobStorage(ABC):
         pass
 
     @abstractmethod
-    def write_stream(self, stream: IOBase, name: Optional[str]) -> "BlobIdentifier":
+    def write_stream(
+        self, stream: IOBase, name: Optional[str]
+    ) -> "BlobIdentifier":
         pass
 
     @abstractmethod

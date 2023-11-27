@@ -4,13 +4,12 @@ from semantic_retrieval.access_control.access_function import (
     AccessFunction,
     get_data_access_checked,
 )
-from semantic_retrieval.access_control.access_identity import AuthenticatedIdentity
-
-from semantic_retrieval.common.types import CallbackEvent, Record
-from semantic_retrieval.retrieval.retriever import (
-    BaseRetriever,
+from semantic_retrieval.access_control.access_identity import (
+    AuthenticatedIdentity,
 )
-from semantic_retrieval.utils.callbacks import Traceable, CallbackManager
+from semantic_retrieval.common.types import CallbackEvent, Record
+from semantic_retrieval.retrieval.retriever import BaseRetriever
+from semantic_retrieval.utils.callbacks import CallbackManager, Traceable
 
 
 class CSVRetrieverQuery(Record):
